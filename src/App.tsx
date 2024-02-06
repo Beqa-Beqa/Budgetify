@@ -1,9 +1,16 @@
 import "bootstrap/dist/css/bootstrap.css";
+import { Authentication } from "./Pages";
 
 function App() {
   return (
-    <div>
-    </div>
+    <>
+      <header>
+
+      </header>
+      <main>
+        <Authentication />
+      </main>
+    </>
   )
 }
 

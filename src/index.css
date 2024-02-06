@@ -49,3 +49,19 @@ table {
 
 /* Above is CSS reset */
 /* <-----------------------------------------------------------------------------------------------------------> */
+
+* {
+	font-family: "Space Grotesk", sans-serif;
+}
+
+:root {
+	--primary: #FFF;
+	--secondary: #FFFFFFCC;
+	--button: #B9E2E6;
+	--header: #000000;
+	--placeholder: #474747;
+	--text: #373737;
+	--border: #333333;
+	--base-border-radius: 10px;
+	--base-transition-duration: 0.1s;
+}
