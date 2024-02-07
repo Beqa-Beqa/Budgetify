@@ -1,17 +1,41 @@
-import { FormEvent, useState } from "react";
+import { useState } from "react";
 import "../CSS/authentication.css";
 import Input from "../Components/Authentication/Input";
 import { Xmark } from "../Assets/Authentication/Svgs";
 
 const Authentication = () => {
+  // Email value holder state.
   const [email, setEmail] = useState<string>("");
+  // Pass value holder state.
   const [password, setPassword] = useState<string>("");
+  // State that updates according to alerts, whether alert is set in email or in password field.
   const [formAlert, setFormAlert] = useState<{email: boolean, password: boolean}>({email: false, password: false});
+  // Showtoast state that dictates wheter to show toast message or not.
   const [showToast, setShowToast] = useState<boolean>(false);
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  // Submit handler
+  const handleSubmit = async (e: any) => {
+    // Prevent default form submit action (refresh).
     e.preventDefault();
-    setShowToast(true);
+    // Stringify body to send it as post request.
+    const body = JSON.stringify({email, password});
+    // Make post request
+    const response = await fetch("https://budgetify-back.adaptable.app/login", {
+      method: "POST",
+      mode: "cors",
+      cache: "no-cache",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body
+    });
+    const responseData = await response.json();
+    // responseData will be in the following format: {res: {res: (Array of UserData objects)}}
+    // If response data res array is empty then show toast message and return.
+    if(!responseData.res.length) {
+      setShowToast(true);
+      return
+    };
   }
 
   return (
