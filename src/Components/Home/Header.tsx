@@ -34,7 +34,7 @@ const Header = (props: {
               <li>Admin</li>
             </ul>
           </nav> */}
-          <div className="profile-corner col-3 col-xl-2 d-flex justify-content-end">
+          <div className="profile-corner col-5 col-md-3 col-xl-2 d-flex justify-content-end">
             <div className="d-flex w-100 justify-content-end align-items-center position-relative" style={{maxWidth: 150}}>
               <div onClick={() => setShowProfileDropdown(prev => !prev)} role="button" className="d-flex align-items-center gap-2">
                 <img src={UserIcon} alt="user"/>
@@ -53,7 +53,7 @@ const Header = (props: {
       </div>
       {showLogoutPrompt && <div className="prompt">
           <div className="prompt-box p-3 rounded">
-            <h5 className="mb-5">Dear Sample User, Are you sure you want to proceed to logout?</h5>
+            <h5 className="mb-5">Are you sure that you want to logout?</h5>
             <div className="prompt-box-actions-container d-flex justify-content-center gap-3">
               <Button onClick={handleLogout} className="action-button" variant="outline-dark">
                 Confirm
