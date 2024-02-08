@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 
 function App() {
   // Current user data that will display user related info.
-  const [currentUserData, setCurrentUserData] = useState(JSON.parse(window.sessionStorage.getItem("Budgetify-user-data") || "{}"));
+  const [currentUserData, setCurrentUserData] = useState<CurrentUserData | {}>(JSON.parse(window.sessionStorage.getItem("Budgetify-user-data") || "{}"));
 
   // Useffect that reruns after currentuser changes.
   useEffect(() => {

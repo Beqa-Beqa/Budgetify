@@ -4,8 +4,8 @@ import "./header.css";
 import { Button } from "react-bootstrap";
  
 const Header = (props: {
-  currentUserData: any,
-  setCurrentUserData: React.Dispatch<any>
+  currentUserData: CurrentUserData,
+  setCurrentUserData: React.Dispatch<React.SetStateAction<{} | CurrentUserData>>
 }) => {
   // User data
   const userData: UserData = props.currentUserData.data;

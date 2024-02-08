@@ -4,8 +4,10 @@ import Input from "../Components/Authentication/Input";
 import { Xmark } from "../Assets/Authentication/Svgs";
 
 const Authentication = (props: {
-  setCurrentUserData: React.Dispatch<any>
+  setCurrentUserData: React.Dispatch<React.SetStateAction<{} | CurrentUserData>>
 }) => {
+  const loginApiUrl = "https://budgetify-back.adaptable.app/login";
+
   // Email value holder state.
   const [email, setEmail] = useState<string>("");
   // Pass value holder state.
@@ -24,7 +26,7 @@ const Authentication = (props: {
       const body = JSON.stringify({email, password});
 
       // Make post request
-      const response = await fetch("https://budgetify-back.adaptable.app/login", {
+      const response = await fetch(loginApiUrl, {
         method: "POST",
         mode: "cors",
         cache: "no-cache",
@@ -51,6 +53,8 @@ const Authentication = (props: {
     }
   }
 
+  const isButtonDisabled = !formAlert.email && !formAlert.password && email && password ? false : true;
+
   return (
     <main className="authentication d-flex justify-content-center align-items-center">
       <div className="authentication-box d-flex flex-column align-items-center gap-5 py-5 px-3">
@@ -76,7 +80,7 @@ const Authentication = (props: {
                 value={password} 
                 setValue={setPassword} 
               />
-              <button disabled={!formAlert.email && !formAlert.password && email && password ? false : true} type="submit" className="button">Login</button>
+              <button disabled={isButtonDisabled} type="submit" className="button">Login</button>
           </form>
         </div>
       </div>

@@ -1,4 +1,11 @@
+declare interface CurrentUserData {
+  email: string,
+  password: string,
+  data: UserData,
+  _id: string
+}
+
 declare interface UserData {
   name: string,
-  id: string
+  _id: string
 }
