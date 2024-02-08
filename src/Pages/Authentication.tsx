@@ -3,7 +3,9 @@ import "../CSS/authentication.css";
 import Input from "../Components/Authentication/Input";
 import { Xmark } from "../Assets/Authentication/Svgs";
 
-const Authentication = () => {
+const Authentication = (props: {
+  setCurrentUserData: React.Dispatch<any>
+}) => {
   // Email value holder state.
   const [email, setEmail] = useState<string>("");
   // Pass value holder state.
@@ -17,29 +19,40 @@ const Authentication = () => {
   const handleSubmit = async (e: any) => {
     // Prevent default form submit action (refresh).
     e.preventDefault();
-    // Stringify body to send it as post request.
-    const body = JSON.stringify({email, password});
-    // Make post request
-    const response = await fetch("https://budgetify-back.adaptable.app/login", {
-      method: "POST",
-      mode: "cors",
-      cache: "no-cache",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body
-    });
-    const responseData = await response.json();
-    // responseData will be in the following format: {res: {res: (Array of UserData objects)}}
-    // If response data res array is empty then show toast message and return.
-    if(!responseData.res.length) {
-      setShowToast(true);
-      return
-    };
+    try {
+      // Stringify body to send it as post request.
+      const body = JSON.stringify({email, password});
+
+      // Make post request
+      const response = await fetch("https://budgetify-back.adaptable.app/login", {
+        method: "POST",
+        mode: "cors",
+        cache: "no-cache",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body
+      });
+      const responseData = await response.json();
+      // responseData will be in the following format: {res: {res: (Array of UserData objects)}}
+      const data = responseData.res;
+
+      // If response data res array is empty then show toast message and return.
+      if(!data.length) {
+        setShowToast(true);
+        return;
+      };
+
+      // Save user info in session storage and update parent state.
+      window.sessionStorage.setItem("Budgetify-user-data", JSON.stringify(data[0]));
+      props.setCurrentUserData(data[0]);
+    } catch (err) {
+      console.error(err);
+    }
   }
 
   return (
-    <div className="authentication d-flex justify-content-center align-items-center">
+    <main className="authentication d-flex justify-content-center align-items-center">
       <div className="authentication-box d-flex flex-column align-items-center gap-5 py-5 px-3">
         <h1 className="logo">Budgetify</h1>
         <div className="d-flex flex-column gap-2 w-100 align-items-center">
@@ -67,7 +80,7 @@ const Authentication = () => {
           </form>
         </div>
       </div>
-    </div>
+    </main>
   );
 }
 

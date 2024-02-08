@@ -51,7 +51,7 @@ table {
 /* <-----------------------------------------------------------------------------------------------------------> */
 
 * {
-	font-family: "Space Grotesk", sans-serif;
+	font-family: "Space Grotesk", sans-serif !important;
 }
 
 :root {
@@ -63,6 +63,7 @@ table {
 	--danger: #EE3F19;
 	--text: #373737;
 	--border: #333333;
+	--page-background: #ECEDED;
 	--base-border-radius: 10px;
 	--base-transition-duration: 0.1s;
 }

@@ -1,0 +1,48 @@
+.homepage-header .homepage-mini-logo {
+  font-size: 20px;
+  font-family: "Alas", sans-serif !important;
+  color: var(--header) !important;
+  display: flex;
+  align-items: center;
+}
+
+.homepage-header .navbar ul li {
+  font-weight: 400;
+  font-size: 20px;
+  color: var(--text);
+}
+
+.homepage-header .profile-corner ul {
+  background-color: var(--primary);
+  top: 40px;
+}
+
+.homepage-header .profile-corner ul li {
+  transition: var(--base-transition-duration);
+}
+
+.homepage-header .profile-corner ul li:hover {
+  background-color: var(--text);
+  color: var(--primary);
+}
+
+.prompt {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.6);
+}
+
+.prompt .prompt-box {
+  background-color: var(--primary);
+}
+
+.prompt .prompt-box .prompt-box-actions-container .action-button {
+  max-width: 100px;
+  width: 100%;
+}

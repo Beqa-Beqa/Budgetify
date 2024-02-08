@@ -1,0 +1,1 @@
+export {default as UserIcon} from "./Header/user-icon.png";
