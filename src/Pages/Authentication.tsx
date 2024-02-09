@@ -36,7 +36,7 @@ const Authentication = (props: {
         body
       });
       const responseData = await response.json();
-      // responseData will be in the following format: {res: {res: (Array of UserData objects)}}
+      // responseData will be in the following format: {res: {res: (Array of CurrentUserData type objects)}}
       const data = responseData.res;
 
       // If response data res array is empty then show toast message and return.

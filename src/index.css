@@ -56,14 +56,33 @@ table {
 
 :root {
 	--primary: #FFF;
+	--component-background: #F9F9F9;
 	--secondary: #FFFFFFCC;
 	--button: #B9E2E6;
 	--header: #000000;
 	--placeholder: #474747;
 	--danger: #EE3F19;
+	--success: #21C206;
 	--text: #373737;
 	--border: #333333;
 	--page-background: #ECEDED;
 	--base-border-radius: 10px;
 	--base-transition-duration: 0.1s;
+}
+
+.prompt {
+  z-index: 999;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.6);
+}
+
+.prompt .prompt-box {
+  background-color: var(--primary);
 }

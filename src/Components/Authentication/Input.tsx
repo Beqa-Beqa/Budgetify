@@ -13,8 +13,6 @@ const Input = (props: {
   }>>,
   pattern?: string
 }) => {
-  // Current input value holder.
-  const [inputValue, setInputValue] = useState<any>("");
   // Input type state (text or password).
   const [inputType, setInputType] = useState<string>(props.type);
   // Alert message state
@@ -25,6 +23,7 @@ const Input = (props: {
 
   // Handle blur event (outside click).
   const handleBlur = () => {
+    const inputValue = props.value
     if(!inputValue) {
       // If input field is empty
       // Set alert
@@ -52,6 +51,13 @@ const Input = (props: {
     }
   }
 
+  // Handle input value change vent.
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Prevent default action, otherwise too many recursion error occurs and lags the browser tab.
+    e.preventDefault();
+    props.setValue(e.target.value);
+  }
+
   return (
     <div className="input-container w-100 d-flex flex-column gap-1">
       <div className="d-flex align-items-center">
@@ -59,9 +65,9 @@ const Input = (props: {
           onBlur={handleBlur}
           required
           title={props.name}
-          className={`input ${alert && "alert"} px-3`}
-          onChange={(e) => {props.setValue(e.target.value); setInputValue(e.target.value)}} 
-          value={props.value} 
+          className={`input ${alert && "alert"} px-3 ${props.type === "password" && "pe-5"}`}
+          onChange={(e) => handleChange(e)}
+          value={props.value}
           type={inputType}
         />
         <span className="floating-placeholder">{props.name}</span>

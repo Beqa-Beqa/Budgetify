@@ -1,7 +1,9 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { UserIcon } from "../../Assets/Home";
 import "./header.css";
 import { Button } from "react-bootstrap";
+import { GeneralContext } from "../../Contexts/GeneralContextProvider";
+import { RxHamburgerMenu } from "react-icons/rx";
  
 const Header = (props: {
   currentUserData: CurrentUserData,
@@ -9,6 +11,9 @@ const Header = (props: {
 }) => {
   // User data
   const userData: UserData = props.currentUserData.data;
+
+  // window inner width.
+  const {width} = useContext(GeneralContext);
 
   // State for profile dropdown menu.
   const [showProfileDropdown, setShowProfileDropdown] = useState<boolean>(false);
@@ -24,24 +29,27 @@ const Header = (props: {
     <>
       <div className="homepage-header container-fluid">
         <div className="row justify-content-between align-items-cente">
-          <h1 className="homepage-mini-logo col-4 fw-bold">Budgetify</h1>
-          {/* <nav className="navbar col-5">
-            <ul className="w-100 d-flex gap-4">
-              <li>Categories</li>
-              <li>Subscriptions</li>
-              <li>Obligatory</li>
-              <li>Statistic</li>
-              <li>Admin</li>
-            </ul>
-          </nav> */}
-          <div className="profile-corner col-5 col-md-3 col-xl-2 d-flex justify-content-end">
-            <div className="d-flex w-100 justify-content-end align-items-center position-relative" style={{maxWidth: 150}}>
+          <h1 className="homepage-mini-logo col col-lg-2 col-xl-4 col-xxl-4 fw-bold">Budgetify</h1>
+          {width >= 992 &&
+            <nav className="navbar col-lg-7 col-xl-6 col-xxl-5 p-0">
+              <ul className="d-flex justify-content-between w-100">
+                <li>Categories</li>
+                <li>Subscriptions</li>
+                <li>Obligatory</li>
+                <li>Statistic</li>
+                <li>Admin</li>
+              </ul>
+            </nav>
+          }
+          <div className="profile-corner col col-lg-2 col-xl-2 col-xxl-2 d-flex justify-content-end">
+            <div className="d-flex w-100 justify-content-end align-items-center gap-3 position-relative" style={{maxWidth: 150}}>
+              {width < 992 && <RxHamburgerMenu role="button" style={{width: 20, height: 20}} />}
               <div onClick={() => setShowProfileDropdown(prev => !prev)} role="button" className="d-flex align-items-center gap-2">
                 <img src={UserIcon} alt="user"/>
                 <h2>{userData.name}</h2>
               </div>
               {showProfileDropdown &&
-                <ul className="position-absolute w-100 rounded py-2">
+                <ul className="profile-dropdown position-absolute w-100 rounded py-2">
                   <li onClick={() => setShowLogoutPrompt(true)} role="button" className="py-2 text-center">
                     Logout
                   </li>
