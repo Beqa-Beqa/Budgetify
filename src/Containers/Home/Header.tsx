@@ -1,16 +1,15 @@
 import { useContext, useState } from "react";
 import { UserIcon } from "../../Assets/Home";
 import "./header.css";
-import { Button } from "react-bootstrap";
 import { GeneralContext } from "../../Contexts/GeneralContextProvider";
 import { RxHamburgerMenu } from "react-icons/rx";
+import { AuthContext } from "../../Contexts/AuthContextProvider";
  
-const Header = (props: {
-  currentUserData: CurrentUserData,
-  setCurrentUserData: React.Dispatch<React.SetStateAction<{} | CurrentUserData>>
-}) => {
+const Header = () => {
+  const {currentUserData, setCurrentUserData} = useContext(AuthContext);
+
   // User data
-  const userData: UserData = props.currentUserData.data;
+  const userData = (currentUserData as CurrentUserData).data;
 
   // window inner width.
   const {width} = useContext(GeneralContext);
@@ -21,7 +20,9 @@ const Header = (props: {
   const [showLogoutPrompt, setShowLogoutPrompt] = useState<boolean>(false);
 
   const handleLogout = () => {
-    props.setCurrentUserData({});
+    // Clear state of currentuserdata.
+    setCurrentUserData({});
+    // Clear cache.
     window.sessionStorage.removeItem("Budgetify-user-data");
   }
 
@@ -50,7 +51,7 @@ const Header = (props: {
               </div>
               {showProfileDropdown &&
                 <ul className="profile-dropdown position-absolute w-100 rounded py-2">
-                  <li onClick={() => setShowLogoutPrompt(true)} role="button" className="py-2 text-center">
+                  <li onClick={() => {setShowLogoutPrompt(true); setShowProfileDropdown(false);}} role="button" className="py-2 text-center">
                     Logout
                   </li>
                 </ul>
@@ -63,12 +64,12 @@ const Header = (props: {
           <div className="prompt-box p-3 rounded">
             <h5 className="mb-5">Are you sure that you want to logout?</h5>
             <div className="prompt-box-actions-container d-flex justify-content-center gap-3">
-              <Button onClick={handleLogout} className="action-button" variant="outline-dark">
+              <button onClick={handleLogout} className="action-button negative">
                 Confirm
-              </Button>
-              <Button onClick={() => setShowLogoutPrompt(false)} className="action-button" variant="outline-dark">
+              </button>
+              <button onClick={() => setShowLogoutPrompt(false)} className="action-button positive">
                 Cancel
-              </Button>
+              </button>
             </div>
           </div>
       </div>}

@@ -1,12 +1,13 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import "../CSS/authentication.css";
 import Input from "../Components/Authentication/Input";
 import { Xmark } from "../Assets/Authentication/Svgs";
+import { AuthContext } from "../Contexts/AuthContextProvider";
 
-const Authentication = (props: {
-  setCurrentUserData: React.Dispatch<React.SetStateAction<{} | CurrentUserData>>
-}) => {
+const Authentication = () => {
   const loginApiUrl = "https://budgetify-back.adaptable.app/login";
+
+  const {setCurrentUserData, setAccountsData} = useContext(AuthContext);
 
   // Email value holder state.
   const [email, setEmail] = useState<string>("");
@@ -36,18 +37,21 @@ const Authentication = (props: {
         body
       });
       const responseData = await response.json();
-      // responseData will be in the following format: {res: {res: (Array of CurrentUserData type objects)}}
-      const data = responseData.res;
+      // responseData will be in the following format: {CurrentUserData type object}
+      const userData: CurrentUserData = responseData.credentialRes;
+      const accountsData: AccountData[] = responseData.accountsData;
 
       // If response data res array is empty then show toast message and return.
-      if(!data.length) {
+      if(!Object.keys(userData).length) {
         setShowToast(true);
         return;
       };
 
       // Save user info in session storage and update parent state.
-      window.sessionStorage.setItem("Budgetify-user-data", JSON.stringify(data[0]));
-      props.setCurrentUserData(data[0]);
+      window.sessionStorage.setItem("Budgetify-user-data", JSON.stringify(userData));
+      window.sessionStorage.setItem("Budgetify-user-accounts-data", JSON.stringify(accountsData));
+      setCurrentUserData(userData);
+      setAccountsData(accountsData);
     } catch (err) {
       console.error(err);
     }

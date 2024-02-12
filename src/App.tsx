@@ -1,10 +1,11 @@
 import "bootstrap/dist/css/bootstrap.css";
 import { Authentication, Homepage } from "./Pages";
-import { useEffect, useState } from "react";
+import { useContext, useEffect } from "react";
+import { AuthContext } from "./Contexts/AuthContextProvider";
 
 function App() {
   // Current user data that will display user related info.
-  const [currentUserData, setCurrentUserData] = useState<CurrentUserData | {}>(JSON.parse(window.sessionStorage.getItem("Budgetify-user-data") || "{}"));
+  const {currentUserData, setCurrentUserData} = useContext(AuthContext);
 
   // Useffect that reruns after currentuser changes.
   useEffect(() => {
@@ -21,10 +22,10 @@ function App() {
 
   // If currentUserData is empty (that is user is not logged in), show authentication page.
   if(!Object.keys(currentUserData).length) {
-    return <Authentication setCurrentUserData={setCurrentUserData} />
+    return <Authentication />
   } else {
     // Otherwise show homepage
-    return <Homepage currentUserData={currentUserData} setCurrentUserData={setCurrentUserData} />
+    return <Homepage />
   }
 }
 

@@ -10,8 +10,9 @@ const Main = () => {
   return (
     <div className="homepage-main container-fluid">
       <div className="row justify-content-between">
-        <div className="col-xl-4 col-12 d-flex flex-column gap-5 mb-5 mb-xl-0">
-          <Card title="Credit Card" amount="5,356.18" currency="$" />
+        <div className="col-xl-4 col-12 d-flex flex-column flex-md-row flex-md-wrap justify-content-md-between flex-xl-column gap-5 mb-5 mb-xl-0">
+          <Card classname="col-xxl col-xl-12 col-md-5 col" title="Add Account" />
+          <div className="col-xxl col-xl-12 col-md-5 col"/>
         </div>
         <div className="col-xxl-5 col-xl-6 col-lg-9 p-xl-0">
           <MainSearch sort={sort} setSort={setSort}/>

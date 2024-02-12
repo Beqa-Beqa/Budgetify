@@ -72,7 +72,7 @@ table {
 
 .prompt {
   z-index: 999;
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
@@ -85,4 +85,32 @@ table {
 
 .prompt .prompt-box {
   background-color: var(--primary);
+}
+
+.prompt .prompt-box .prompt-box-actions-container .action-button {
+  max-width: 100px;
+  width: 100%;
+	height: 51px;
+	border-radius: var(--base-border-radius);
+}
+
+.action-button.negative {
+	transition: var(--base-transition-duration);
+	border: 1px solid transparent;
+	outline: 0;
+	background-color: transparent;
+}
+
+.action-button.negative:hover {
+	border: 1px solid var(--border);
+}
+
+.action-button.positive {
+	border: 0;
+	outline: 0;
+	background-color: var(--button);
+}
+
+.action-button.positive:disabled {
+	opacity: 70%;
 }
