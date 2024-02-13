@@ -1,6 +1,6 @@
+import "../../CSS/Containers/header.css";
 import { useContext, useState } from "react";
 import { UserIcon } from "../../Assets/Home";
-import "./header.css";
 import { GeneralContext } from "../../Contexts/GeneralContextProvider";
 import { RxHamburgerMenu } from "react-icons/rx";
 import { AuthContext } from "../../Contexts/AuthContextProvider";

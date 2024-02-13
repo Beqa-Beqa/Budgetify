@@ -1,4 +1,4 @@
-import "./addAccountPrompt.css"
+import "../../CSS/Containers/addAccountPrompt.css";
 import { HiXMark } from "react-icons/hi2";
 import FormInput from "../../Components/Home/FormInput";
 import { ChangeEvent, useContext, useEffect, useRef, useState } from "react";
@@ -30,7 +30,7 @@ const AddAccountPrompt = (props: {
   // Description field value.
   const [description, setDescription] = useState<string>("");
   // Chosen currency value.
-  const [currency, setCurrency] = useState<string>("USD");
+  const [currency, setCurrency] = useState<string>("USD $");
   // State for showing toast message. (Account creation).
   const [showToast, setShowToast] = useState<boolean>(false);
   // State that holds alerts.
@@ -138,6 +138,7 @@ const AddAccountPrompt = (props: {
       const newData = [...accountsData, accData];
       // Update accounts data state. (for immediate visual update purposes).
       setAccountsData(newData);
+      window.sessionStorage.setItem("Budgetify-user-accounts-data", JSON.stringify(newData));
       // Show toast.
       setShowToast(true);
       // Timeout for toast to be closed in 5 sec.
@@ -146,7 +147,7 @@ const AddAccountPrompt = (props: {
   }
   
   return (
-    <div className="prompt">
+    <div className="prompt text-color">
       <div style={{maxWidth: 515}} className="prompt-box rounded py-3 w-100">
         <div className="w-100 position-relative d-flex align-items-center justify-content-center">
           <h3 className="text-center fs-4">Create Account</h3>
@@ -175,7 +176,7 @@ const AddAccountPrompt = (props: {
           <FormInput classname="input" required title="Currency">
             <select onChange={(e) => setCurrency(e.target.value)} defaultValue={currency} className="px-3">
               {currencies.length && currencies.map((item: CurrencyData, key: number) => {
-                return <option value={item.ISOCurrencyCode} key={key}>{item.CurrencySymbol} {item.ISOCurrencyCode}</option>
+                return <option value={`${item.ISOCurrencyCode} ${item.CurrencySymbol}`} key={key}>{item.CurrencySymbol} {item.ISOCurrencyCode}</option>
               })}
             </select>
           </FormInput>
@@ -200,7 +201,7 @@ const AddAccountPrompt = (props: {
         </form>
         {
         showToast && 
-          <div style={{backgroundColor: "var(--success)"}} className="d-flex justify-content-between align-items-center mx-5 mt-4 rounded fs-5 py-3 px-5">
+          <div style={{backgroundColor: "var(--success)", color: "var(--primary)"}} className="d-flex justify-content-between align-items-center mx-5 mt-4 rounded fs-5 py-3 px-5">
             <span>The Account created</span>
             <div role="button" onClick={() => setShowToast(false)}>
               <HiXMark />

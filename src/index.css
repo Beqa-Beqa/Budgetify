@@ -87,7 +87,7 @@ table {
   background-color: var(--primary);
 }
 
-.prompt .prompt-box .prompt-box-actions-container .action-button {
+.action-button {
   max-width: 100px;
   width: 100%;
 	height: 51px;

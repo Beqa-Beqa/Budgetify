@@ -3,9 +3,10 @@
   background-position: center;
   background-repeat: no-repeat;
   background-size: contain;
-  box-shadow: 5px 10px 20px 0px #00000040;
   border-radius: var(--base-border-radius);
   color: var(--primary);
+  opacity: 60%;
+  transition: var(--base-transition-duration);
 }
 
 .account-card-currency {
@@ -17,4 +18,18 @@
 
 .account-card-currency span {
   font-size: 64px;
+}
+
+.details-button {
+  transition: var(--base-transition-duration);
+  border: 1px solid transparent;
+}
+
+.details-button:hover {
+  border: 1px solid var(--border);
+}
+
+.active {
+  opacity: 1;
+  box-shadow: 5px 10px 20px 0px #00000040;
 }

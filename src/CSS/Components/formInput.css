@@ -22,3 +22,7 @@ fieldset legend {
 .alert-input legend {
   color: var(--danger);
 }
+
+.text-color *{
+  color: var(--text);
+}

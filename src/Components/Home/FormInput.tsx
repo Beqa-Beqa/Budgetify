@@ -1,4 +1,4 @@
-import "./formInput.css";
+import "../../CSS/Components/formInput.css";
 
 const FormInput = (props: {
   title: string,
