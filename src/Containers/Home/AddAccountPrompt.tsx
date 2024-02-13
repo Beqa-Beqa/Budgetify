@@ -3,6 +3,7 @@ import { HiXMark } from "react-icons/hi2";
 import FormInput from "../../Components/Home/FormInput";
 import { ChangeEvent, useContext, useEffect, useRef, useState } from "react";
 import { AuthContext } from "../../Contexts/AuthContextProvider";
+import { accountExistsByTitle } from "../../Functions";
 
 const AddAccountPrompt = (props: {
   setShowAddAccountPrompt: React.Dispatch<React.SetStateAction<boolean>>
@@ -104,7 +105,7 @@ const AddAccountPrompt = (props: {
   }
   
   // Check if button is disabled or not.
-  const isButtonDisabled = title.length && !alert.title.error && !alert.description.error ? false : true;
+  const isButtonDisabled = title.length && !alert.title.error && !alert.description.error && !accountExistsByTitle(accountsData, title) ? false : true;
 
   const handleSave = async (event: React.FormEvent<HTMLFormElement>) => {
     // prevent default action (form submit refresh).
