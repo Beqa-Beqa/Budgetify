@@ -4,6 +4,7 @@ import { UserIcon } from "../../Assets/Home";
 import { GeneralContext } from "../../Contexts/GeneralContextProvider";
 import { RxHamburgerMenu } from "react-icons/rx";
 import { AuthContext } from "../../Contexts/AuthContextProvider";
+import ActionPrompt from "../../Components/Home/ActionPrompt";
  
 const Header = () => {
   const {currentUserData, setCurrentUserData} = useContext(AuthContext);
@@ -60,19 +61,13 @@ const Header = () => {
           </div>
         </div>
       </div>
-      {showLogoutPrompt && <div className="prompt">
-          <div className="prompt-box p-3 rounded">
-            <h5 className="mb-5">Are you sure that you want to logout?</h5>
-            <div className="prompt-box-actions-container d-flex justify-content-center gap-3">
-              <button onClick={handleLogout} className="action-button negative">
-                Confirm
-              </button>
-              <button onClick={() => setShowLogoutPrompt(false)} className="action-button positive">
-                Cancel
-              </button>
-            </div>
-          </div>
-      </div>}
+      {showLogoutPrompt && 
+        <ActionPrompt 
+          text="Are you sure that you want to logout?"
+          cancel={{action: () => setShowLogoutPrompt(false), text: "Cancel"}}
+          confirm={{action: handleLogout, text: "Confirm"}}
+        />
+      }
     </>
   );
 }
