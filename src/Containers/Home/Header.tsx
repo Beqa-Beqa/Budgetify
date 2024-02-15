@@ -13,7 +13,7 @@ const Header = () => {
   const userData = (currentUserData as CurrentUserData).data;
 
   // window inner width.
-  const {width} = useContext(GeneralContext);
+  const {width, showToastMessage, setShowToastMessage} = useContext(GeneralContext);
 
   // State for profile dropdown menu.
   const [showProfileDropdown, setShowProfileDropdown] = useState<boolean>(false);
@@ -30,18 +30,24 @@ const Header = () => {
   return (
     <>
       <div className="homepage-header container-fluid">
-        <div className="row justify-content-between align-items-cente">
+        <div className="row justify-content-between align-items-cente position-relative">
           <h1 className="homepage-mini-logo col col-lg-2 col-xl-4 col-xxl-4 fw-bold">Budgetify</h1>
           {width >= 992 &&
-            <nav className="navbar col-lg-7 col-xl-6 col-xxl-5 p-0">
-              <ul className="d-flex justify-content-between w-100">
-                <li>Categories</li>
-                <li>Subscriptions</li>
-                <li>Obligatory</li>
-                <li>Statistic</li>
-                <li>Admin</li>
-              </ul>
-            </nav>
+            <div className="position-relative col-lg-7 col-xl-6 col-xxl-5 p-0">
+              <div className={`toast-message ${showToastMessage.show && "active"} d-flex justify-content-between align-items-center rounded fs-5 py-3 px-5`}>
+                <span>{showToastMessage.text}</span>
+                <span onClick={() => setShowToastMessage({show: false, text: ""})} className="fw-bold" role="button">Close</span>
+              </div>
+              <nav className="navbar p-0">
+                <ul className="d-flex justify-content-between w-100">
+                  <li>Categories</li>
+                  <li>Subscriptions</li>
+                  <li>Obligatory</li>
+                  <li>Statistic</li>
+                  <li>Admin</li>
+                </ul>
+              </nav>
+            </div>
           }
           <div className="profile-corner col col-lg-2 col-xl-2 col-xxl-2 d-flex justify-content-end">
             <div className="d-flex w-100 justify-content-end align-items-center gap-3 position-relative" style={{maxWidth: 150}}>
@@ -62,7 +68,7 @@ const Header = () => {
         </div>
       </div>
       {showLogoutPrompt && 
-        <ActionPrompt 
+        <ActionPrompt
           text="Are you sure that you want to logout?"
           cancel={{action: () => setShowLogoutPrompt(false), text: "Cancel"}}
           confirm={{action: handleLogout, text: "Confirm"}}

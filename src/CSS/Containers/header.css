@@ -6,6 +6,21 @@
   align-items: center;
 }
 
+.homepage-header .toast-message {
+  position: absolute;
+  width: 100%;
+  background-color: var(--success);
+  color: var(--primary); 
+  z-index: 100;
+  left: 0;
+  top: -85px;
+  transition: calc(var(--base-transition-duration) * 3);
+}
+
+.homepage-header .toast-message.active {
+  top: 0;
+}
+
 .homepage-header .navbar ul li {
   font-weight: 400;
   font-size: 20px;

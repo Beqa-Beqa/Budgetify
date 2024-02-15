@@ -5,6 +5,7 @@ import { ChangeEvent, FormEvent, useContext, useEffect, useRef, useState } from 
 import { AuthContext } from "../../Contexts/AuthContextProvider";
 import { accountExistsByTitle } from "../../Functions";
 import ActionPrompt from "../../Components/Home/ActionPrompt";
+import { GeneralContext } from "../../Contexts/GeneralContextProvider";
 
 const AddAccountPrompt = (props: {
   setShowAddAccountPrompt: React.Dispatch<React.SetStateAction<boolean>>,
@@ -22,6 +23,8 @@ const AddAccountPrompt = (props: {
   const currentUserData: CurrentUserData = (authContext.currentUserData as CurrentUserData);
   const {accountsData, setAccountsData} = authContext;
 
+  const {setShowToastMessage} = useContext(GeneralContext);
+
   // Title input reference, used for UI functionality.
   const titleRef = useRef<HTMLInputElement | null>(null);
 
@@ -33,8 +36,6 @@ const AddAccountPrompt = (props: {
   const [description, setDescription] = useState<string>(props.data ? props.data.description : "");
   // Chosen currency value.
   const [currency, setCurrency] = useState<string>(props.data ? props.data.currency : "USD $");
-  // State for showing toast message. (Account creation).
-  const [showToast, setShowToast] = useState<boolean>(false);
   // Confirmation popup state for currency change
   const [showConfirmPopUp, setShowConfirmPopUp] = useState<boolean>(false);
   // State that holds alerts.
@@ -153,10 +154,10 @@ const AddAccountPrompt = (props: {
         // Update accounts data state. (for immediate visual update purposes).
         setAccountsData(newData);
         window.sessionStorage.setItem("Budgetify-user-accounts-data", JSON.stringify(newData));
-        // Show toast.
-        setShowToast(true);
-        // Timeout for toast to be closed in 5 sec.
-        setTimeout(() => setShowToast(false), 5000);
+
+        props.setShowAddAccountPrompt(false);
+        setShowConfirmPopUp(false);
+        setShowToastMessage({show: true, text: props.data ? "The account edited successfuly" : "The account created"});
       } catch (err) {
         console.error(err);
       }
@@ -227,17 +228,7 @@ const AddAccountPrompt = (props: {
             </button>
           </div>
         </form>
-        {
-          showToast && 
-            <div style={{backgroundColor: "var(--success)"}} className="d-flex justify-content-between align-items-center mx-5 mt-4 rounded fs-5 py-3 px-5">
-              <span style={{color: "var(--primary)"}}>The Account {props.data ? "successfully edited" : "Created"}</span>
-              <div role="button" onClick={() => setShowToast(false)}>
-                <HiXMark style={{fill: "var(--primary)"}} />
-              </div>
-            </div>
-        }
-        {
-          showConfirmPopUp && 
+        {showConfirmPopUp && 
           <ActionPrompt 
             text="Are you sure you want to change the currency? It will be changed in all transactions, numbers will stay the same." 
             confirm={{action: handlePromptConfirm, text: "Ok"}}

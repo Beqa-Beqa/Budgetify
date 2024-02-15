@@ -7,6 +7,8 @@ import { useContext, useState } from "react";
 import { AuthContext } from "../../Contexts/AuthContextProvider";
 import AddAccountPrompt from "../../Containers/Home/AddAccountPrompt";
 import { makeFirstCapitals } from "../../Functions";
+import ActionPrompt from "./ActionPrompt";
+import { GeneralContext } from "../../Contexts/GeneralContextProvider";
 
 const CardDetails = (props: {
   setShowDetails: React.Dispatch<React.SetStateAction<boolean>>,
@@ -18,9 +20,12 @@ const CardDetails = (props: {
   const currentUserData = authContext.currentUserData as CurrentUserData;
   const {accountsData, setAccountsData} = authContext;
 
+  const {setShowToastMessage} = useContext(GeneralContext);
+
   const splitCurrency = props.accountData.currency.split(" ");
 
   const [showAddAccountPrompt, setShowAddAccountPrompt] = useState<boolean>(false);
+  const [showActionPrompt, setShowActionPrompt] = useState<boolean>(false);
 
   const handleAccountDelete = async () => {
     try {
@@ -44,6 +49,7 @@ const CardDetails = (props: {
       window.sessionStorage.setItem("Budgetify-user-accounts-data", JSON.stringify(newAccountsData));
 
       props.setShowDetails(false);
+      setShowToastMessage({show: true, text: "Account is successfully deleted"});
     } catch (err) {
       console.error(err);
     }
@@ -51,7 +57,7 @@ const CardDetails = (props: {
 
   return (
     <>
-      {!showAddAccountPrompt && <div className="prompt">
+      {!showAddAccountPrompt && !showActionPrompt &&<div className="prompt">
         <div style={{maxWidth: 515}} className="prompt-box rounded w-100">
           <div className="w-100 px-sm-4 py-3 px-3 position-relative d-flex align-items-center justify-content-center">
             <div className="d-flex align-items-center justify-content-between w-100 ms-sm-5 me-5 ms-2 ">
@@ -60,7 +66,7 @@ const CardDetails = (props: {
                 <div onClick={() => setShowAddAccountPrompt(true)} className="icon p-1" role="button">
                   <MdOutlineModeEdit />
                 </div>
-                <div onClick={handleAccountDelete} className="icon p-1" role="button">
+                <div onClick={() => setShowActionPrompt(true)} className="icon p-1" role="button">
                   <FaRegTrashCan />
                 </div>
               </div>
@@ -82,6 +88,13 @@ const CardDetails = (props: {
         </div>
       </div>}
       {showAddAccountPrompt && <AddAccountPrompt data={props.accountData} setShowAddAccountPrompt={setShowAddAccountPrompt} />}
+      {showActionPrompt && 
+        <ActionPrompt
+          head="Delete Account"
+          text="Are you sure you want to delete this account?" 
+          confirm={{action: handleAccountDelete, text: "Yes"}}
+          cancel={{action: () => setShowActionPrompt(false), text: "No"}}
+        />}
     </>
   );
 }
