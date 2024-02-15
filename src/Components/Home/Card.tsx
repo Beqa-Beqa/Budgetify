@@ -9,10 +9,14 @@ const Card = (props: {
   onclick?: any,
   active?: boolean
 }) => {
+  // account data.
   const accData = props.accountData;
 
+  // left side digits of float number (divided by comma after every 3 digit).
   const dividedByThousandDecimalPart = accData?.amount.toString().split(".")[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  // if float part exists (right side of dot) then get it.
   const floatPart = accData?.amount.toString().split(".")[1];
+  // concatenate everything.
   const amount = floatPart ? dividedByThousandDecimalPart + "." + floatPart : dividedByThousandDecimalPart;
 
   // State for showing account details.

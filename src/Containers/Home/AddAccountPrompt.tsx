@@ -53,18 +53,21 @@ const AddAccountPrompt = (props: {
   // when component mounts, if we haven't already fetched currencies data from api, fetch it.
   useEffect(() => {
     const getCurrencyData = async () => {
+      // If currencies are not fetched.
       if(!currencies.length) {
         const response = await fetch(fetchCurrenciesApi, {
           method: "post", 
           headers: {"Apikey": currencyApiKey}
         });
         const data = await response.json();
+        // update currencies state.
         setCurrencies(data.Currencies);
-
+        // save currencies in localstorage.
         window.localStorage.setItem("Budgetify-currencies-data", JSON.stringify(data.Currencies));
       }
     }
 
+    // call async getcurrencydata function.
     getCurrencyData();
   }, []);
 
@@ -76,7 +79,7 @@ const AddAccountPrompt = (props: {
     setTitle(value);
     // Check if characters length exceeds 128.
     const maxCharErr = value.length > 128;
-    // pattern check.
+    // pattern check. (letters from all alphabet, digits and whitespaces except special symbols.)
     const charErr = !value.match(/^[\p{L}\p{N}\p{Zs}]+$/gmu);
 
     // Alert updates according to the error reason.
@@ -110,17 +113,28 @@ const AddAccountPrompt = (props: {
   }
   
   // Check if button is disabled or not.
+  // if there is no props.data this means it's not an edit prompt open
+  // hence no title, title error, description error, and account exists by title error will disable button.
+  // if props.data is present it means it's edit prompt.
+  // if everything is same (currencies, title, description) or title is not provided button is disabled.
   const isButtonDisabled = !props.data ?
       title.length && !alert.title.error && !alert.description.error && !accountExistsByTitle(accountsData, title) ? false : true
     : 
       props.data.currency === currency && props.data.title.toLocaleLowerCase() === title.toLocaleLowerCase() && props.data.description === description || !title;
 
+  // check if currency is changed.
   const isCurrencyChanged = props.data && props.data.currency !== currency;
 
   const handleSave = async () => {
     // Check if button is disabled or not (Disabled attribute can be removed from dev tools, hence this is additional protection).
     if(!isButtonDisabled) {
       // Request body to send for post request.
+      // if props.data is present we send edit body on edit api.
+      // edit api is waiting for body in following format:
+      // {accId: string (id of account in db), fields: {title: string, currency: string, description: string}}
+      // otherwise it is new account prompt.
+      // account creation api is waiting for body in format:
+      // {userId: string (creator of acc), accountData: {title: string, currency: string, description: string}}
       const requestBody = props.data ? JSON.stringify({
         infoForEdit: {
           accId: props.data._id,
@@ -149,14 +163,21 @@ const AddAccountPrompt = (props: {
 
         // Result will be of type AccountData (check interfaces.d.ts in src folder).
         const accData: AccountData = await result.json();
+        // if props.data is present it was an edit operation, therefore we do not add
+        // anything new in accounts state. otherwise it was a new account prompt and we update state
+        // and add new account.
         const newData = props.data ? [...accountsData] : [...accountsData, accData];
+        // if it was edit prompt, change current account data with new data (server will respond with new changed data).
         if(props.data) newData[newData.indexOf(props.data)] = accData;
         // Update accounts data state. (for immediate visual update purposes).
         setAccountsData(newData);
+        // update sessionStorage.
         window.sessionStorage.setItem("Budgetify-user-accounts-data", JSON.stringify(newData));
-
+        // close prompt.
         props.setShowAddAccountPrompt(false);
+        // close confirmation pop up.
         setShowConfirmPopUp(false);
+        // set toast message.
         setShowToastMessage({show: true, text: props.data ? "The account edited successfuly" : "The account created"});
       } catch (err) {
         console.error(err);

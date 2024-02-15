@@ -14,26 +14,35 @@ const CardDetails = (props: {
   setShowDetails: React.Dispatch<React.SetStateAction<boolean>>,
   accountData: AccountData
 }) => {
+  // api for deleting acc.
   const deleteAccountApi = "https://budgetify-back.adaptable.app/delete-account";
 
+  // authcontext provides with user data and accountsdata. also accounts data setter.
   const authContext = useContext(AuthContext);
   const currentUserData = authContext.currentUserData as CurrentUserData;
   const {accountsData, setAccountsData} = authContext;
 
+  // general context provides with toast message setter.
   const {setShowToastMessage} = useContext(GeneralContext);
 
+  // split currency (ex: "USD $" => ["USD", "$"])
   const splitCurrency = props.accountData.currency.split(" ");
 
+  // state for showing add account prompt (or edit).
   const [showAddAccountPrompt, setShowAddAccountPrompt] = useState<boolean>(false);
+  // action prompt (for deleting).
   const [showActionPrompt, setShowActionPrompt] = useState<boolean>(false);
 
   const handleAccountDelete = async () => {
+    // server excepts body for deleting in format:
+    // {accId: (account id), userId: (account owner id)}
     try {
       const body = JSON.stringify({
         accId: props.accountData._id,
         userId: currentUserData._id
       });
         
+      // make request.
       await fetch(deleteAccountApi, {
         method: "post",
         cache: "no-cache",
@@ -44,11 +53,15 @@ const CardDetails = (props: {
         body
       });
 
+      // remove deleted account and update state.
       const newAccountsData = accountsData.filter((account: AccountData) => account._id !== props.accountData._id);
       setAccountsData(newAccountsData);
+      // update session storage.
       window.sessionStorage.setItem("Budgetify-user-accounts-data", JSON.stringify(newAccountsData));
 
+      // close acc info.
       props.setShowDetails(false);
+      // set toast message.
       setShowToastMessage({show: true, text: "Account is successfully deleted"});
     } catch (err) {
       console.error(err);

@@ -29,9 +29,9 @@ const Header = () => {
 
   return (
     <>
-      <div className="homepage-header container-fluid">
+      <div className="homepage-header mt-4 mt-xl-0 container-fluid">
         <div className="row justify-content-between align-items-cente position-relative">
-          <h1 className="homepage-mini-logo col col-lg-2 col-xl-4 col-xxl-4 fw-bold">Budgetify</h1>
+          <h1 className="homepage-mini-logo pb-2 col col-lg-2 col-xl-4 col-xxl-4 fw-bold">Budgetify</h1>
           {width >= 992 &&
             <div className="position-relative col-lg-7 col-xl-6 col-xxl-5 p-0">
               <div className={`toast-message ${showToastMessage.show && "active"} d-flex justify-content-between align-items-center rounded fs-5 py-3 px-5`}>
@@ -49,7 +49,7 @@ const Header = () => {
               </nav>
             </div>
           }
-          <div className="profile-corner col col-lg-2 col-xl-2 col-xxl-2 d-flex justify-content-end">
+          <div className="profile-corner pb-2 col col-lg-2 col-xl-2 col-xxl-2 d-flex justify-content-end">
             <div className="d-flex w-100 justify-content-end align-items-center gap-3 position-relative" style={{maxWidth: 150}}>
               {width < 992 && <RxHamburgerMenu role="button" style={{width: 20, height: 20}} />}
               <div onClick={() => setShowProfileDropdown(prev => !prev)} role="button" className="d-flex align-items-center gap-2">
