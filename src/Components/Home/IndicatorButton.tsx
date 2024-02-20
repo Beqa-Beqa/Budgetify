@@ -1,4 +1,5 @@
 import "../../CSS/Components/indicatorButton.css";
+import { GoArrowDown, GoArrowUp } from "react-icons/go";
 
 const IndicatorButton = (props: {type: "Income" | "Expenses"}) => {
   return (
