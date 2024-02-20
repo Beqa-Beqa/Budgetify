@@ -52,7 +52,6 @@ const CardDetails = (props: {
         },
         body
       });
-
       // remove deleted account and update state.
       const newAccountsData = accountsData.filter((account: AccountData) => account._id !== props.accountData._id);
       setAccountsData(newAccountsData);

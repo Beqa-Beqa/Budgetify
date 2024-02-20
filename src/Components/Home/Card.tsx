@@ -3,6 +3,7 @@ import "../../CSS/Components/card.css";
 import { useState } from "react";
 import { makeFirstCapitals } from "../../Functions";
 
+
 const Card = (props: {
   accountData?: AccountData,
   classname?: string,

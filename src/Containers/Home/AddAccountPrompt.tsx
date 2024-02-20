@@ -31,6 +31,7 @@ const AddAccountPrompt = (props: {
   // Currencies data fetched from api.
   const [currencies, setCurrencies] = useState<CurrencyData[]>(JSON.parse(window.localStorage.getItem("Budgetify-currencies-data") || "[]") || []);
   // Title value entered in input.
+
   const [title, setTitle] = useState<string>(props.data ? props.data.title : "");
   // Description field value.
   const [description, setDescription] = useState<string>(props.data ? props.data.description : "");
@@ -148,7 +149,7 @@ const AddAccountPrompt = (props: {
       // Clear title and description fields.
       setTitle("");
       setDescription("");
-
+      
       try {
         // make post request and get result (result will be data that was saved in db).
         const result = await fetch(createAccountApi, {
