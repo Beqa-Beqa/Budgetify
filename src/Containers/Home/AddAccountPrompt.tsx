@@ -1,4 +1,5 @@
 import "../../CSS/Containers/addAccountPrompt.css";
+
 import { HiXMark } from "react-icons/hi2";
 import FormInput from "../../Components/Home/FormInput";
 import { ChangeEvent, useContext, useEffect, useRef, useState } from "react";
