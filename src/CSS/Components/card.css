@@ -1,0 +1,35 @@
+.account-card {
+  background-image: linear-gradient(135deg, #f9a7af, #f87681 20%, #e063b9 50%, #a598e4 80%, #79a4e8);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+  border-radius: var(--base-border-radius);
+  color: var(--primary);
+  opacity: 60%;
+  transition: var(--base-transition-duration);
+}
+
+.account-card-currency {
+  max-width: 90px;
+  height: 90px;
+  background-color: var(--primary);
+  color: #D376D7;
+}
+
+.account-card-currency span {
+  font-size: 64px;
+}
+
+.details-button {
+  transition: var(--base-transition-duration);
+  border: 1px solid transparent;
+}
+
+.details-button:hover {
+  border: 1px solid var(--border);
+}
+
+.active {
+  opacity: 1;
+  box-shadow: 5px 10px 20px 0px #00000040;
+}
