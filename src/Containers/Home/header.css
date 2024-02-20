@@ -10,6 +10,15 @@
   font-weight: 400;
   font-size: 20px;
   color: var(--text);
+  cursor: pointer;
+  user-select: none;
+  padding-bottom: 10px;
+  border-bottom: 1px solid transparent;
+  transition: var(--base-transition-duration);
+}
+
+.homepage-header .navbar ul li:hover {
+  border-bottom: 1px solid var(--border);
 }
 
 .homepage-header .profile-corner ul {
@@ -26,23 +35,6 @@
   color: var(--primary);
 }
 
-.prompt {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background-color: rgba(0, 0, 0, 0.6);
-}
-
-.prompt .prompt-box {
-  background-color: var(--primary);
-}
-
-.prompt .prompt-box .prompt-box-actions-container .action-button {
-  max-width: 100px;
-  width: 100%;
+.profile-corner .profile-dropdown {
+  box-shadow: rgba(0, 0, 0, 0.3) 0px 19px 38px, rgba(0, 0, 0, 0.22) 0px 15px 12px;
 }
