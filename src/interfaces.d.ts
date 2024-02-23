@@ -24,7 +24,25 @@ declare interface AccountData {
   owner: string,
   title: string,
   currency: string,
-  amount: number,
+  amount: string,
   description: string,
   _id: string
+}
+
+declare interface TransactionData {
+  _id: string,
+  belongsToAccountWithId: string,
+  transactionType: string,
+  title: string,
+  amount: string,
+  date: string,
+  chosenCategories: string[],
+  creationDate: string,
+  updateDate: string,
+  description?: string
+}
+
+declare interface InputBasicAlert {
+  error: boolean,
+  text: string
 }

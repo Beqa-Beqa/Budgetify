@@ -1,13 +1,12 @@
 import { useContext, useState } from "react";
-import "../CSS/authentication.css";
-import Input from "../Components/Authentication/Input";
-import { Xmark } from "../Assets/Authentication/Svgs";
-import { AuthContext } from "../Contexts/AuthContextProvider";
+import "./authentication.css";
+import Input from "../../Components/Authentication/Input";
+import { Xmark } from "../../Assets/Authentication/Svgs";
+import { AuthContext } from "../../Contexts/AuthContextProvider";
+import { loginApi } from "../../apiURLs";
 
 const Authentication = () => {
-  const loginApiUrl = "https://budgetify-back.adaptable.app/login";
-
-  const {setCurrentUserData, setAccountsData} = useContext(AuthContext);
+  const {setCurrentUserData, setAccountsData, setTransactionsData} = useContext(AuthContext);
 
   // Email value holder state.
   const [email, setEmail] = useState<string>("");
@@ -27,7 +26,7 @@ const Authentication = () => {
       const body = JSON.stringify({email, password});
 
       // Make post request
-      const response = await fetch(loginApiUrl, {
+      const response = await fetch(loginApi, {
         method: "POST",
         mode: "cors",
         cache: "no-cache",
@@ -40,6 +39,7 @@ const Authentication = () => {
       // responseData will be in the following format: {CurrentUserData type object}
       const userData: CurrentUserData = responseData.credentialRes;
       const accountsData: AccountData[] = responseData.accountsData;
+      const transactionsData: TransactionData[] = responseData.transactionsData;
 
       // If response data res array is empty then show toast message and return.
       if(!Object.keys(userData).length) {
@@ -50,10 +50,12 @@ const Authentication = () => {
       // Save user info in session storage and update parent state.
       window.sessionStorage.setItem("Budgetify-user-data", JSON.stringify(userData));
       window.sessionStorage.setItem("Budgetify-user-accounts-data", JSON.stringify(accountsData));
+      window.sessionStorage.setItem("Budgetify-user-transactions-data", JSON.stringify(transactionsData));
       setCurrentUserData(userData);
       setAccountsData(accountsData);
+      setTransactionsData(transactionsData);
     } catch (err) {
-      console.error(err);
+      setShowToast(true);
     }
   }
 

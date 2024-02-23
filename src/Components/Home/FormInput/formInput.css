@@ -1,7 +1,9 @@
 fieldset {
+  height: fit-content;
   border: 1px solid rgba(0, 0, 0, 0.5) !important;
   height: fit-content;
   transition: var(--base-transition-duration);
+  border-radius: calc(var(--base-border-radius) / 2);
 }
 
 fieldset legend {
@@ -9,6 +11,7 @@ fieldset legend {
   margin: 0 5px;
   padding: 0 5px;
   background-color: var(--primary);
+  color: rgba(0, 0, 0, 0.5);
   position: absolute;
   top: -8px;
   left: 8px;

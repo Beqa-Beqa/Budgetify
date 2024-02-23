@@ -1,4 +1,4 @@
-import "../../CSS/Components/mainSearch.css";
+import "./mainSearch.css";
 import { IoSearch } from "react-icons/io5";
 import { GoSortDesc, GoSortAsc } from "react-icons/go";
 

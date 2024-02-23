@@ -2,9 +2,24 @@
   background-color: var(--component-background);
 }
 
+.indicator-button.transaction {
+  background-color: var(--button) !important;
+  color: var(--button);
+}
+
+.indicator-button.transaction .transaction-icon {
+  width: 35px;
+  height: 35px;
+  background-color: var(--component-background);
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 40px;
+}
+
 .indicator-button span {
   color: var(--text);
-  font-size: 20px;
 }
 
 .indicator-button .income, .indicator-button .expenses {

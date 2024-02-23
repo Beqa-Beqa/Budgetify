@@ -1,22 +1,20 @@
 import { HiXMark } from "react-icons/hi2";
-import "../../CSS/Components/cardDetails.css";
+import "./cardDetails.css";
 import { MdOutlineModeEdit } from "react-icons/md";
 import { FaRegTrashCan } from "react-icons/fa6";
-import AccountInfoField from "./AccountInfoFIeld";
+import AccountInfoField from "../AccountInfoFIeld/AccountInfoFIeld";
 import { useContext, useState } from "react";
-import { AuthContext } from "../../Contexts/AuthContextProvider";
-import AddAccountPrompt from "../../Containers/Home/AddAccountPrompt";
-import { makeFirstCapitals } from "../../Functions";
-import ActionPrompt from "./ActionPrompt";
-import { GeneralContext } from "../../Contexts/GeneralContextProvider";
+import { AuthContext } from "../../../Contexts/AuthContextProvider";
+import AddAccountPrompt from "../../../Containers/Home/AddAccountPrompt/AddAccountPrompt";
+import { makeFirstCapitals } from "../../../Functions";
+import ActionPrompt from "../ActionPrompt/ActionPrompt";
+import { GeneralContext } from "../../../Contexts/GeneralContextProvider";
+import { deleteAccountApi } from "../../../apiURLs";
 
 const CardDetails = (props: {
   setShowDetails: React.Dispatch<React.SetStateAction<boolean>>,
   accountData: AccountData
 }) => {
-  // api for deleting acc.
-  const deleteAccountApi = "https://budgetify-back.adaptable.app/delete-account";
-
   // authcontext provides with user data and accountsdata. also accounts data setter.
   const authContext = useContext(AuthContext);
   const currentUserData = authContext.currentUserData as CurrentUserData;

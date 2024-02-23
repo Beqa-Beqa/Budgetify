@@ -1,5 +1,3 @@
-import "../../CSS/Components/accountInfoField.css";
-
 const AccountInfoField = (props: {
   title: string,
   text: string,

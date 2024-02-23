@@ -1,10 +1,11 @@
-import "../../CSS/Containers/header.css";
+import "./header.css";
 import { useContext, useState } from "react";
-import { UserIcon } from "../../Assets/Home";
-import { GeneralContext } from "../../Contexts/GeneralContextProvider";
+import { UserIcon } from "../../../Assets/Home";
+import { GeneralContext } from "../../../Contexts/GeneralContextProvider";
 import { RxHamburgerMenu } from "react-icons/rx";
-import { AuthContext } from "../../Contexts/AuthContextProvider";
-import ActionPrompt from "../../Components/Home/ActionPrompt";
+import { AuthContext } from "../../../Contexts/AuthContextProvider";
+import ActionPrompt from "../../../Components/Home/ActionPrompt/ActionPrompt";
+import SideNavbarMenu from "../../../Components/Home/SideMenus/Navbar/SideNavbarMenu";
  
 const Header = () => {
   const {currentUserData, setCurrentUserData} = useContext(AuthContext);
@@ -19,6 +20,8 @@ const Header = () => {
   const [showProfileDropdown, setShowProfileDropdown] = useState<boolean>(false);
   // State for logout prompt.
   const [showLogoutPrompt, setShowLogoutPrompt] = useState<boolean>(false);
+  // state for showing sidemenu.
+  const [showSideNavbarMenu, setShowSideNavbarMenu] = useState<boolean>(false);
 
   const handleLogout = () => {
     // Clear state of currentuserdata.
@@ -51,13 +54,16 @@ const Header = () => {
           }
           <div className="profile-corner pb-2 col col-lg-2 col-xl-2 col-xxl-2 d-flex justify-content-end">
             <div className="d-flex w-100 justify-content-end align-items-center gap-3 position-relative" style={{maxWidth: 150}}>
-              {width < 992 && <RxHamburgerMenu role="button" style={{width: 20, height: 20}} />}
+              {width < 992 && <div onClick={() => setShowSideNavbarMenu(true)} role="button">
+                  <RxHamburgerMenu style={{width: 20, height: 20}} />
+                </div>
+              }
               <div onClick={() => setShowProfileDropdown(prev => !prev)} role="button" className="d-flex align-items-center gap-2">
                 <img src={UserIcon} alt="user"/>
                 <h2>{userData.name}</h2>
               </div>
               {showProfileDropdown &&
-                <ul className="profile-dropdown position-absolute w-100 rounded py-2">
+                <ul style={{zIndex: 200}} className="profile-dropdown position-absolute w-100 rounded py-2">
                   <li onClick={() => {setShowLogoutPrompt(true); setShowProfileDropdown(false);}} role="button" className="py-2 text-center">
                     Logout
                   </li>
@@ -73,6 +79,9 @@ const Header = () => {
           cancel={{action: () => setShowLogoutPrompt(false), text: "Cancel"}}
           confirm={{action: handleLogout, text: "Confirm"}}
         />
+      }
+      {
+        width < 992 && <SideNavbarMenu classname={showSideNavbarMenu ? "show" : ""} setShowSideNavbarMenu={setShowSideNavbarMenu} />
       }
     </>
   );

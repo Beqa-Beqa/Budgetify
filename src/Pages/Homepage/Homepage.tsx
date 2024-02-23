@@ -1,6 +1,6 @@
-import Header from "../Containers/Home/Header";
-import Main from "../Containers/Home/Main";
-import "../CSS/homepage.css";
+import Header from "../../Containers/Home/Header/Header";
+import Main from "../../Containers/Home/Main/Main";
+import "./homepage.css";
 
 const Homepage = () => {
   return (

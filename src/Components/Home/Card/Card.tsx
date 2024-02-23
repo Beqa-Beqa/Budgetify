@@ -1,7 +1,7 @@
-import CardDetails from "./CardDetails";
-import "../../CSS/Components/card.css";
+import CardDetails from "../CardDetails/CardDetails";
+import "./card.css";
 import { useState } from "react";
-import { makeFirstCapitals } from "../../Functions";
+import { divideByThousands, makeFirstCapitals } from "../../../Functions";
 
 const Card = (props: {
   accountData?: AccountData,
@@ -11,19 +11,13 @@ const Card = (props: {
 }) => {
   // account data.
   const accData = props.accountData;
-
-  // left side digits of float number (divided by comma after every 3 digit).
-  const dividedByThousandDecimalPart = accData?.amount.toString().split(".")[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-  // if float part exists (right side of dot) then get it.
-  const floatPart = accData?.amount.toString().split(".")[1];
-  // concatenate everything.
-  const amount = floatPart ? dividedByThousandDecimalPart + "." + floatPart : dividedByThousandDecimalPart;
-
+  const amount = (accData?.amount && divideByThousands(parseFloat(accData.amount.replace(/,/g, ""))) as String);
   // State for showing account details.
   const [showDetails, setShowDetails] = useState<boolean>(false);
 
   // Money amount font size.
-  const amountFontSize = amount && amount.length > 9 ? {fontSize: 33} : {fontSize: 53};
+  const amountFontSize = amount ?
+    amount.length > 15 ? {fontSize: 22} : amount.length > 9 ? {fontSize: 33} : {fontSize: 53} : {};
 
   return (
     <>
@@ -31,7 +25,7 @@ const Card = (props: {
         <div onClick={props.onclick}  className="align-items-center p-3 d-flex flex-column flex-sm-row">
           <div className={`w-100 d-flex flex-column align-items-sm-start align-items-center justify-content-center mb-3 mb-sm-0 gap-4 ${accData && "pt-3"}`}>
             <h3 className="fs-2">{accData ? makeFirstCapitals(accData.title) : "Add Account"}</h3>
-            {amount && <span style={amountFontSize}>{amount}</span>}
+            <span style={amountFontSize}>{amount && amount}</span>
           </div>
           <div className="account-card-currency w-100 rounded-circle align-self-sm-start d-flex align-items-center justify-content-center">
             <span>{accData?.currency ? accData.currency.split(" ")[1] : "+"}</span>

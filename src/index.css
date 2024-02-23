@@ -85,6 +85,8 @@ table {
 
 .prompt .prompt-box {
   background-color: var(--primary);
+	max-height: 100vh;
+	overflow-y: auto;
 }
 
 .action-button {
@@ -113,4 +115,18 @@ table {
 
 .action-button.positive:disabled {
 	opacity: 70%;
+}
+
+.sidemenu {
+  position: fixed;
+  z-index: 300;
+  background-color: var(--component-background);
+  transition: calc(var(--base-transition-duration) * 3);
+  top: 0;
+  right: -1500px;
+  box-shadow: rgba(0, 0, 0, 0.3) 0px 19px 38px, rgba(0, 0, 0, 0.22) 0px 15px 12px;
+}
+
+.sidemenu.show {
+  right: 0;
 }
