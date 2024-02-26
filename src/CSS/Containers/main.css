@@ -1,9 +1,0 @@
-.homepage-main .cards-container {
-  height: 100%;
-  max-height: calc((189px + 3rem) * 3);
-  overflow-y: auto;
-}
-
-.homepage-main .cards-container::-webkit-scrollbar {
-  display: none;
-}
