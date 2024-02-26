@@ -57,11 +57,13 @@ table {
 :root {
 	--primary: #FFF;
 	--component-background: #F9F9F9;
+	--component-background: #F9F9F9;
 	--secondary: #FFFFFFCC;
 	--button: #B9E2E6;
 	--header: #000000;
 	--placeholder: #474747;
 	--danger: #EE3F19;
+	--success: #21C206;
 	--success: #21C206;
 	--text: #373737;
 	--border: #333333;
