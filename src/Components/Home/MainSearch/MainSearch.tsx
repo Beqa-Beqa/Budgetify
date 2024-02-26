@@ -1,12 +1,14 @@
-import "../../CSS/Components/mainSearch.css";
+import "./mainSearch.css";
 import { IoSearch } from "react-icons/io5";
 import { GoSortDesc, GoSortAsc } from "react-icons/go";
 
 const MainSearch = (props: {
-  sort: "desc" | "asc",
-  setSort: React.Dispatch<React.SetStateAction<"desc" | "asc">>
+  sortByPaymentDate: "desc" | "asc",
+  setSortByPaymentDate: React.Dispatch<React.SetStateAction<"desc" | "asc">>,
+  sortByTransaction: "Income" | "Expenses" | "",
+  setSortByTransaction: React.Dispatch<React.SetStateAction<"Income" | "Expenses" | "">>
 }) => {
-  const {sort, setSort} = props;
+  const {sortByPaymentDate, setSortByPaymentDate} = props;
 
   return (
     <div className="w-100">
@@ -25,9 +27,9 @@ const MainSearch = (props: {
           role="button" 
           className="user-select-none" 
           style={{opacity: 0.7}}
-          onClick={() => setSort(prev => prev === "asc" ? "desc" : "asc")}
+          onClick={() => setSortByPaymentDate(prev => prev === "asc" ? "desc" : "asc")}
         >
-          {sort === "desc" ? <GoSortDesc/> : <GoSortAsc />} Transaction Date
+          {sortByPaymentDate === "desc" ? <GoSortDesc/> : <GoSortAsc />} Transaction Date
         </span>
       </div>
     </div>

@@ -1,0 +1,34 @@
+.success {
+  border: 4px solid var(--success);
+  border-radius: var(--base-border-radius);
+}
+
+.alert {
+  border: 4px solid var(--danger);
+  border-radius: var(--base-border-radius);
+}
+
+.success .action-description {
+  color: var(--success);
+}
+
+.alert .action-description {
+  color: var(--danger);
+}
+
+.success .prompt-box-actions-container button {
+  border: 0;
+  background-color: var(--success);
+  color: var(--primary);
+}
+
+.alert .prompt-box-actions-container button {
+  border: 0;
+  background-color: var(--danger);
+  color: var(--primary);
+}
+
+.alert .prompt-box-actions-container .action-button:hover.negative,
+.success .prompt-box-actions-container .action-button:hover.negative {
+  border: 0;
+}

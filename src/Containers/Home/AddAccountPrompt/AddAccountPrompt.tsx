@@ -1,23 +1,20 @@
-import "../../CSS/Containers/addAccountPrompt.css";
+import "./addAccountPrompt.css";
 import { HiXMark } from "react-icons/hi2";
-import FormInput from "../../Components/Home/FormInput";
-import { ChangeEvent, FormEvent, useContext, useEffect, useRef, useState } from "react";
-import { AuthContext } from "../../Contexts/AuthContextProvider";
-import { accountExistsByTitle } from "../../Functions";
-import ActionPrompt from "../../Components/Home/ActionPrompt";
-import { GeneralContext } from "../../Contexts/GeneralContextProvider";
+import FormInput from "../../../Components/Home/FormInput/FormInput";
+import { useContext, useEffect, useRef, useState } from "react";
+import { AuthContext } from "../../../Contexts/AuthContextProvider";
+import { accountExistsByTitle, clearFormStringValues, updateAccountsData } from "../../../Functions";
+import ActionPrompt from "../../../Components/Home/ActionPrompt/ActionPrompt";
+import { GeneralContext } from "../../../Contexts/GeneralContextProvider";
+import { divideByThousands } from "../../../Functions";
+import { handleAmountChange, handleDescriptionChange, handleTitleChange } from "../sharedFunctions";
+import { createAccountApi, currenciesApiKey, editAccountApi, fetchCurrenciesApi } from "../../../apiURLs";
 
 const AddAccountPrompt = (props: {
   setShowAddAccountPrompt: React.Dispatch<React.SetStateAction<boolean>>,
-  data?: AccountData
+  data?: AccountData,
+  classname?: string
 }) => {
-  // Currencies api.
-  const fetchCurrenciesApi = "https://api.cloudmersive.com/currency/exchange-rates/list-available";
-  // Key for currency api.
-  const currencyApiKey = "5713676a-6942-440e-b9b8-97e260ba7100";
-  // API of budgetify back for creating acc.
-  const createAccountApi = `https://budgetify-back.adaptable.app/${props.data ? "edit-account" : "create-account"}`;
-
   // Auth context which provides accounts data and user data.
   const authContext = useContext(AuthContext);
   const currentUserData: CurrentUserData = (authContext.currentUserData as CurrentUserData);
@@ -32,23 +29,19 @@ const AddAccountPrompt = (props: {
   const [currencies, setCurrencies] = useState<CurrencyData[]>(JSON.parse(window.localStorage.getItem("Budgetify-currencies-data") || "[]") || []);
   // Title value entered in input.
   const [title, setTitle] = useState<string>(props.data ? props.data.title : "");
+  // amount holder.
+  const [amount, setAmount] = useState<string>(props.data ? props.data.amount : "");
+  // amount alert holder.
+  const [amountAlert, setAmountAlert] = useState<InputBasicAlert>({error: false, text: ""});
   // Description field value.
   const [description, setDescription] = useState<string>(props.data ? props.data.description : "");
   // Chosen currency value.
   const [currency, setCurrency] = useState<string>(props.data ? props.data.currency : "USD $");
   // Confirmation popup state for currency change
   const [showConfirmPopUp, setShowConfirmPopUp] = useState<boolean>(false);
-  // State that holds alerts.
-  const [alert, setAlert] = useState<{
-    title: {
-      error: boolean,
-      text: string
-    }, 
-    description: {
-      error: boolean,
-      text: string
-    }
-  }>({description: {error: false, text: ""}, title: {error: false, text: ""}});
+  // States that hold alerts.
+  const [titleAlert, setTitleAlert] = useState<InputBasicAlert>({error: false, text: ""});
+  const [descriptionAlert, setDescriptionAlert] = useState<InputBasicAlert>({error: false, text: ""});
 
   // when component mounts, if we haven't already fetched currencies data from api, fetch it.
   useEffect(() => {
@@ -57,7 +50,7 @@ const AddAccountPrompt = (props: {
       if(!currencies.length) {
         const response = await fetch(fetchCurrenciesApi, {
           method: "post", 
-          headers: {"Apikey": currencyApiKey}
+          headers: {"Apikey": currenciesApiKey}
         });
         const data = await response.json();
         // update currencies state.
@@ -70,47 +63,6 @@ const AddAccountPrompt = (props: {
     // call async getcurrencydata function.
     getCurrencyData();
   }, []);
-
-  const handleTitleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    // Prevent default change actions which may cause bugs.
-    e.preventDefault();
-    const value = e.target.value;
-    // update title state.
-    setTitle(value);
-    // Check if characters length exceeds 128.
-    const maxCharErr = value.length > 128;
-    // pattern check. (letters from all alphabet, digits and whitespaces except special symbols.)
-    const charErr = !value.match(/^[\p{L}\p{N}\p{Zs}]+$/gmu);
-
-    // Alert updates according to the error reason.
-    setAlert(prev => {return {
-      description: prev.description,
-      title: {
-        error: maxCharErr || charErr,
-        text: maxCharErr ? "Maximum number of characters reached." :
-              charErr ? "Invalid Title entered. Please check it." : ""
-      }
-    }});
-  } 
-
-  const handleDescriptionChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
-    // Prevent default behavior.
-    e.preventDefault();
-    const value = e.target.value;
-    // Update description state.
-    setDescription(value);
-    // Check if characters exceed 256.
-    const maxCharErr = value.length > 256;
-
-    // Update alert.
-    setAlert(prev => {return {
-      description: {
-        error: maxCharErr, 
-        text: maxCharErr ? "Maximum number of characters reached." : ""
-      },
-      title: prev.title
-    }});
-  }
   
   // Check if button is disabled or not.
   // if there is no props.data this means it's not an edit prompt open
@@ -118,9 +70,9 @@ const AddAccountPrompt = (props: {
   // if props.data is present it means it's edit prompt.
   // if everything is same (currencies, title, description) or title is not provided button is disabled.
   const isButtonDisabled = !props.data ?
-      title.length && !alert.title.error && !alert.description.error && !accountExistsByTitle(accountsData, title) ? false : true
+      title.trim().length && amount && !titleAlert.error && !amountAlert.error && !descriptionAlert.error && !accountExistsByTitle(accountsData, title) ? false : true
     : 
-      props.data.currency === currency && props.data.title.toLocaleLowerCase() === title.toLocaleLowerCase() && props.data.description === description || !title;
+      props.data.currency === currency && props.data.title.toLocaleLowerCase() === title.toLocaleLowerCase() && props.data.description === description && props.data.amount === amount || !title.trim();
 
   // check if currency is changed.
   const isCurrencyChanged = props.data && props.data.currency !== currency;
@@ -138,20 +90,19 @@ const AddAccountPrompt = (props: {
       const requestBody = props.data ? JSON.stringify({
         infoForEdit: {
           accId: props.data._id,
-          fields: {title, currency, description}
+          fields: {title, currency, description, amount}
         }
       }) : JSON.stringify({
         userId: currentUserData._id,
-        accountData: {title, currency, description}
+        accountData: {title, currency, description, amount}
       });
 
       // Clear title and description fields.
-      setTitle("");
-      setDescription("");
+      clearFormStringValues(setTitle, setDescription, setAmount);
 
       try {
         // make post request and get result (result will be data that was saved in db).
-        const result = await fetch(createAccountApi, {
+        const result = await fetch(props.data ? editAccountApi : createAccountApi, {
           method: props.data ? "PATCH" : "POST",
           mode: "cors",
           cache: "no-cache",
@@ -166,28 +117,21 @@ const AddAccountPrompt = (props: {
         // if props.data is present it was an edit operation, therefore we do not add
         // anything new in accounts state. otherwise it was a new account prompt and we update state
         // and add new account.
-        const newData = props.data ? [...accountsData] : [...accountsData, accData];
-        // if it was edit prompt, change current account data with new data (server will respond with new changed data).
-        if(props.data) newData[newData.indexOf(props.data)] = accData;
-        // Update accounts data state. (for immediate visual update purposes).
-        setAccountsData(newData);
-        // update sessionStorage.
-        window.sessionStorage.setItem("Budgetify-user-accounts-data", JSON.stringify(newData));
+        props.data ? updateAccountsData(accountsData, setAccountsData, {new: accData, old: props.data}, "Update")
+        : updateAccountsData(accountsData, setAccountsData, {new: accData, old: undefined}, "Insert");
         // close prompt.
         props.setShowAddAccountPrompt(false);
         // close confirmation pop up.
         setShowConfirmPopUp(false);
         // set toast message.
-        setShowToastMessage({show: true, text: props.data ? "The account edited successfuly" : "The account created"});
+        setShowToastMessage({show: true, text: props.data ? "The account edited successfully" : "The account created"});
       } catch (err) {
         console.error(err);
       }
     }  
   }
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-    // Prevent default action (refresh).
-    event.preventDefault();
+  const handleSubmit = () => {
     // If currency is not changed, pop up won't be shown.
     props.data ? !isCurrencyChanged ? handleSave() : setShowConfirmPopUp(true) : handleSave();
   }
@@ -198,30 +142,29 @@ const AddAccountPrompt = (props: {
   }
   
   return (
-    <div className="prompt text-color">
-      <div style={{maxWidth: 515}} className="prompt-box rounded py-3 w-100">
-        <div className="w-100 position-relative d-flex align-items-center justify-content-center">
+    <div className={`${props.classname === "show" ? "prompt" : ""} text-color`}>
+      <div className={`prompt-box ${props.classname} d-flex flex-column p-4 w-100`}>
+        <div className="w-100 position-relative d-flex align-items-center justify-content-between mb-4">
           <h3 className="text-center fs-4">{props.data ? "Edit" : "Create"} Account</h3>
-          <div onClick={() => props.setShowAddAccountPrompt(false)} role="button" style={{right: 20}} className="position-absolute">
+          <div onClick={() => props.setShowAddAccountPrompt(false)} role="button">
             <HiXMark style={{width: 30, height: 30}} />
           </div>
         </div>
-        <hr className="mt-2 mb-5"/>
-        <form onSubmit={handleSubmit} className="create-account-form position-relative d-flex flex-column gap-4">
+        <form className="create-account-form position-relative d-flex flex-column gap-4">
           <div className="prompt-box-input-container">
-            {title && <span style={{top: -40}} className="prompt-box-tooltip rounded p-2 position-absolute mx-5">{title}</span>}
-            <FormInput alert={alert.title.error} classname="input" required title="Title">
+            {title && <span style={{top: -40}} className="prompt-box-tooltip rounded p-2 position-absolute">{title}</span>}
+            <FormInput alert={titleAlert.error} classname="input" required title="Title">
               <input
                 ref={titleRef}
                 value={title}
                 onBlur={() => {if(titleRef.current) titleRef.current.scrollLeft = 0}}
-                onChange={(e) => handleTitleChange(e)} 
+                onChange={(e) => handleTitleChange(e, setTitle, setTitleAlert)} 
                 type="text" 
                 className="px-3" 
                 required
                 />
             </FormInput>
-            {alert.title.error && <span className="mx-5 mt-2 d-block" style={{color: "var(--danger)"}}>{alert.title.text}</span>}
+            {titleAlert.error && <span className="mt-2 d-block" style={{color: "var(--danger)"}}>{titleAlert.text}</span>}
           </div>
           <FormInput classname="input" required title="Currency">
             <select onChange={(e) => setCurrency(e.target.value)} defaultValue={currency} className="px-3">
@@ -231,24 +174,36 @@ const AddAccountPrompt = (props: {
             </select>
           </FormInput>
           <div>
+            <FormInput alert={amountAlert.error} classname="input" required title="Amount">
+              <input 
+                value={amount} 
+                onBlur={() => setAmount(divideByThousands(parseFloat(amount)))}
+                onChange={(e) => handleAmountChange(e, setAmount, setAmountAlert)}
+                type="text" 
+                className="w-100 px-3" 
+                />
+            </FormInput>
+            {amountAlert.error && <span className="mt-2 d-block" style={{color: "var(--danger)"}}>{amountAlert.text}</span>}
+          </div>
+          <div>
             <FormInput classname="input" title="Description">
               <textarea 
                 value={description} 
-                onChange={(e) => handleDescriptionChange(e)} 
-                className="px-3"
+                onChange={(e) => handleDescriptionChange(e, setDescription, setDescriptionAlert)} 
+                className="w-100 px-3"
                 />
             </FormInput>
-            {alert.description.error && <span className="mx-5 mt-2 d-block" style={{color: "var(--danger)"}}>{alert.description.text}</span>}
-          </div>
-          <div className="prompt-box-actions-container d-flex gap-2 justify-content-end me-3">
-            <button onClick={() => props.setShowAddAccountPrompt(false)} className="action-button negative">
-              Cancel
-            </button>
-            <button type="submit" disabled={isButtonDisabled} className="action-button positive">
-              Save
-            </button>
+            {descriptionAlert.error && <span className="mt-2 d-block" style={{color: "var(--danger)"}}>{descriptionAlert.text}</span>}
           </div>
         </form>
+        <div className="prompt-box-actions-container mt-auto d-flex gap-3 justify-content-end">
+          <button onClick={() => props.setShowAddAccountPrompt(false)} className="action-button negative">
+            Cancel
+          </button>
+          <button onClick={handleSubmit} type="submit" disabled={isButtonDisabled} className="action-button positive">
+            Save
+          </button>
+        </div>
         {showConfirmPopUp && 
           <ActionPrompt 
             text="Are you sure you want to change the currency? It will be changed in all transactions, numbers will stay the same." 

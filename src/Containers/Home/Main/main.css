@@ -1,0 +1,25 @@
+.homepage-main .cards-container {
+  max-height: calc(190px * 3 + 2rem * 3);
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.homepage-main .transactions-container {
+  max-height: calc(100vh - 220px);
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.homepage-main .cards-container::-webkit-scrollbar {
+  display: none;
+}
+
+.homepage-main .transaction {
+  background-color: var(--component-background);
+  color: var(--text);
+}
+
+.homepage-main .transaction .transaction-title {
+  max-width: 160px;
+  background-color: #ECEDED;
+}
