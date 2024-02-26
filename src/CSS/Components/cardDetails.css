@@ -1,0 +1,14 @@
+.icon {
+  transition: var(--base-transition-duration);
+  border: 1px solid transparent;
+  border-radius: var(--base-border-radius);
+}
+
+.icon:hover {
+  border: 1px solid var(--border);
+}
+
+.icon svg {
+  width: 20px;
+  height: 20px;
+}
