@@ -30,7 +30,8 @@ const AddTransactionPrompt = (props: {
         description,
         amount,
         date,
-        chosenCategories
+        chosenCategories,
+        payee
       } = props.transactionData;
 
       setTransactionType(transactionType || "Expenses");
@@ -39,6 +40,7 @@ const AddTransactionPrompt = (props: {
       setAmount(amount || "");
       setDate(date || "");
       setChosenCategories(chosenCategories || []);
+      setPayee(payee || "");
     }
   }, [hasInfo]);
 
@@ -74,7 +76,7 @@ const AddTransactionPrompt = (props: {
   // transaction type holder state.
   const [transactionType, setTransactionType] = useState<string>(hasInfo ? hasInfo.transactionType : "Expenses");
   // title holder state.
-  const [title, setTitle] = useState<string>(hasInfo ? hasInfo.title : "ads");
+  const [title, setTitle] = useState<string>(hasInfo ? hasInfo.title : "");
   // title alert holder.
   const [titleAlert, setTitleAlert] = useState<InputBasicAlert>({error: false, text: ""});
   // description holder.
@@ -87,6 +89,8 @@ const AddTransactionPrompt = (props: {
   const [amountAlert, setAmountAlert] = useState<InputBasicAlert>({error: false, text: ""});
   // date holder.
   const [date, setDate] = useState<string>(hasInfo ? hasInfo.date : "");
+  // payee state
+  const [payee, setPayee] = useState<string>(hasInfo ? hasInfo.payee : "");
   // date alert holder.
   const [dateAlert, setDateAlert] = useState<InputBasicAlert>({error: false, text: ""});
   // categories holder which were not chosen yet.
@@ -108,7 +112,7 @@ const AddTransactionPrompt = (props: {
   // alert holder that displays ... is required field alert.
   const [showRequiredAlert, setShowRequiredAlert] = useState<boolean>(false);
 
-  const clearValues = () => clearFormStringValues(setTitle, setDescription, setDate, setAmount);
+  const clearValues = () => clearFormStringValues(setTitle, setDescription, setDate, setAmount, setPayee);
   const clearAlerts = () => {
     setDateAlert({error: false, text: ""});
     setTitleAlert({error: false, text: ""});
@@ -165,7 +169,7 @@ const AddTransactionPrompt = (props: {
             JSON.stringify({
               transactionId: hasInfo._id,
               belongsToId: hasInfo.belongsToAccountWithId,
-              fields: {transactionType, title, description, amount, date, chosenCategories}
+              fields: {transactionType, title, description, amount, date, chosenCategories, payee}
             })
           :
             JSON.stringify({
@@ -176,7 +180,8 @@ const AddTransactionPrompt = (props: {
                 description, 
                 amount, 
                 date, 
-                chosenCategories
+                chosenCategories,
+                payee
               }
             })
 
@@ -243,7 +248,7 @@ const AddTransactionPrompt = (props: {
           updateAccountsData(accountsData, setAccountsData, {new: account, old: props.accountData}, "Update");
 
           // clear fields.
-          
+          clearValues();
           clearAlerts();
           setChosenCategories([]);
           setCategoriesAvailable([]);
@@ -331,17 +336,6 @@ const AddTransactionPrompt = (props: {
               {showRequiredAlert && !chosenCategories.length && <span className="w-100 mt-2" style={{color: "var(--danger)"}}>Category is required field!</span>}
             </div>
             <div className="w-100 d-flex flex-column align-items-center">
-              <FormInput alert={descriptionAlert.error} classname="w-100 input" title="Description">
-                <input 
-                  value={description} 
-                  onChange={(e) => handleDescriptionChange(e, setDescription, setDescriptionAlert)} 
-                  type="text" 
-                  className="px-3" 
-                />
-              </FormInput>
-              {descriptionAlert.error && <span style={{color: "var(--danger)"}} className="w-100 mt-2">{descriptionAlert.text}</span>}
-            </div>
-            <div className="w-100 d-flex flex-column align-items-center">
               <FormInput alert={amountAlert.error || (showRequiredAlert && !amount)} required classname="w-100 input" title="Amount">
                 <input 
                   value={amount}
@@ -365,6 +359,25 @@ const AddTransactionPrompt = (props: {
               </FormInput>
               {dateAlert.error && <span style={{color: "var(--danger)"}} className="w-100 mt-2">{dateAlert.text}</span>}
               {showRequiredAlert && !date && <span className="w-100 mt-2" style={{color: "var(--danger)"}}>Date is required field!</span>}
+            </div>
+            <FormInput classname="w-100 input" title="Payee">
+              <input
+                value={payee}
+                onChange={(e) => setPayee(e.target.value)}
+                type="text"
+                className="px-3"
+              />
+            </FormInput>
+            <div className="w-100 d-flex flex-column align-items-center">
+              <FormInput alert={descriptionAlert.error} classname="w-100 input" title="Description">
+                <input 
+                  value={description} 
+                  onChange={(e) => handleDescriptionChange(e, setDescription, setDescriptionAlert)} 
+                  type="text" 
+                  className="px-3" 
+                />
+              </FormInput>
+              {descriptionAlert.error && <span style={{color: "var(--danger)"}} className="w-100 mt-2">{descriptionAlert.text}</span>}
             </div>
             <div className="w-100 d-flex flex-column align-items-center">
               <FormInput classname="w-100 input" title="Attachment">

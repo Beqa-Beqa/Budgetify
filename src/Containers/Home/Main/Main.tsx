@@ -11,9 +11,7 @@ import SideTransactionMenu from "../../../Components/Home/SideMenus/Transaction/
 
 const Main = () => {
   // list of accounts data.
-  const authContext = useContext(AuthContext);
-  const {accountsData, transactionsData} = authContext;
-  const currentUserData = authContext.currentUserData as CurrentUserData;
+  const {accountsData, transactionsData} = useContext(AuthContext);
   // sort setting holder state.
   const [sortByPamentDate, setSortByPaymentDate] = useState<"desc" | "asc">("desc");
   const [sortByTransaction, setSortByTransaction] = useState<"Income" | "Expenses" | "">("");
@@ -32,7 +30,8 @@ const Main = () => {
   // transaction side info menu.
   const [showTransactionInfo, setShowTransactionInfo] = useState<{show: boolean, data: TransactionData | null}>({show: false, data: null});
 
-  const filteredTransactionsByCard = transactionsData.filter((transaction: TransactionData) => accountsData[activeCard] && transaction.belongsToAccountWithId === accountsData[activeCard]._id);
+  const filteredTransactionsByCard = transactionsData.filter((transaction: TransactionData) => accountsData[activeCard] && transaction.belongsToAccountWithId === accountsData[activeCard]._id)
+                                                     .filter((transaction: TransactionData) => sortByTransaction === "Income" ? transaction.transactionType === "Income" : sortByTransaction === "Expenses" ? transaction.transactionType === "Expenses" : transaction);
 
   return (
     <div className="homepage-main container-fluid">
@@ -53,9 +52,9 @@ const Main = () => {
         <div className="h-100 col-xxl-5 col-xl-6 col-lg-9 p-xl-0 pe-2 mb-3 mb-lg-0">
           <MainSearch sortByTransaction={sortByTransaction} setSortByTransaction={setSortByTransaction} sortByPaymentDate={sortByPamentDate} setSortByPaymentDate={setSortByPaymentDate}/>
           <div className="transactions-container d-flex flex-column mt-1 gap-4">
-            {filteredTransactionsByCard.length ? filteredTransactionsByCard
-                             .sort((a: TransactionData, b: TransactionData) => sortByPamentDate === "desc" ? new Date(b.date).getTime() - new Date(a.date).getTime() : new Date(a.date).getTime() - new Date(b.date).getTime())
-                             .map((transaction: TransactionData, key: number) => {
+            {filteredTransactionsByCard.length ? filteredTransactionsByCard                      
+            .sort((a: TransactionData, b: TransactionData) => sortByPamentDate === "desc" ? new Date(b.date).getTime() - new Date(a.date).getTime() : new Date(a.date).getTime() - new Date(b.date).getTime())
+            .map((transaction: TransactionData, key: number) => {
               const type = transaction.transactionType as "Income" | "Expenses";
 
               return (
@@ -72,8 +71,10 @@ const Main = () => {
                       <IndicatorButton classname="h-50 mb-1" type={type} />
                       <GoDotFill style={{width: 5, height: 5}} />
                       <span>{transaction.date.split("-").reverse().join(".")}</span>
-                      <GoDotFill style={{width: 5, height: 5}} />
-                      <span>{currentUserData.data.name}</span>
+                      {transaction.payee && <>
+                        <GoDotFill style={{width: 5, height: 5}} />
+                        <span>{transaction.payee}</span>
+                      </>}
                     </div>
                   </div>
                 </div>

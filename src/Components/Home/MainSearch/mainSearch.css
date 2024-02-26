@@ -22,7 +22,7 @@
   border-radius: var(--base-border-radius);
 }
 
-.homepage-main-search-container ~ .sort-button svg {
+.sort-container svg {
   width: 24px;
   height: 24px;
 }

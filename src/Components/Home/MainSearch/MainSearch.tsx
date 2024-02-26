@@ -1,6 +1,7 @@
 import "./mainSearch.css";
 import { IoSearch } from "react-icons/io5";
 import { GoSortDesc, GoSortAsc } from "react-icons/go";
+import IndicatorButton from "../IndicatorButton/IndicatorButton";
 
 const MainSearch = (props: {
   sortByPaymentDate: "desc" | "asc",
@@ -9,6 +10,9 @@ const MainSearch = (props: {
   setSortByTransaction: React.Dispatch<React.SetStateAction<"Income" | "Expenses" | "">>
 }) => {
   const {sortByPaymentDate, setSortByPaymentDate} = props;
+
+  const border = {border: "1px solid var(--border)"};
+  const emptyBorder = {border: "1px solid transparent"};
 
   return (
     <div className="w-100">
@@ -22,15 +26,21 @@ const MainSearch = (props: {
           <IoSearch style={{width: 22, height: 22}} />
         </div>
       </div>
-      <div className="my-2 mx-3 sort-button">
+      <div className="my-2 mx-3 sort-container d-flex align-items-center gap-4">
         <span 
           role="button" 
-          className="user-select-none" 
+          className="user-select-none d-flex align-items-center gap-2" 
           style={{opacity: 0.7}}
           onClick={() => setSortByPaymentDate(prev => prev === "asc" ? "desc" : "asc")}
         >
           {sortByPaymentDate === "desc" ? <GoSortDesc/> : <GoSortAsc />} Transaction Date
         </span>
+        <div className="rounded px-2 py-1" style={props.sortByTransaction === "Income" ? border : emptyBorder}>
+          <IndicatorButton onclick={() => props.setSortByTransaction(prev => prev !== "Income" ? "Income" : "")} role="button" classname="bg-transparent" type="Income" />
+        </div>
+        <div className="rounded px-2 py-1" style={props.sortByTransaction === "Expenses" ? border : emptyBorder}>
+          <IndicatorButton onclick={() => props.setSortByTransaction(prev => prev !== "Expenses" ? "Expenses" : "")} role="button" classname="bg-transparent" type="Expenses" />
+        </div>
       </div>
     </div>
   );

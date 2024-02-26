@@ -61,7 +61,7 @@ const SideTransactionMenu = (props: {
               </div>
               <div className="mt-5 d-flex flex-column">
                 <AccountInfoField title="Payment Date" text={info.date} hasLine />
-                <AccountInfoField title="Payee" text="Unknown" hasLine />
+                <AccountInfoField title="Payee" text={info.payee} hasLine />
                 <AccountInfoField title="Description" text={info.description || ""} />
               </div>
               <div className="mt-5 d-flex flex-column flex-sm-row align-items-center gap-2 justify-content-between">
