@@ -21,8 +21,8 @@ const ActionPrompt = (props: {
   }
 
   return (
-    <div className="prompt">
-      <div className={`prompt-box rounded ${props.alert ? "alert" : props.success ? "success" : ""}`}>
+    <div className="prompt d-flex justify-content-center align-items-center">
+      <div style={{top: "unset", right: "unset", height: "fit-content"}} className={`prompt-box rounded ${props.alert ? "alert" : props.success ? "success" : ""}`}>
         {props.head && 
           <>
             <div className="d-flex justify-content-between align-items-center p-3">
@@ -35,7 +35,7 @@ const ActionPrompt = (props: {
           </>
         }
         <div className="p-3">
-          <h5 className="action-description mb-5 fs-5">{renderText(props.text)}</h5>
+          <h5 className="action-description mb-5 fs-5 text-center">{renderText(props.text)}</h5>
           <div className="prompt-box-actions-container d-flex justify-content-center gap-3">
             {props.confirm && <button onClick={props.confirm.action} className="action-button negative">
               {props.confirm.text}

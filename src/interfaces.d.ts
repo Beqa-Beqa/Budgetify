@@ -36,6 +36,7 @@ declare interface TransactionData {
   title: string,
   amount: string,
   date: string,
+  payee: string,
   chosenCategories: string[],
   creationDate: string,
   updateDate: string,

@@ -1,7 +1,8 @@
 import CardDetails from "../CardDetails/CardDetails";
 import "./card.css";
 import { useState } from "react";
-import { divideByThousands, makeFirstCapitals } from "../../../Functions";
+import { makeFirstCapitals } from "../../../Functions";
+import { divideByThousands, removeThousandsCommas } from "../../../Functions";
 
 const Card = (props: {
   accountData?: AccountData,
@@ -11,7 +12,7 @@ const Card = (props: {
 }) => {
   // account data.
   const accData = props.accountData;
-  const amount = (accData?.amount && divideByThousands(parseFloat(accData.amount.replace(/,/g, ""))) as String);
+  const amount = (accData?.amount && divideByThousands(removeThousandsCommas(accData.amount as string)));
   // State for showing account details.
   const [showDetails, setShowDetails] = useState<boolean>(false);
 
@@ -42,9 +43,7 @@ const Card = (props: {
         </div>
         }
       </div>
-      {
-        showDetails && accData && <CardDetails accountData={accData} setShowDetails={setShowDetails} />
-      }
+      {accData && <CardDetails classname={showDetails ? "show" : ""} accountData={accData} setShowDetails={setShowDetails} />}
     </>
   );
 }

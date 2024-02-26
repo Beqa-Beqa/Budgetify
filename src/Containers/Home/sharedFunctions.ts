@@ -71,8 +71,7 @@ export const handleAmountChange = (event: React.ChangeEvent<HTMLInputElement>, s
 }
 
 // transaction onChange handler
-export const handleTransactionTypeChange = (event: React.ChangeEvent<HTMLSelectElement>, setType: React.Dispatch<React.SetStateAction<string>>, cb?: () => any) => {
-  const value = event.target.value;
+export const handleTransactionTypeChange = (value: string, setType: React.Dispatch<React.SetStateAction<string>>, cb?: () => any) => {
   setType(value);
   cb && cb();
 }

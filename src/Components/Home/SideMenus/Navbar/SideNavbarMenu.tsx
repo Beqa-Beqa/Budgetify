@@ -1,19 +1,13 @@
 import { HiXMark } from "react-icons/hi2";
 import "../../../../Containers/Home/Header/header.css";
-import { useContext } from "react";
-import { GeneralContext } from "../../../../Contexts/GeneralContextProvider";
 
 const SideNavbarMenu = (props: {
   classname?: string,
   setShowSideNavbarMenu: React.Dispatch<React.SetStateAction<boolean>>
 }) => {
-  const {width} = useContext(GeneralContext);
-
-  const menuWidth = width < 768 ? "w-100" : "w-50";
-
   return (
     <div className={`${props.classname === "show" ? "prompt" : ""}`}>
-      <div className={`sidemenu ${menuWidth} ${props.classname} h-100 p-3 homepage-header`}>
+      <div className={`prompt-box ${props.classname} w-100 p-3 homepage-header`}>
         <div className="w-100 d-flex justify-content-end">
           <div role="button" onClick={() => props.setShowSideNavbarMenu(false)}>
             <HiXMark style={{width: 25, height: 25}} />
