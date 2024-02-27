@@ -12,6 +12,7 @@ const ActionPrompt = (props: {
 }) => {
 
   const renderText = (text: string) => {
+    // insert newlines instead of [br]s
     return text.split("[br]").map((line: string, index: number) => {
       return <React.Fragment key={index}>
         {line}
@@ -26,12 +27,11 @@ const ActionPrompt = (props: {
         {props.head && 
           <>
             <div className="d-flex justify-content-between align-items-center p-3">
-              <span className="fs-5">{props.head}</span>
+              <span className="fs-4">{props.head}</span>
               {props.cancel && <div role="button" onClick={props.cancel.action}>
-                <HiXMark style={{width: 23, height: 23}} />
+                <HiXMark style={{width: 30, height: 30}} />
               </div>}
             </div>
-            <hr className="m-0"/>
           </>
         }
         <div className="p-3">

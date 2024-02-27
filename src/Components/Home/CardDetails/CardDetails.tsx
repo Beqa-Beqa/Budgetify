@@ -6,7 +6,7 @@ import AccountInfoField from "../AccountInfoFIeld/AccountInfoFIeld";
 import { useContext, useState } from "react";
 import { AuthContext } from "../../../Contexts/AuthContextProvider";
 import AddAccountPrompt from "../../../Containers/Home/AddAccountPrompt/AddAccountPrompt";
-import { divideByThousands, makeFirstCapitals, removeThousandsCommas } from "../../../Functions";
+import { divideByThousands, makeFirstCapitals, removeThousandsCommas, updateAccountsData } from "../../../Functions";
 import ActionPrompt from "../ActionPrompt/ActionPrompt";
 import { GeneralContext } from "../../../Contexts/GeneralContextProvider";
 import { deleteAccountApi } from "../../../apiURLs";
@@ -52,12 +52,8 @@ const CardDetails = (props: {
         body
       });
 
-      // remove deleted account and update state.
-      const newAccountsData = accountsData.filter((account: AccountData) => account._id !== props.accountData._id);
-      setAccountsData(newAccountsData);
-      // update session storage.
-      window.sessionStorage.setItem("Budgetify-user-accounts-data", JSON.stringify(newAccountsData));
-
+      // Remove account
+      updateAccountsData(accountsData, setAccountsData, {new: props.accountData, old: undefined}, "Delete");
       // close acc info.
       props.setShowDetails(false);
       // set toast message.

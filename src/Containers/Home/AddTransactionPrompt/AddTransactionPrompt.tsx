@@ -10,6 +10,7 @@ import { AuthContext } from "../../../Contexts/AuthContextProvider";
 import { handleTransactionTypeChange, handleDateChange, handleCategorySelect, handleCategoryUnselect } from "../sharedFunctions";
 import { createTransactionApi, editAccountApi, editTransactionApi } from "../../../apiURLs";
 import IndicatorButton from "../../../Components/Home/IndicatorButton/IndicatorButton";
+import { GeneralContext } from "../../../Contexts/GeneralContextProvider";
 
 const AddTransactionPrompt = (props: {
   setShowAddTransactionPrompt: React.Dispatch<React.SetStateAction<boolean>>,
@@ -69,6 +70,7 @@ const AddTransactionPrompt = (props: {
 
   // Authcontext provides with transactions data, accounts data and their setters.
   const {transactionsData, setTransactionsData, accountsData, setAccountsData} = useContext(AuthContext);
+  const {setShowToastMessage} = useContext(GeneralContext);
 
   // Title reference.
   const titleRef = useRef<HTMLInputElement | null>(null);
@@ -107,8 +109,6 @@ const AddTransactionPrompt = (props: {
   const [chosenCategories, setChosenCategories] = useState<string[]>(hasInfo ? hasInfo.chosenCategories : []);
   // cancel prompt (transaction creation).
   const [showCancelPrompt, setShowCancelPrompt] = useState<boolean>(false);
-  // save prompt (transaction creation).
-  const [showSavePrompt, setShowSavePrompt] = useState<boolean>(false);
   // alert holder that displays ... is required field alert.
   const [showRequiredAlert, setShowRequiredAlert] = useState<boolean>(false);
 
@@ -198,23 +198,26 @@ const AddTransactionPrompt = (props: {
 
           // Amount to send is for account (when transaction is made, account balance should be updated too)
           // if it's an edit prompt and in edit we set transaction type to income and previous type was also income
-          // subtract previous value to the current amount of account, and add new value that was set.
-          // if it was expense perviously, add that amount to current amount and add new value to current amount.
-          // if we chose expense in edit and it was income perviously, subtract pervious value to the current
-          // value and subtract new value to the current value.
-          // if it was chosen expense perviously and we chose expense again, add pervious value to current amount of account
-          // and subtract new value to current amount of the account.
+          // subtract previous value from the current amount of account, and add new value that was set.
+          // if it was expense previously, add that amount to current amount and add new value to current amount.
+          // if we chose expense in edit and it was income previously, subtract previous value from the current
+          // value and subtract new value from the current value.
+          // if it was chosen expense perviously and we chose expense again, add previous value to current amount of account
+          // and subtract new value from current amount of the account.
+          const accVal = removeThousandsCommas(props.accountData.amount);
+          const prevTransVal = removeThousandsCommas(hasInfo!.amount);
+          const editTransVal = removeThousandsCommas(amount);
           const amountToSend = hasInfo ?
             transactionType === "Income" ?
-              hasInfo.transactionType === "Income" ? removeThousandsCommas(props.accountData.amount) - removeThousandsCommas(hasInfo.amount) + removeThousandsCommas(amount)
-              : removeThousandsCommas(props.accountData.amount) + removeThousandsCommas(hasInfo.amount) + removeThousandsCommas(amount)
+              hasInfo.transactionType === "Income" ? accVal - prevTransVal + editTransVal
+              : accVal + prevTransVal + editTransVal
             :
-              hasInfo.transactionType === "Income" ? removeThousandsCommas(props.accountData.amount) - removeThousandsCommas(hasInfo.amount) - removeThousandsCommas(amount)
-              : removeThousandsCommas(props.accountData.amount) + removeThousandsCommas(hasInfo.amount) - removeThousandsCommas(amount)
+              hasInfo.transactionType === "Income" ? accVal - prevTransVal - editTransVal
+              : accVal + prevTransVal - editTransVal
           :
             transactionType === "Income" ?
-            removeThousandsCommas(props.accountData.amount) + removeThousandsCommas(amount)
-            : removeThousandsCommas(props.accountData.amount) - removeThousandsCommas(amount);
+            accVal + editTransVal
+            : accVal - editTransVal;
 
           // body to send for account update request.
           const accountBody = JSON.stringify({infoForEdit: {
@@ -253,9 +256,8 @@ const AddTransactionPrompt = (props: {
           setChosenCategories([]);
           setCategoriesAvailable([]);
           setShowRequiredAlert(false);
-
-          // show save prompt.
-          setShowSavePrompt(true);
+          setShowToastMessage({show: true, text: hasInfo ? "Transaction successfully edited" : `${transactionType} transaction has been successfully added!`})
+          props.setShowAddTransactionPrompt(false);
         } catch (err) {
           console.error(err);
         }
@@ -391,14 +393,6 @@ const AddTransactionPrompt = (props: {
           </div>
         </div>
       </div>
-      {
-        showSavePrompt && 
-          <ActionPrompt
-            text={hasInfo ? `A transaction has been[br]successfully updated` : `${transactionType} transaction has been[br]successfully added!`}
-            cancel={{action: () => {setShowSavePrompt(false); props.setShowAddTransactionPrompt(false); props.callback && props.callback()}, text: "Ok"}}
-            success
-          />
-      }
       {
         showCancelPrompt && 
           <ActionPrompt 

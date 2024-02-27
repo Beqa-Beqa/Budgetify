@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import "./sideTransactionMenu.css";
 import { HiXMark } from "react-icons/hi2";
 import { MdOutlineModeEdit } from "react-icons/md";
@@ -8,6 +8,11 @@ import AccountInfoField from "../../AccountInfoFIeld/AccountInfoFIeld";
 import { FaImage } from "react-icons/fa";
 import { GoArrowDown } from "react-icons/go";
 import AddTransactionPrompt from "../../../../Containers/Home/AddTransactionPrompt/AddTransactionPrompt";
+import { deleteTransactionApi, editAccountApi } from "../../../../apiURLs";
+import ActionPrompt from "../../ActionPrompt/ActionPrompt";
+import { removeThousandsCommas, updateAccountsData, updateTransactionsData } from "../../../../Functions";
+import { AuthContext } from "../../../../Contexts/AuthContextProvider";
+import { GeneralContext } from "../../../../Contexts/GeneralContextProvider";
 
 const SideTransactionMenu = (props: {
   setShowSideTransactionMenu: React.Dispatch<React.SetStateAction<{
@@ -20,10 +25,76 @@ const SideTransactionMenu = (props: {
 }) => {
   const iconSizes = {width: 30, height: 30};
   const info = props.transactionInfo;
+  const acc = props.accountData as AccountData;
   const type = info && info.transactionType as "Income" | "Expenses" ;
   const currency = (props.accountData as AccountData).currency;
 
+  const {transactionsData, setTransactionsData, accountsData, setAccountsData} = useContext(AuthContext);
+  const {setShowToastMessage} = useContext(GeneralContext);
+
   const [showEditPrompt, setShowEditPrompt] = useState<boolean>(false);
+  const [showDeletePrompt, setShowDeletePrompt] = useState<boolean>(false);
+
+  const handleDelete = async () => {
+    if(info) {
+      // if we have transaction info present
+      // body to send for transaction delete request
+      const transactionBody = JSON.stringify({
+        transactionId: info._id, 
+        belongsToId: info.belongsToAccountWithId
+      });
+
+      // amount with which we update account
+      const amountToSend = info.transactionType === "Income" ?
+      removeThousandsCommas(acc.amount) - removeThousandsCommas(info.amount)
+      : removeThousandsCommas(acc.amount) + removeThousandsCommas(info.amount);
+      // account edit request body
+      const accountBody = JSON.stringify({infoForEdit: {
+        accId: acc._id,
+        fields: {amount: amountToSend}
+      }});
+
+      try {
+        // delete transaction request
+        await fetch(deleteTransactionApi, {
+          method: "POST",
+          cache: "no-cache",
+          mode: "cors",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: transactionBody
+        });
+
+        // edit account request
+        const accRes = await fetch(editAccountApi, {
+          method: "PATCH",
+          cache: "no-cache",
+          mode: "cors",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: accountBody
+        });
+
+        // this result will be updated account.
+        const updatedAccount = await accRes.json();
+
+        // update transactions data
+        updateTransactionsData(transactionsData, setTransactionsData, {new: info, old: undefined}, "Delete");
+        // update accounts data
+        updateAccountsData(accountsData, setAccountsData, {new: updatedAccount, old: acc}, "Update");
+        // show confirmation message
+        setShowToastMessage({show: true, text: "Transaction was successfully removed"});
+        // close delete confirmation prompt
+        setShowDeletePrompt(false);
+        // close transaction menu
+        props.setShowSideTransactionMenu({data: null, show: false});
+      } catch (err) {
+        console.error(err);
+      }
+    }
+  }
 
   return (
     <>
@@ -35,7 +106,7 @@ const SideTransactionMenu = (props: {
               <div onClick={() => setShowEditPrompt(true)} role="button">
                 <MdOutlineModeEdit style={iconSizes} />
               </div>
-              <div role="button">
+              <div onClick={() => setShowDeletePrompt(true)} role="button">
                 <FaRegTrashCan style={iconSizes} />
               </div>
               <div role="button" onClick={() => props.setShowSideTransactionMenu({show: false, data: null})}>
@@ -82,6 +153,14 @@ const SideTransactionMenu = (props: {
         </div>
       </div>
       <AddTransactionPrompt classname={`${showEditPrompt && "show"}`} callback={() => props.setShowSideTransactionMenu({show: false, data: props.transactionInfo})} transactionData={info ? info : undefined} accountData={props.accountData as AccountData} setShowAddTransactionPrompt={setShowEditPrompt} />
+      {showDeletePrompt && 
+        <ActionPrompt
+          text="Are you sure you want to delete transaction?"
+          head="Delete Transaction"
+          cancel={{text: "No", action: () => setShowDeletePrompt(false)}}
+          confirm={{text: "Yes", action: () => handleDelete()}}
+        />
+      }
     </>
   );
 }

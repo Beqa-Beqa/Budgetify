@@ -12,6 +12,7 @@ const Card = (props: {
 }) => {
   // account data.
   const accData = props.accountData;
+  // in db amount is saved either with commas or without it hence we remove commas (if exist) and add them again.
   const amount = (accData?.amount && divideByThousands(removeThousandsCommas(accData.amount as string)));
   // State for showing account details.
   const [showDetails, setShowDetails] = useState<boolean>(false);
