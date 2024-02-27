@@ -104,7 +104,7 @@ const AddTransactionPrompt = (props: {
   const defEditCategories = hasInfo ? hasInfo.transactionType === "Income" ?  defIncomeCategories.filter((category: string) => hasInfo.chosenCategories.indexOf(category) === -1)
   : defExpenseCategories.filter((category: string) => hasInfo.chosenCategories.indexOf(category) === -1) : undefined;
   // categories state that are available for choosing.
-  const [categoriesAvailable, setCategoriesAvailable] = useState<string[]>(hasInfo ? defEditCategories! : transactionType === "Expenses" ? defExpenseCategories : defIncomeCategories);
+  const [categoriesAvailable, setCategoriesAvailable] = useState<string[]>((hasInfo && defEditCategories!) || (transactionType === "Expenses" ? defExpenseCategories : defIncomeCategories));
   // categories that were chosen already.
   const [chosenCategories, setChosenCategories] = useState<string[]>(hasInfo ? hasInfo.chosenCategories : []);
   // cancel prompt (transaction creation).
@@ -165,6 +165,7 @@ const AddTransactionPrompt = (props: {
           // expected format from server: {transactionId: string, belongsToId: string, fields: {fields to update}}
           // for create prompt, build body for creating transaction.
           // expected format: {transactionData: {all the fields}}
+          console.log(hasInfo)
           const transactionBody = hasInfo ? 
             JSON.stringify({
               transactionId: hasInfo._id,
@@ -205,15 +206,15 @@ const AddTransactionPrompt = (props: {
           // if it was chosen expense perviously and we chose expense again, add previous value to current amount of account
           // and subtract new value from current amount of the account.
           const accVal = removeThousandsCommas(props.accountData.amount);
-          const prevTransVal = removeThousandsCommas(hasInfo!.amount);
+          const prevTransVal = hasInfo && removeThousandsCommas(hasInfo!.amount);
           const editTransVal = removeThousandsCommas(amount);
           const amountToSend = hasInfo ?
             transactionType === "Income" ?
-              hasInfo.transactionType === "Income" ? accVal - prevTransVal + editTransVal
-              : accVal + prevTransVal + editTransVal
+              hasInfo.transactionType === "Income" ? accVal - prevTransVal! + editTransVal
+              : accVal + prevTransVal! + editTransVal
             :
-              hasInfo.transactionType === "Income" ? accVal - prevTransVal - editTransVal
-              : accVal + prevTransVal - editTransVal
+              hasInfo.transactionType === "Income" ? accVal - prevTransVal! - editTransVal
+              : accVal + prevTransVal! - editTransVal
           :
             transactionType === "Income" ?
             accVal + editTransVal
