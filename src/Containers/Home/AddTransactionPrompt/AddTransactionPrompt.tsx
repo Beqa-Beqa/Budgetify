@@ -313,12 +313,11 @@ const AddTransactionPrompt = (props: {
             </div>
             <div className="w-100 d-flex flex-column align-items-center justify-content-center ">
               <FormInput alert={showRequiredAlert && !chosenCategories.length} classname="w-100 input position-relative d-flex flex-column align-items-center justify-content-center" required title="Category">
-                <select required value={""} onChange={() => {}} className="px-3">
+                <select required value={""} onChange={(e) => handleCategorySelect(e.target.value, categoriesAvailable, setCategoriesAvailable, chosenCategories, setChosenCategories)} className="px-3">
                   <option className="d-none" disabled value={""} />
                   {categoriesAvailable.map((category: string, key: number) => {
                     return <option
                       value={category}
-                      onClick={() => handleCategorySelect(category, categoriesAvailable, setCategoriesAvailable, chosenCategories, setChosenCategories)}
                       key={key}>{category}</option>
                   })}
                 </select>
