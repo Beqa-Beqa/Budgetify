@@ -1,7 +1,7 @@
 import "./addAccountPrompt.css";
 import { HiXMark } from "react-icons/hi2";
 import FormInput from "../../../Components/Home/FormInput/FormInput";
-import { FormEvent, useContext, useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { AuthContext } from "../../../Contexts/AuthContextProvider";
 import { accountExistsByTitle, clearFormStringValues, updateAccountsData } from "../../../Functions";
 import ActionPrompt from "../../../Components/Home/ActionPrompt/ActionPrompt";
@@ -12,7 +12,8 @@ import { createAccountApi, currenciesApiKey, editAccountApi, fetchCurrenciesApi 
 
 const AddAccountPrompt = (props: {
   setShowAddAccountPrompt: React.Dispatch<React.SetStateAction<boolean>>,
-  data?: AccountData
+  data?: AccountData,
+  classname?: string
 }) => {
   // Auth context which provides accounts data and user data.
   const authContext = useContext(AuthContext);
@@ -130,9 +131,7 @@ const AddAccountPrompt = (props: {
     }  
   }
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-    // Prevent default action (refresh).
-    event.preventDefault();
+  const handleSubmit = () => {
     // If currency is not changed, pop up won't be shown.
     props.data ? !isCurrencyChanged ? handleSave() : setShowConfirmPopUp(true) : handleSave();
   }
@@ -143,18 +142,17 @@ const AddAccountPrompt = (props: {
   }
   
   return (
-    <div className="prompt text-color">
-      <div style={{maxWidth: 515}} className="prompt-box rounded py-3 w-100">
-        <div className="w-100 position-relative d-flex align-items-center justify-content-center">
+    <div className={`${props.classname === "show" ? "prompt" : ""} text-color`}>
+      <div className={`prompt-box ${props.classname} d-flex flex-column p-4 w-100`}>
+        <div className="w-100 position-relative d-flex align-items-center justify-content-between mb-4">
           <h3 className="text-center fs-4">{props.data ? "Edit" : "Create"} Account</h3>
-          <div onClick={() => props.setShowAddAccountPrompt(false)} role="button" style={{right: 20}} className="position-absolute">
+          <div onClick={() => props.setShowAddAccountPrompt(false)} role="button">
             <HiXMark style={{width: 30, height: 30}} />
           </div>
         </div>
-        <hr className="mt-2 mb-5"/>
-        <form onSubmit={handleSubmit} className="create-account-form position-relative d-flex flex-column gap-4">
+        <form className="create-account-form position-relative d-flex flex-column gap-4">
           <div className="prompt-box-input-container">
-            {title && <span style={{top: -40}} className="prompt-box-tooltip rounded p-2 position-absolute mx-5">{title}</span>}
+            {title && <span style={{top: -40}} className="prompt-box-tooltip rounded p-2 position-absolute">{title}</span>}
             <FormInput alert={titleAlert.error} classname="input" required title="Title">
               <input
                 ref={titleRef}
@@ -166,7 +164,7 @@ const AddAccountPrompt = (props: {
                 required
                 />
             </FormInput>
-            {titleAlert.error && <span className="mx-5 mt-2 d-block" style={{color: "var(--danger)"}}>{titleAlert.text}</span>}
+            {titleAlert.error && <span className="mt-2 d-block" style={{color: "var(--danger)"}}>{titleAlert.text}</span>}
           </div>
           <FormInput classname="input" required title="Currency">
             <select onChange={(e) => setCurrency(e.target.value)} defaultValue={currency} className="px-3">
@@ -185,27 +183,27 @@ const AddAccountPrompt = (props: {
                 className="w-100 px-3" 
                 />
             </FormInput>
-            {amountAlert.error && <span className="mx-5 mt-2 d-block" style={{color: "var(--danger)"}}>{amountAlert.text}</span>}
+            {amountAlert.error && <span className="mt-2 d-block" style={{color: "var(--danger)"}}>{amountAlert.text}</span>}
           </div>
           <div>
             <FormInput classname="input" title="Description">
               <textarea 
                 value={description} 
                 onChange={(e) => handleDescriptionChange(e, setDescription, setDescriptionAlert)} 
-                className="px-3"
+                className="w-100 px-3"
                 />
             </FormInput>
-            {descriptionAlert.error && <span className="mx-5 mt-2 d-block" style={{color: "var(--danger)"}}>{descriptionAlert.text}</span>}
-          </div>
-          <div className="prompt-box-actions-container d-flex gap-2 justify-content-end me-3">
-            <button onClick={() => props.setShowAddAccountPrompt(false)} className="action-button negative">
-              Cancel
-            </button>
-            <button type="submit" disabled={isButtonDisabled} className="action-button positive">
-              Save
-            </button>
+            {descriptionAlert.error && <span className="mt-2 d-block" style={{color: "var(--danger)"}}>{descriptionAlert.text}</span>}
           </div>
         </form>
+        <div className="prompt-box-actions-container mt-auto d-flex gap-3 justify-content-end">
+          <button onClick={() => props.setShowAddAccountPrompt(false)} className="action-button negative">
+            Cancel
+          </button>
+          <button onClick={handleSubmit} type="submit" disabled={isButtonDisabled} className="action-button positive">
+            Save
+          </button>
+        </div>
         {showConfirmPopUp && 
           <ActionPrompt 
             text="Are you sure you want to change the currency? It will be changed in all transactions, numbers will stay the same." 

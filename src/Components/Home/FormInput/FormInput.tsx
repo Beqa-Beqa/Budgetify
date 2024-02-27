@@ -8,7 +8,7 @@ const FormInput = (props: {
   classname?: string
 }) => {
   return (
-    <fieldset className={`${props.classname} ${props.alert && "alert-input"} px-1 mx-5 position-relative`}>
+    <fieldset className={`${props.classname} ${props.alert && "alert-input"} px-1 position-relative`}>
       <legend>{props.title} {props.required && <span style={{color: "var(--danger)", opacity: 0.7}}>*</span>}</legend>
       {props.children}
     </fieldset>

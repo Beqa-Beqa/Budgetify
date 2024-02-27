@@ -53,7 +53,7 @@ export const updateAccountsData = (currentData: AccountData[], setData: React.Di
   } else if (type === "Update") {
     newAccountsData[newAccountsData.indexOf(data.old!)] = data.new;
   } else if (type === "Delete") {
-    newAccountsData.slice(newAccountsData.indexOf(data.new), 1); 
+    newAccountsData.splice(newAccountsData.indexOf(data.new), 1); 
   }
 
   window.sessionStorage.setItem("Budgetify-user-accounts-data", JSON.stringify(newAccountsData));
@@ -68,7 +68,7 @@ export const updateTransactionsData = (currentData: TransactionData[], setData: 
   } else if (type === "Update") {
     newTransactionsData[newTransactionsData.indexOf(data.old!)] = data.new;
   } else if (type === "Delete") {
-    newTransactionsData.slice(newTransactionsData.indexOf(data.new), 1); 
+    newTransactionsData.splice(newTransactionsData.indexOf(data.new), 1); 
   }
 
   window.sessionStorage.setItem("Budgetify-user-transactions-data", JSON.stringify(newTransactionsData));

@@ -1,6 +1,7 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import FormInput from "../../../Components/Home/FormInput/FormInput";
 import "../AddAccountPrompt/addAccountPrompt.css";
+import "./addTransactionPrompt.css";
 import ActionPrompt from "../../../Components/Home/ActionPrompt/ActionPrompt";
 import { handleDescriptionChange, handleTitleChange, handleAmountChange } from "../sharedFunctions";
 import { clearFormStringValues, divideByThousands, getGlobalTimeUnix, removeThousandsCommas, updateTransactionsData, updateAccountsData } from "../../../Functions";
@@ -8,15 +9,41 @@ import { HiXMark } from "react-icons/hi2";
 import { AuthContext } from "../../../Contexts/AuthContextProvider";
 import { handleTransactionTypeChange, handleDateChange, handleCategorySelect, handleCategoryUnselect } from "../sharedFunctions";
 import { createTransactionApi, editAccountApi, editTransactionApi } from "../../../apiURLs";
+import IndicatorButton from "../../../Components/Home/IndicatorButton/IndicatorButton";
+import { GeneralContext } from "../../../Contexts/GeneralContextProvider";
 
 const AddTransactionPrompt = (props: {
   setShowAddTransactionPrompt: React.Dispatch<React.SetStateAction<boolean>>,
   accountData: AccountData,
   transactionData?: TransactionData,
-  callback?: () => void
+  callback?: () => void,
+  classname?: string
 }) => {
   // if info is present this prompt is for edit.
   const hasInfo = props.transactionData;
+
+  // Update state based on the transactionData prop
+  useEffect(() => {
+    if (props.transactionData) {
+      const {
+        transactionType,
+        title,
+        description,
+        amount,
+        date,
+        chosenCategories,
+        payee
+      } = props.transactionData;
+
+      setTransactionType(transactionType || "Expenses");
+      setTitle(title || "");
+      setDescription(description || "");
+      setAmount(amount || "");
+      setDate(date || "");
+      setChosenCategories(chosenCategories || []);
+      setPayee(payee || "");
+    }
+  }, [hasInfo]);
 
   // Current global time, retrieved after component mount.
   const [curDate, setCurDate] = useState<string>(JSON.parse(window.sessionStorage.getItem("budgetify-current-date") || "{}"));
@@ -43,12 +70,13 @@ const AddTransactionPrompt = (props: {
 
   // Authcontext provides with transactions data, accounts data and their setters.
   const {transactionsData, setTransactionsData, accountsData, setAccountsData} = useContext(AuthContext);
+  const {setShowToastMessage} = useContext(GeneralContext);
 
   // Title reference.
   const titleRef = useRef<HTMLInputElement | null>(null);
 
   // transaction type holder state.
-  const [transactionType, setTransactionType] = useState<string>(hasInfo ? hasInfo.transactionType : "");
+  const [transactionType, setTransactionType] = useState<string>(hasInfo ? hasInfo.transactionType : "Expenses");
   // title holder state.
   const [title, setTitle] = useState<string>(hasInfo ? hasInfo.title : "");
   // title alert holder.
@@ -63,6 +91,8 @@ const AddTransactionPrompt = (props: {
   const [amountAlert, setAmountAlert] = useState<InputBasicAlert>({error: false, text: ""});
   // date holder.
   const [date, setDate] = useState<string>(hasInfo ? hasInfo.date : "");
+  // payee state
+  const [payee, setPayee] = useState<string>(hasInfo ? hasInfo.payee : "");
   // date alert holder.
   const [dateAlert, setDateAlert] = useState<InputBasicAlert>({error: false, text: ""});
   // categories holder which were not chosen yet.
@@ -74,18 +104,29 @@ const AddTransactionPrompt = (props: {
   const defEditCategories = hasInfo ? hasInfo.transactionType === "Income" ?  defIncomeCategories.filter((category: string) => hasInfo.chosenCategories.indexOf(category) === -1)
   : defExpenseCategories.filter((category: string) => hasInfo.chosenCategories.indexOf(category) === -1) : undefined;
   // categories state that are available for choosing.
-  const [categoriesAvailable, setCategoriesAvailable] = useState<string[]>(hasInfo ? defEditCategories! : []);
+  const [categoriesAvailable, setCategoriesAvailable] = useState<string[]>(hasInfo ? defEditCategories! : transactionType === "Expenses" ? defExpenseCategories : defIncomeCategories);
   // categories that were chosen already.
   const [chosenCategories, setChosenCategories] = useState<string[]>(hasInfo ? hasInfo.chosenCategories : []);
   // cancel prompt (transaction creation).
   const [showCancelPrompt, setShowCancelPrompt] = useState<boolean>(false);
-  // save prompt (transaction creation).
-  const [showSavePrompt, setShowSavePrompt] = useState<boolean>(false);
   // alert holder that displays ... is required field alert.
   const [showRequiredAlert, setShowRequiredAlert] = useState<boolean>(false);
 
+  const clearValues = () => clearFormStringValues(setTitle, setDescription, setDate, setAmount, setPayee);
+  const clearAlerts = () => {
+    setDateAlert({error: false, text: ""});
+    setTitleAlert({error: false, text: ""});
+    setAmountAlert({error: false, text: ""});
+    setDescriptionAlert({error: false, text: ""});
+    setShowRequiredAlert(false);
+  }
+
   // cancel button click handler (transaction creation).
   const handleCancel = () => {
+    if(!hasInfo) {
+      clearValues();
+      clearAlerts();
+    }
     // show cancel prompt
     setShowCancelPrompt(false);
     // close add transacion prompt
@@ -128,7 +169,7 @@ const AddTransactionPrompt = (props: {
             JSON.stringify({
               transactionId: hasInfo._id,
               belongsToId: hasInfo.belongsToAccountWithId,
-              fields: {transactionType, title, description, amount, date, chosenCategories}
+              fields: {transactionType, title, description, amount, date, chosenCategories, payee}
             })
           :
             JSON.stringify({
@@ -139,7 +180,8 @@ const AddTransactionPrompt = (props: {
                 description, 
                 amount, 
                 date, 
-                chosenCategories
+                chosenCategories,
+                payee
               }
             })
 
@@ -156,23 +198,26 @@ const AddTransactionPrompt = (props: {
 
           // Amount to send is for account (when transaction is made, account balance should be updated too)
           // if it's an edit prompt and in edit we set transaction type to income and previous type was also income
-          // subtract previous value to the current amount of account, and add new value that was set.
-          // if it was expense perviously, add that amount to current amount and add new value to current amount.
-          // if we chose expense in edit and it was income perviously, subtract pervious value to the current
-          // value and subtract new value to the current value.
-          // if it was chosen expense perviously and we chose expense again, add pervious value to current amount of account
-          // and subtract new value to current amount of the account.
+          // subtract previous value from the current amount of account, and add new value that was set.
+          // if it was expense previously, add that amount to current amount and add new value to current amount.
+          // if we chose expense in edit and it was income previously, subtract previous value from the current
+          // value and subtract new value from the current value.
+          // if it was chosen expense perviously and we chose expense again, add previous value to current amount of account
+          // and subtract new value from current amount of the account.
+          const accVal = removeThousandsCommas(props.accountData.amount);
+          const prevTransVal = removeThousandsCommas(hasInfo!.amount);
+          const editTransVal = removeThousandsCommas(amount);
           const amountToSend = hasInfo ?
             transactionType === "Income" ?
-              hasInfo.transactionType === "Income" ? removeThousandsCommas(props.accountData.amount) - removeThousandsCommas(hasInfo.amount) + removeThousandsCommas(amount)
-              : removeThousandsCommas(props.accountData.amount) + removeThousandsCommas(hasInfo.amount) + removeThousandsCommas(amount)
+              hasInfo.transactionType === "Income" ? accVal - prevTransVal + editTransVal
+              : accVal + prevTransVal + editTransVal
             :
-              hasInfo.transactionType === "Income" ? removeThousandsCommas(props.accountData.amount) - removeThousandsCommas(hasInfo.amount) - removeThousandsCommas(amount)
-              : removeThousandsCommas(props.accountData.amount) + removeThousandsCommas(hasInfo.amount) - removeThousandsCommas(amount)
+              hasInfo.transactionType === "Income" ? accVal - prevTransVal - editTransVal
+              : accVal + prevTransVal - editTransVal
           :
             transactionType === "Income" ?
-            removeThousandsCommas(props.accountData.amount) + removeThousandsCommas(amount)
-            : removeThousandsCommas(props.accountData.amount) - removeThousandsCommas(amount);
+            accVal + editTransVal
+            : accVal - editTransVal;
 
           // body to send for account update request.
           const accountBody = JSON.stringify({infoForEdit: {
@@ -206,13 +251,13 @@ const AddTransactionPrompt = (props: {
           updateAccountsData(accountsData, setAccountsData, {new: account, old: props.accountData}, "Update");
 
           // clear fields.
-          clearFormStringValues(setTransactionType, setTitle, setAmount, setDate, setDescription);
+          clearValues();
+          clearAlerts();
           setChosenCategories([]);
           setCategoriesAvailable([]);
           setShowRequiredAlert(false);
-
-          // show save prompt.
-          setShowSavePrompt(true);
+          setShowToastMessage({show: true, text: hasInfo ? "Transaction successfully edited" : `${transactionType} transaction has been successfully added!`})
+          props.setShowAddTransactionPrompt(false);
         } catch (err) {
           console.error(err);
         }
@@ -226,19 +271,30 @@ const AddTransactionPrompt = (props: {
 
   return (
     <>
-      <div className="prompt">
-        <div style={{maxWidth: 515}} className="prompt-box w-100 rounded py-3">
-          <h2 className="fs-4 mb-5 text-center">Create Transaction</h2>
-          <form style={{overflow: "visible"}} className="d-flex flex-column align-items-center gap-4 px-md-5 px-2">
-            <div className="w-100 d-flex flex-column align-items-center">
-              <FormInput alert={showRequiredAlert && !transactionType} required classname="w-100 input" title="Transaction Type">
-                <select onChange={(e) => handleTransactionTypeChange(e, setTransactionType, () => {setCategoriesAvailable(e.target.value === "Income" ? defIncomeCategories : defExpenseCategories); setChosenCategories([])})} required defaultValue={transactionType} className="px-3">
-                  <option className="d-none" disabled value={""} />
-                  <option value="Income">Income</option>
-                  <option value="Expenses">Expenses</option>
-                </select>
-              </FormInput>
-              {showRequiredAlert && !transactionType && <span className="w-100 mt-2" style={{color: "var(--danger)"}}>Transaction type is required field!</span>}
+      <div className={`${props.classname === "show" && "prompt"}`}>
+        <div className={`prompt-box ${props.classname} w-100 d-flex flex-column align-items-center gap-5 p-4`}>
+          <div className="d-flex align-items-center justify-content-between w-100">
+            <h2 className="fs-4">{hasInfo ? "Edit" : "Create"} Transaction</h2>
+            <div onClick={handleCancel} role="button">
+              <HiXMark style={{width: 30, height: 30}}/>
+            </div>
+          </div>
+          <form style={{overflow: "visible"}} className="w-100 d-flex flex-column align-items-center gap-4">
+            <div className="w-100 d-flex align-items-center mb-2">
+              <button 
+                onClick={() => handleTransactionTypeChange("Expenses", setTransactionType, () => {setCategoriesAvailable(defExpenseCategories); setChosenCategories([])})} 
+                style={{border: "1px solid var(--border)"}} 
+                className={`transaction-type-button ${transactionType === "Expenses" && "active"} rounded bg-transparent py-1 pe-2`} value="Expenses"
+              >
+                <IndicatorButton classname="bg-transparent" type="Expenses" />
+              </button>
+              <button 
+                onClick={() => handleTransactionTypeChange("Income", setTransactionType, () => {setCategoriesAvailable(defIncomeCategories); setChosenCategories([])})}
+                style={{border: "1px solid var(--border)", left: -2}} 
+                className={`transaction-type-button ${transactionType === "Income" && "active"} position-relative border-start-0 rounded-end bg-transparent py-1 pe-2`} value="Income"
+              >
+                <IndicatorButton classname="bg-transparent" type="Income" />
+              </button>
             </div>
             <div className="w-100 d-flex flex-column align-items-center">
               <FormInput alert={titleAlert.error || (showRequiredAlert && !title)} classname="w-100 input" required title="Title">
@@ -282,17 +338,6 @@ const AddTransactionPrompt = (props: {
               {showRequiredAlert && !chosenCategories.length && <span className="w-100 mt-2" style={{color: "var(--danger)"}}>Category is required field!</span>}
             </div>
             <div className="w-100 d-flex flex-column align-items-center">
-              <FormInput alert={descriptionAlert.error} classname="w-100 input" title="Description">
-                <input 
-                  value={description} 
-                  onChange={(e) => handleDescriptionChange(e, setDescription, setDescriptionAlert)} 
-                  type="text" 
-                  className="px-3" 
-                />
-              </FormInput>
-              {descriptionAlert.error && <span style={{color: "var(--danger)"}} className="w-100 mt-2">{descriptionAlert.text}</span>}
-            </div>
-            <div className="w-100 d-flex flex-column align-items-center">
               <FormInput alert={amountAlert.error || (showRequiredAlert && !amount)} required classname="w-100 input" title="Amount">
                 <input 
                   value={amount}
@@ -317,26 +362,37 @@ const AddTransactionPrompt = (props: {
               {dateAlert.error && <span style={{color: "var(--danger)"}} className="w-100 mt-2">{dateAlert.text}</span>}
               {showRequiredAlert && !date && <span className="w-100 mt-2" style={{color: "var(--danger)"}}>Date is required field!</span>}
             </div>
+            <FormInput classname="w-100 input" title="Payee">
+              <input
+                value={payee}
+                onChange={(e) => setPayee(e.target.value)}
+                type="text"
+                className="px-3"
+              />
+            </FormInput>
+            <div className="w-100 d-flex flex-column align-items-center">
+              <FormInput alert={descriptionAlert.error} classname="w-100 input" title="Description">
+                <input 
+                  value={description} 
+                  onChange={(e) => handleDescriptionChange(e, setDescription, setDescriptionAlert)} 
+                  type="text" 
+                  className="px-3" 
+                />
+              </FormInput>
+              {descriptionAlert.error && <span style={{color: "var(--danger)"}} className="w-100 mt-2">{descriptionAlert.text}</span>}
+            </div>
             <div className="w-100 d-flex flex-column align-items-center">
               <FormInput classname="w-100 input" title="Attachment">
                 <input type="file" className="px-3 pt-3" />
               </FormInput>
             </div>
-            <div style={{width: 220}} className="d-flex gap-3">
-              <button disabled={isButtonDisabled} onClick={(e) => handleSave(e)} className="action-button positive" type="submit">Save</button>
-              <button onClick={(e) => {e.preventDefault(); setShowCancelPrompt(true);}} className="action-button negative">Cancel</button>
-            </div>
           </form>
+          <div className="w-100 mt-auto d-flex justify-content-end gap-3">
+            <button onClick={(e) => {e.preventDefault(); setShowCancelPrompt(true);}} className="action-button negative">Cancel</button>
+            <button disabled={isButtonDisabled} onClick={(e) => handleSave(e)} className="action-button positive" type="submit">Save</button>
+          </div>
         </div>
       </div>
-      {
-        showSavePrompt && 
-          <ActionPrompt
-            text={hasInfo ? `A transaction has been[br]successfully updated` : `${transactionType} transaction has been[br]successfully added!`}
-            cancel={{action: () => {setShowSavePrompt(false); props.setShowAddTransactionPrompt(false); props.callback && props.callback()}, text: "Ok"}}
-            success
-          />
-      }
       {
         showCancelPrompt && 
           <ActionPrompt 

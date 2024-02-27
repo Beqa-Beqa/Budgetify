@@ -54,6 +54,10 @@ table {
 	font-family: "Space Grotesk", sans-serif !important;
 }
 
+html {
+	scrollbar-width: thin;
+}
+
 :root {
 	--primary: #FFF;
 	--component-background: #F9F9F9;
@@ -79,16 +83,24 @@ table {
   left: 0;
   width: 100vw;
   height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
   background-color: rgba(0, 0, 0, 0.6);
 }
 
-.prompt .prompt-box {
+.prompt-box {
+	position: fixed;
+	top: 0;
+	right: -1500px;
+	transition: calc(var(--base-transition-duration) * 3);
   background-color: var(--primary);
 	max-height: 100vh;
+	height: 100%;
+	max-width: 590px;
 	overflow-y: auto;
+}
+
+.prompt-box.show {
+	z-index: 300;
+  right: 0;
 }
 
 .action-button {

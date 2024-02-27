@@ -11,11 +11,10 @@ import SideTransactionMenu from "../../../Components/Home/SideMenus/Transaction/
 
 const Main = () => {
   // list of accounts data.
-  const authContext = useContext(AuthContext);
-  const {accountsData, transactionsData} = authContext;
-  const currentUserData = authContext.currentUserData as CurrentUserData;
+  const {accountsData, transactionsData} = useContext(AuthContext);
   // sort setting holder state.
-  const [sort, setSort] = useState<"desc" | "asc">("desc");
+  const [sortByPamentDate, setSortByPaymentDate] = useState<"desc" | "asc">("desc");
+  const [sortByTransaction, setSortByTransaction] = useState<"Income" | "Expenses" | "">("");
   // active card holder state.
   const [activeCard, setActiveCard] = useState<number>(NaN);
   // if accounts exist and active card is NaN, update it to 0.
@@ -31,11 +30,14 @@ const Main = () => {
   // transaction side info menu.
   const [showTransactionInfo, setShowTransactionInfo] = useState<{show: boolean, data: TransactionData | null}>({show: false, data: null});
 
+  const filteredTransactionsByCard = transactionsData.filter((transaction: TransactionData) => accountsData[activeCard] && transaction.belongsToAccountWithId === accountsData[activeCard]._id)
+                                                     .filter((transaction: TransactionData) => sortByTransaction === "Income" ? transaction.transactionType === "Income" : sortByTransaction === "Expenses" ? transaction.transactionType === "Expenses" : transaction);
+
   return (
     <div className="homepage-main container-fluid">
       <div className="row row-wrap justify-content-between">
-        <div style={{height: "fit-content"}} className="col-xl-4 col-12 d-flex flex-column gap-4">
-          {accountsData.length ? <div className="position-relative cards-container d-flex flex-row flex-xl-column gap-5 pb-4 pe-xl-3">
+        <div style={{height: "fit-content !important"}} className="position-relative col-xl-4 col-12 d-flex flex-column gap-2">
+          {accountsData.length ? <div className="cards-container d-flex flex-row flex-xl-column justify-content-xl-start gap-2 pb-4 mt-4 mt-xl-0 pb-xl-0 pe-xl-3">
             {accountsData.map((account: AccountData, key: number) => {
               const isActive = key === activeCard;
               const handleClick = () => setActiveCard(key);
@@ -44,15 +46,15 @@ const Main = () => {
             })}
           </div> : null}
           <div className="w-100 pe-xl-3">
-            <Card onclick={() => setShowAddAccountPrompt(true)} classname="active align-self-md-center col-xxl col-xl-12 col-md-5 col mb-4 mb-xl-0" />
+            <Card onclick={() => setShowAddAccountPrompt(true)} classname="active align-self-md-center col-xxl col-xl-12 col-md-6 col mb-4 mb-xl-0" />
           </div>
         </div>
-        <div className="col-xxl-5 col-xl-6 col-lg-9 p-xl-0 pe-2 mb-3 mb-lg-0">
-          <MainSearch sort={sort} setSort={setSort}/>
-          <div className="d-flex flex-column mt-1 gap-4">
-            {transactionsData.filter((transaction: TransactionData) => accountsData[activeCard] && transaction.belongsToAccountWithId === accountsData[activeCard]._id)
-                             .sort((a: TransactionData, b: TransactionData) => sort === "desc" ? new Date(b.date).getTime() - new Date(a.date).getTime() : new Date(a.date).getTime() - new Date(b.date).getTime())
-                             .map((transaction: TransactionData, key: number) => {
+        <div className="h-100 col-xxl-5 col-xl-6 col-lg-9 p-xl-0 pe-2 mb-3 mb-lg-0">
+          <MainSearch sortByTransaction={sortByTransaction} setSortByTransaction={setSortByTransaction} sortByPaymentDate={sortByPamentDate} setSortByPaymentDate={setSortByPaymentDate}/>
+          <div className="transactions-container d-flex flex-column mt-1 gap-4">
+            {filteredTransactionsByCard.length ? filteredTransactionsByCard                      
+            .sort((a: TransactionData, b: TransactionData) => sortByPamentDate === "desc" ? new Date(b.date).getTime() - new Date(a.date).getTime() : new Date(a.date).getTime() - new Date(b.date).getTime())
+            .map((transaction: TransactionData, key: number) => {
               const type = transaction.transactionType as "Income" | "Expenses";
 
               return (
@@ -69,13 +71,20 @@ const Main = () => {
                       <IndicatorButton classname="h-50 mb-1" type={type} />
                       <GoDotFill style={{width: 5, height: 5}} />
                       <span>{transaction.date.split("-").reverse().join(".")}</span>
-                      <GoDotFill style={{width: 5, height: 5}} />
-                      <span>{currentUserData.data.name}</span>
+                      {transaction.payee && <>
+                        <GoDotFill style={{width: 5, height: 5}} />
+                        <span>{transaction.payee}</span>
+                      </>}
                     </div>
                   </div>
                 </div>
               );
-            })}
+            })
+          :
+            <div className="w-100 text-center my-3 overflow-hidden">
+              <h2 style={{color: "var(--placeholder)"}} className="fs-2 opacity-25">You don't have any transactions. Please, add a transaction.</h2>
+            </div>
+          }
           </div>
         </div>
         <div className="col-xl-2 col-lg-3">
@@ -86,13 +95,9 @@ const Main = () => {
           </div>
         </div>
       </div>
-      {
-        showAddAccountPrompt && <AddAccountPrompt setShowAddAccountPrompt={setShowAddAccountPrompt} />
-      }
-      {
-        showAddTransactionPrompt && <AddTransactionPrompt accountData={accountsData[activeCard]} setShowAddTransactionPrompt={setShowAddTransactionPrompt} />
-      }
-      <SideTransactionMenu accountData={!isNaN(activeCard) && accountsData[activeCard]} transactionInfo={showTransactionInfo.data} setShowSideTransactionMenu={setShowTransactionInfo} classname={`${showTransactionInfo.show && "show"}`} />
+      <AddAccountPrompt classname={showAddAccountPrompt ? "show" : ""} setShowAddAccountPrompt={setShowAddAccountPrompt} />
+      <AddTransactionPrompt classname={`${showAddTransactionPrompt ? "show" : ""}`} accountData={accountsData[activeCard]} setShowAddTransactionPrompt={setShowAddTransactionPrompt} />
+      <SideTransactionMenu accountData={!isNaN(activeCard) && accountsData[activeCard]} transactionInfo={showTransactionInfo.data && showTransactionInfo.data} setShowSideTransactionMenu={setShowTransactionInfo} classname={`${showTransactionInfo.show && "show"}`} />
     </div>
   );
 }

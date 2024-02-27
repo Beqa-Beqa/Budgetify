@@ -5,6 +5,7 @@ export const editAccountApi = `${baseAPIURL}/edit-account`;
 export const deleteAccountApi = `${baseAPIURL}/delete-account`;
 export const createTransactionApi = `${baseAPIURL}/create-transaction`;
 export const editTransactionApi = `${baseAPIURL}/edit-transaction`;
+export const deleteTransactionApi = `${baseAPIURL}/delete-transaction`;
 export const fetchCurrenciesApi = "https://api.cloudmersive.com/currency/exchange-rates/list-available";
 export const currenciesApiKey = "5713676a-6942-440e-b9b8-97e260ba7100";
 export const getGlobalTimeUnixApi = "https://worldtimeapi.org/api/timezone/Asia/Tbilisi";
