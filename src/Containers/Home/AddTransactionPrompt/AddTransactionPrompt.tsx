@@ -4,19 +4,19 @@ import "../AddAccountPrompt/addAccountPrompt.css";
 import "./addTransactionPrompt.css";
 import ActionPrompt from "../../../Components/Home/ActionPrompt/ActionPrompt";
 import { handleDescriptionChange, handleTitleChange, handleAmountChange } from "../sharedFunctions";
-import { clearFormStringValues, divideByThousands, getGlobalTimeUnix, removeThousandsCommas, updateTransactionsData, updateAccountsData } from "../../../Functions";
+import { clearFormStringValues, divideByThousands, getGlobalTimeUnix, removeThousandsCommas, updateTransactionsData, updateAccountsData, getCategoryNameById } from "../../../Functions";
 import { HiXMark } from "react-icons/hi2";
 import { AuthContext } from "../../../Contexts/AuthContextProvider";
 import { handleTransactionTypeChange, handleDateChange, handleCategorySelect, handleCategoryUnselect } from "../sharedFunctions";
 import { createTransactionApi, editAccountApi, editTransactionApi } from "../../../apiURLs";
 import IndicatorButton from "../../../Components/Home/IndicatorButton/IndicatorButton";
 import { GeneralContext } from "../../../Contexts/GeneralContextProvider";
+import { defExpenseCategories, defIncomeCategories } from "../../../Data";
 
 const AddTransactionPrompt = (props: {
   setShowAddTransactionPrompt: React.Dispatch<React.SetStateAction<boolean>>,
   accountData: AccountData,
   transactionData?: TransactionData,
-  callback?: () => void,
   classname?: string
 }) => {
   // if info is present this prompt is for edit.
@@ -24,7 +24,7 @@ const AddTransactionPrompt = (props: {
 
   // Update state based on the transactionData prop
   useEffect(() => {
-    if (props.transactionData) {
+    if (hasInfo) {
       const {
         transactionType,
         title,
@@ -33,7 +33,7 @@ const AddTransactionPrompt = (props: {
         date,
         chosenCategories,
         payee
-      } = props.transactionData;
+      } = hasInfo;
 
       setTransactionType(transactionType || "Expenses");
       setTitle(title || "");
@@ -69,8 +69,8 @@ const AddTransactionPrompt = (props: {
   }, []);
 
   // Authcontext provides with transactions data, accounts data and their setters.
-  const {transactionsData, setTransactionsData, accountsData, setAccountsData} = useContext(AuthContext);
-  const {setShowToastMessage} = useContext(GeneralContext);
+  const {transactionsData, setTransactionsData, accountsData, setAccountsData, categoriesData} = useContext(AuthContext);
+  const {setShowToastMessage, setShowAddCategoryPrompt} = useContext(GeneralContext);
 
   // Title reference.
   const titleRef = useRef<HTMLInputElement | null>(null);
@@ -95,22 +95,36 @@ const AddTransactionPrompt = (props: {
   const [payee, setPayee] = useState<string>(hasInfo ? hasInfo.payee : "");
   // date alert holder.
   const [dateAlert, setDateAlert] = useState<InputBasicAlert>({error: false, text: ""});
-  // categories holder which were not chosen yet.
-  // expense categories.
-  const defExpenseCategories = ["Home", "Entertainment", "Groceries", "Clothing", "Restaurant", "Cinema"];
-  // income categories.
-  const defIncomeCategories = ["Salary", "Debt", "Business", "Entertainment", "Lottery"];
+
+
+  // custom expense categories
+  const customExpenseCategories = categoriesData.filter((category: CategoryData) => category.transactionType === "Expenses" && category).map((category: CategoryData) => category._id);
+  // custom income categories.
+  const customIncomeCategories = categoriesData.filter((category: CategoryData) => category.transactionType === "Income" && category).map((category: CategoryData) => category._id);
+  // default expense categories.
+  const expenseCategories = [...defExpenseCategories, ...customExpenseCategories];
+  // default income categories.
+  const incomeCategories = [...defIncomeCategories, ...customIncomeCategories];
+
+
   // edit categories.
-  const defEditCategories = hasInfo ? hasInfo.transactionType === "Income" ?  defIncomeCategories.filter((category: string) => hasInfo.chosenCategories.indexOf(category) === -1)
-  : defExpenseCategories.filter((category: string) => hasInfo.chosenCategories.indexOf(category) === -1) : undefined;
+  const defEditCategories = hasInfo ? hasInfo.transactionType === "Income" ?  incomeCategories.filter((category: string) => hasInfo.chosenCategories.indexOf(category) === -1)
+  : expenseCategories.filter((category: string) => hasInfo.chosenCategories.indexOf(category) === -1) : undefined;
+
+
   // categories state that are available for choosing.
-  const [categoriesAvailable, setCategoriesAvailable] = useState<string[]>((hasInfo && defEditCategories!) || (transactionType === "Expenses" ? defExpenseCategories : defIncomeCategories));
+  const [categoriesAvailable, setCategoriesAvailable] = useState<string[]>((hasInfo && defEditCategories!) || (transactionType === "Expenses" ? expenseCategories : incomeCategories));
+  // whenever categories data changes, update data for render as well
+  useEffect(() => {
+    setCategoriesAvailable(transactionType === "Income" ? incomeCategories : expenseCategories);
+  }, [categoriesData]);
   // categories that were chosen already.
   const [chosenCategories, setChosenCategories] = useState<string[]>(hasInfo ? hasInfo.chosenCategories : []);
   // cancel prompt (transaction creation).
   const [showCancelPrompt, setShowCancelPrompt] = useState<boolean>(false);
   // alert holder that displays ... is required field alert.
   const [showRequiredAlert, setShowRequiredAlert] = useState<boolean>(false);
+
 
   const clearValues = () => clearFormStringValues(setTitle, setDescription, setDate, setAmount, setPayee);
   const clearAlerts = () => {
@@ -273,24 +287,24 @@ const AddTransactionPrompt = (props: {
   return (
     <>
       <div className={`${props.classname === "show" && "prompt"}`}>
-        <div className={`prompt-box ${props.classname} w-100 d-flex flex-column align-items-center gap-5 p-4`}>
+        <div className={`prompt-box ${props.classname} w-100 d-flex flex-column align-items-center gap-5 p-2 p-lg-4`}>
           <div className="d-flex align-items-center justify-content-between w-100">
             <h2 className="fs-4">{hasInfo ? "Edit" : "Create"} Transaction</h2>
             <div onClick={handleCancel} role="button">
               <HiXMark style={{width: 30, height: 30}}/>
             </div>
           </div>
-          <form style={{overflow: "visible"}} className="w-100 d-flex flex-column align-items-center gap-4">
+          <form className="w-100 d-flex flex-column align-items-center gap-4">
             <div className="w-100 d-flex align-items-center mb-2">
               <button 
-                onClick={() => handleTransactionTypeChange("Expenses", setTransactionType, () => {setCategoriesAvailable(defExpenseCategories); setChosenCategories([])})} 
+                onClick={(e) => handleTransactionTypeChange(e, "Expenses", setTransactionType, () => {setCategoriesAvailable(expenseCategories); setChosenCategories([])})} 
                 style={{border: "1px solid var(--border)"}} 
                 className={`transaction-type-button ${transactionType === "Expenses" && "active"} rounded bg-transparent py-1 pe-2`} value="Expenses"
               >
                 <IndicatorButton classname="bg-transparent" type="Expenses" />
               </button>
               <button 
-                onClick={() => handleTransactionTypeChange("Income", setTransactionType, () => {setCategoriesAvailable(defIncomeCategories); setChosenCategories([])})}
+                onClick={(e) => handleTransactionTypeChange(e, "Income", setTransactionType, () => {setCategoriesAvailable(incomeCategories); setChosenCategories([])})}
                 style={{border: "1px solid var(--border)", left: -2}} 
                 className={`transaction-type-button ${transactionType === "Income" && "active"} position-relative border-start-0 rounded-end bg-transparent py-1 pe-2`} value="Income"
               >
@@ -299,7 +313,8 @@ const AddTransactionPrompt = (props: {
             </div>
             <div className="w-100 d-flex flex-column align-items-center">
               <FormInput alert={titleAlert.error || (showRequiredAlert && !title)} classname="w-100 input" required title="Title">
-                <input 
+                <input
+                  ref={titleRef}
                   value={title}
                   onBlur={() => {if(titleRef.current) titleRef.current.scrollLeft = 0}}
                   onChange={(e) => handleTitleChange(e, setTitle, setTitleAlert)} 
@@ -313,19 +328,30 @@ const AddTransactionPrompt = (props: {
             </div>
             <div className="w-100 d-flex flex-column align-items-center justify-content-center ">
               <FormInput alert={showRequiredAlert && !chosenCategories.length} classname="w-100 input position-relative d-flex flex-column align-items-center justify-content-center" required title="Category">
-                <select required value={""} onChange={(e) => handleCategorySelect(e.target.value, categoriesAvailable, setCategoriesAvailable, chosenCategories, setChosenCategories)} className="px-3">
+                <select 
+                  required 
+                  value={""} 
+                  onChange={(e) => {
+                    const val = e.target.value
+                    val !== "Add Category" ? handleCategorySelect(val, categoriesAvailable, setCategoriesAvailable, chosenCategories, setChosenCategories)
+                    : setShowAddCategoryPrompt(true);
+                  }} 
+                  className="px-3"
+                >
                   <option className="d-none" disabled value={""} />
                   {categoriesAvailable.map((category: string, key: number) => {
                     return <option
+                      style={{textOverflow: "ellipsis"}}
                       value={category}
-                      key={key}>{category}</option>
+                      key={key}>{getCategoryNameById(categoriesData, category) || category}</option>
                   })}
+                  <option value={"Add Category"}>Add Category</option>
                 </select>
                 <div style={{top: -25}} className="mx-3 align-self-start position-relative d-flex align-items-center flex-wrap gap-2">
                   {
                     chosenCategories.length ? chosenCategories.map((category: string, key: number) => {
                       return <div style={{border: "1px solid var(--border)", backgroundColor: "var(--primary)"}} className="rounded p-2 d-flex align-items-center gap-1 fw-bold" key={key}>
-                        <span style={{color: "var(--text)"}}>{category}</span>
+                        <span style={{color: "var(--text)"}}>{getCategoryNameById(categoriesData, category) || category}</span>
                         <div role="button" onClick={() => handleCategoryUnselect(category, categoriesAvailable, setCategoriesAvailable, chosenCategories, setChosenCategories)}>
                           <HiXMark  />
                         </div>

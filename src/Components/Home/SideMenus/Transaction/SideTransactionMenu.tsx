@@ -10,7 +10,7 @@ import { GoArrowDown } from "react-icons/go";
 import AddTransactionPrompt from "../../../../Containers/Home/AddTransactionPrompt/AddTransactionPrompt";
 import { deleteTransactionApi, editAccountApi } from "../../../../apiURLs";
 import ActionPrompt from "../../ActionPrompt/ActionPrompt";
-import { removeThousandsCommas, updateAccountsData, updateTransactionsData } from "../../../../Functions";
+import { getCategoryNameById, removeThousandsCommas, updateAccountsData, updateTransactionsData } from "../../../../Functions";
 import { AuthContext } from "../../../../Contexts/AuthContextProvider";
 import { GeneralContext } from "../../../../Contexts/GeneralContextProvider";
 
@@ -23,13 +23,13 @@ const SideTransactionMenu = (props: {
   accountData: AccountData | false,
   classname?: string
 }) => {
-  const iconSizes = {width: 30, height: 30};
+  const iconSizes = {width: 25, height: 25};
   const info = props.transactionInfo;
   const acc = props.accountData as AccountData;
   const type = info && info.transactionType as "Income" | "Expenses" ;
   const currency = (props.accountData as AccountData).currency;
 
-  const {transactionsData, setTransactionsData, accountsData, setAccountsData} = useContext(AuthContext);
+  const {transactionsData, setTransactionsData, accountsData, setAccountsData, categoriesData} = useContext(AuthContext);
   const {setShowToastMessage} = useContext(GeneralContext);
 
   const [showEditPrompt, setShowEditPrompt] = useState<boolean>(false);
@@ -99,9 +99,9 @@ const SideTransactionMenu = (props: {
   return (
     <>
       <div className={`${props.classname === "show" ? "prompt" : ""}`}>
-        <div style={{overflowY: "auto"}} className={`prompt-box ${props.classname} h-100 p-2 p-sm-3 p-lg-5`}>
+        <div style={{overflowY: "auto"}} className={`prompt-box ${props.classname} w-100 h-100 p-2 p-sm-3 p-lg-4`}>
           <div className="w-100 d-flex justify-content-between align-items-center gap-2">
-            <h3 className="fs-2">Transaction Information</h3>
+            <h3 className="fs-4">Transaction Information</h3>
             <div className="d-flex gap-2">
               <div onClick={() => setShowEditPrompt(true)} role="button">
                 <MdOutlineModeEdit style={iconSizes} />
@@ -125,7 +125,7 @@ const SideTransactionMenu = (props: {
                 <div className="d-flex align-items-center flex-wrap gap-4">
                   {info.chosenCategories.map((category: string, key: number) => {
                     return <div style={{maxWidth: 160, border: "1px solid var(--border)"}} className="py-4 w-100 rounded d-flex justify-content-center align-items-center" key={key}>
-                      <span className="fw-bold">{category}</span>
+                      <span className="fw-bold text-center text-break px-2">{getCategoryNameById(categoriesData, category) || category}</span>
                     </div>
                   })}
                 </div>
@@ -152,7 +152,7 @@ const SideTransactionMenu = (props: {
           )}
         </div>
       </div>
-      <AddTransactionPrompt classname={`${showEditPrompt && "show"}`} callback={() => props.setShowSideTransactionMenu({show: false, data: props.transactionInfo})} transactionData={info ? info : undefined} accountData={props.accountData as AccountData} setShowAddTransactionPrompt={setShowEditPrompt} />
+      <AddTransactionPrompt classname={`${showEditPrompt && "show"}`} transactionData={info ? info : undefined} accountData={props.accountData as AccountData} setShowAddTransactionPrompt={setShowEditPrompt} />
       {showDeletePrompt && 
         <ActionPrompt
           text="Are you sure you want to delete transaction?"

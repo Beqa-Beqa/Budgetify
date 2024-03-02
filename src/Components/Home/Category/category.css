@@ -1,0 +1,34 @@
+.category {
+  color: var(--text);
+}
+
+.category.expense-type {
+  border: 1px solid var(--danger);
+}
+
+.category.income-type {
+  border: 1px solid var(--success);
+}
+
+.category-tooltip {
+  background-color: var(--text);
+  color: var(--primary);
+  font-size: 12px;
+  opacity: 0;
+  pointer-events: none;
+  transition-duration: var(--base-transition-duration);
+  max-width: 100%;
+  word-wrap: break-word;
+  word-break: break-all;
+  z-index: 100;
+}
+
+.category-title {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.category-title:hover ~ .category-tooltip {
+  opacity: 1;
+}

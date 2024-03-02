@@ -43,6 +43,13 @@ declare interface TransactionData {
   description?: string
 }
 
+declare interface CategoryData {
+  _id: string,
+  owner: string,
+  transactionType: string,
+  title: string
+}
+
 declare interface InputBasicAlert {
   error: boolean,
   text: string

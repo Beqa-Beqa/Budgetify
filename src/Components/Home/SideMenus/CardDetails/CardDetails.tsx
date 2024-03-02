@@ -2,14 +2,14 @@ import { HiXMark } from "react-icons/hi2";
 import "./cardDetails.css";
 import { MdOutlineModeEdit } from "react-icons/md";
 import { FaRegTrashCan } from "react-icons/fa6";
-import AccountInfoField from "../AccountInfoFIeld/AccountInfoFIeld";
+import AccountInfoField from "../../AccountInfoFIeld/AccountInfoFIeld";
 import { useContext, useState } from "react";
-import { AuthContext } from "../../../Contexts/AuthContextProvider";
-import AddAccountPrompt from "../../../Containers/Home/AddAccountPrompt/AddAccountPrompt";
-import { divideByThousands, makeFirstCapitals, removeThousandsCommas, updateAccountsData } from "../../../Functions";
-import ActionPrompt from "../ActionPrompt/ActionPrompt";
-import { GeneralContext } from "../../../Contexts/GeneralContextProvider";
-import { deleteAccountApi } from "../../../apiURLs";
+import { AuthContext } from "../../../../Contexts/AuthContextProvider";
+import AddAccountPrompt from "../../../../Containers/Home/AddAccountPrompt/AddAccountPrompt";
+import { divideByThousands, makeFirstCapitals, removeThousandsCommas, updateAccountsData } from "../../../../Functions";
+import ActionPrompt from "../../ActionPrompt/ActionPrompt";
+import { GeneralContext } from "../../../../Contexts/GeneralContextProvider";
+import { deleteAccountApi } from "../../../../apiURLs";
 
 const CardDetails = (props: {
   setShowDetails: React.Dispatch<React.SetStateAction<boolean>>,

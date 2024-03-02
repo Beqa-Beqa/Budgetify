@@ -7,11 +7,19 @@ export const GeneralContext = createContext<{
   setShowToastMessage: React.Dispatch<React.SetStateAction<{
     show: boolean;
     text: string;
-  }>>
+  }>>,
+  navigateTo: "" | "Categories" | "Subscriptions" | "Obligatory" | "Statistic" | "Admin",
+  setNavigateTo: React.Dispatch<React.SetStateAction<"" | "Categories" | "Subscriptions" | "Obligatory" | "Statistic" | "Admin">>,
+  showAddCategoryPrompt: boolean,
+  setShowAddCategoryPrompt: React.Dispatch<React.SetStateAction<boolean>>
 }>({
   width: 0,
   showToastMessage: {show: false, text: ""},
-  setShowToastMessage: () => {}
+  setShowToastMessage: () => {},
+  navigateTo: "",
+  setNavigateTo: () => {},
+  showAddCategoryPrompt: false,
+  setShowAddCategoryPrompt: () => {}
 });
 
 // General context provider.
@@ -20,6 +28,10 @@ const GeneralContextProvider = ({children}: {children: React.ReactNode}) => {
   const [width, setWidth] = useState<number>(window.innerWidth);
   // state for showing toast message.
   const [showToastMessage, setShowToastMessage] = useState<{show: boolean, text: string}>({show: false, text: ""});
+  // state for navigation bar.
+  const [navigateTo, setNavigateTo] = useState<"" | "Categories" | "Subscriptions" | "Obligatory" | "Statistic" | "Admin">("");
+  // category state
+  const [showAddCategoryPrompt, setShowAddCategoryPrompt] = useState<boolean>(false);
 
   useEffect(() => {
     // resize handler.
@@ -40,7 +52,7 @@ const GeneralContextProvider = ({children}: {children: React.ReactNode}) => {
     return () => timeout ? clearTimeout(timeout) : undefined;
   }, [showToastMessage]);
 
-  return <GeneralContext.Provider value={{width, showToastMessage, setShowToastMessage}}>
+  return <GeneralContext.Provider value={{width, showToastMessage, setShowToastMessage, navigateTo, setNavigateTo, showAddCategoryPrompt, setShowAddCategoryPrompt}}>
     {children}
   </GeneralContext.Provider>
 }

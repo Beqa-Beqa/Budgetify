@@ -61,13 +61,11 @@ html {
 :root {
 	--primary: #FFF;
 	--component-background: #F9F9F9;
-	--component-background: #F9F9F9;
 	--secondary: #FFFFFFCC;
 	--button: #B9E2E6;
 	--header: #000000;
 	--placeholder: #474747;
 	--danger: #EE3F19;
-	--success: #21C206;
 	--success: #21C206;
 	--text: #373737;
 	--border: #333333;
@@ -96,11 +94,33 @@ html {
 	height: 100%;
 	max-width: 590px;
 	overflow-y: auto;
+	scrollbar-width: thin;
 }
 
 .prompt-box.show {
 	z-index: 300;
   right: 0;
+}
+
+.prompt-box .prompt-box-tooltip {
+  background-color: var(--text);
+  color: var(--primary);
+  font-size: 12px;
+  opacity: 0;
+  pointer-events: none;
+  transition-duration: var(--base-transition-duration);
+  max-width: 100%;
+  word-wrap: break-word;
+  word-break: break-all;
+  z-index: 100;
+}
+
+.prompt-box .prompt-box-input-container {
+	position: relative;
+}
+
+.prompt-box .prompt-box-input-container:hover .prompt-box-tooltip {
+  opacity: 1;
 }
 
 .action-button {

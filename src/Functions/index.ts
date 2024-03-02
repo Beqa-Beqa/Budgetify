@@ -5,6 +5,11 @@ export const accountExistsByTitle = (accArr: AccountData[], title: string) => {
   return foundAcc;
 }
 
+export const categoryExistsByTitle = (categArr: CategoryData[], title: string, transactionType: string) => {
+  const foundCateg = categArr.find(categ => categ.title.toLocaleLowerCase() === title.toLocaleLowerCase() && categ.transactionType === transactionType);
+  return foundCateg
+}
+
 export const makeFirstCapitals = (str: string) => {
   const returnWords = [];
   const splitStr = str.trim().split(" ");
@@ -75,8 +80,39 @@ export const updateTransactionsData = (currentData: TransactionData[], setData: 
   setData(newTransactionsData);
 }
 
+// update categories data in cache and update state
+export const updateCategoriesData = (currentData: CategoryData[], setData: React.Dispatch<React.SetStateAction<[] | CategoryData[]>>, data: {new: CategoryData, old: CategoryData | undefined}, type: "Insert" | "Update" | "Delete") => {
+  const newCategoriesData = [...currentData];
+  if(type === "Insert") {
+    newCategoriesData.push(data.new);
+  } else if (type === "Update") {
+    newCategoriesData[newCategoriesData.indexOf(data.old!)] = data.new;
+  } else if (type === "Delete") {
+    newCategoriesData.splice(newCategoriesData.indexOf(data.new), 1);
+  }
+
+  window.sessionStorage.setItem("Budgetify-user-categories-data", JSON.stringify(newCategoriesData));
+  setData(newCategoriesData);
+}
+
 export const clearFormStringValues = (...valueSetters: React.SetStateAction<any>) => {
   for(let setValue of valueSetters) {
     setValue("");
   }
+}
+
+// sorts given array of object by specified key value (must be a string)
+export const sortArrOfObjectByKey = (key: string, srcObjArr: any[]) => {
+  const newArr: any[] = [];
+  const valuesArr: string[] = [];
+  srcObjArr.forEach((obj: any) => valuesArr.push(obj[key].toUpperCase()));
+  for(let value of valuesArr.sort()) {
+    const elem = srcObjArr.find((obj: any) => obj[key].toUpperCase() === value && newArr.indexOf(obj) === -1);
+    newArr.push(elem);
+  }
+  return newArr;
+}
+
+export const getCategoryNameById = (categoriesData: CategoryData[], id: string) => {
+  return categoriesData.find((data: CategoryData) => data._id === id)?.title;
 }

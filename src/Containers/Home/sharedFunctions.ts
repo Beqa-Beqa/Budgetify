@@ -7,7 +7,10 @@ export const handleTitleChange = (
   setAlert: React.Dispatch<React.SetStateAction<{
     error: boolean;
     text: string;
-  }>>
+  }>>,
+  options?: {
+    customAlert: string
+  }
 ) => {
   // Prevent default change actions which may cause bugs.
   e.preventDefault();
@@ -23,7 +26,8 @@ export const handleTitleChange = (
   setAlert({
     error: maxCharErr || charErr,
     text: maxCharErr ? "Maximum number of characters reached." :
-          charErr ? "Invalid Title entered. Please check it." : ""
+          charErr ?
+            options ? options.customAlert : "Invalid Title entered. Please check it." : ""
   });
 }
 
@@ -71,7 +75,8 @@ export const handleAmountChange = (event: React.ChangeEvent<HTMLInputElement>, s
 }
 
 // transaction onChange handler
-export const handleTransactionTypeChange = (value: string, setType: React.Dispatch<React.SetStateAction<string>>, cb?: () => any) => {
+export const handleTransactionTypeChange = (event: React.MouseEvent<HTMLButtonElement>, value: string, setType: React.Dispatch<React.SetStateAction<string>>, cb?: () => any) => {
+  event.preventDefault();
   setType(value);
   cb && cb();
 }

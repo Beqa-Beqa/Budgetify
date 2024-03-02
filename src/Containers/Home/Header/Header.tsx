@@ -8,6 +8,10 @@ import ActionPrompt from "../../../Components/Home/ActionPrompt/ActionPrompt";
 import SideNavbarMenu from "../../../Components/Home/SideMenus/Navbar/SideNavbarMenu";
  
 const Header = () => {
+  // navigator
+  const {navigateTo, setNavigateTo} = useContext(GeneralContext);
+
+  // current user data
   const {currentUserData, setCurrentUserData} = useContext(AuthContext);
 
   // User data
@@ -34,7 +38,7 @@ const Header = () => {
     <>
       <div className="homepage-header mt-4 mt-xl-0 container-fluid">
         <div className="row justify-content-between align-items-cente position-relative">
-          <h1 className="homepage-mini-logo pb-2 col col-lg-2 col-xl-4 col-xxl-4 fw-bold">Budgetify</h1>
+          <h1 role="button" onClick={() => setNavigateTo("")} className="homepage-mini-logo pb-2 col col-lg-2 col-xl-4 col-xxl-4 fw-bold">Budgetify</h1>
           {width >= 992 &&
             <div className="position-relative col-lg-7 col-xl-6 col-xxl-5 p-0">
               <div className={`toast-message ${showToastMessage.show && "active"} d-flex justify-content-between align-items-center rounded fs-5 py-3 px-5`}>
@@ -43,11 +47,11 @@ const Header = () => {
               </div>
               <nav className="navbar p-0">
                 <ul className="d-flex justify-content-between w-100">
-                  <li>Categories</li>
-                  <li>Subscriptions</li>
-                  <li>Obligatory</li>
-                  <li>Statistic</li>
-                  <li>Admin</li>
+                  <li onClick={() => setNavigateTo("Categories")} className={navigateTo === "Categories" && "selected" || ""}>Categories</li>
+                  <li onClick={() => setNavigateTo("Subscriptions")} className={navigateTo === "Subscriptions" && "selected" || ""}>Subscriptions</li>
+                  <li onClick={() => setNavigateTo("Obligatory")} className={navigateTo === "Obligatory" && "selected" || ""}>Obligatory</li>
+                  <li onClick={() => setNavigateTo("Statistic")} className={navigateTo === "Statistic" && "selected" || ""}>Statistic</li>
+                  <li onClick={() => setNavigateTo("Admin")} className={navigateTo === "Admin" && "selected" || ""}>Admin</li>
                 </ul>
               </nav>
             </div>

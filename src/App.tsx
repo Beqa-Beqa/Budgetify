@@ -5,7 +5,7 @@ import { AuthContext } from "./Contexts/AuthContextProvider";
 
 function App() {
   // Current user data that will display user related info.
-  const {currentUserData, setCurrentUserData} = useContext(AuthContext);
+  const {currentUserData, setCurrentUserData, setAccountsData, setCategoriesData, setTransactionsData} = useContext(AuthContext);
 
   // Useffect that reruns after currentuser changes.
   useEffect(() => {
@@ -13,7 +13,13 @@ function App() {
     // After 1 hour, data will be cleared from sessionStorage as well from currentUserData state.
     const timeOut = Object.keys(currentUserData).length && setTimeout(() => {
       setCurrentUserData({});
+      setAccountsData([]);
+      setCategoriesData([]);
+      setTransactionsData([]);
       window.sessionStorage.removeItem("Budgetify-user-data");
+      window.sessionStorage.removeItem("Budgetify-user-accounts-data");
+      window.sessionStorage.removeItem("Budgetify-user-transactions-data");
+      window.sessionStorage.removeItem("Budgetify-user-categories-data");
     }, 1000 * 60 * 60);
 
     // Clear timeout on component unmount.

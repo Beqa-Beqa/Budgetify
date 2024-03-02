@@ -1,4 +1,4 @@
-import CardDetails from "../CardDetails/CardDetails";
+import CardDetails from "../SideMenus/CardDetails/CardDetails";
 import "./card.css";
 import { useState } from "react";
 import { makeFirstCapitals } from "../../../Functions";
