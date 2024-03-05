@@ -32,7 +32,13 @@ const AddCategoryPrompt = (props: {
   // button disable state.
   const [isButtonDisabled, setIsButtonDisabled] = useState<boolean>(false);
   // exists already alert.
-  const existsAlready = !hasInfo && categoryExistsByTitle(categoriesData, title, transactionType) ? true : false;
+  const existsAlready = hasInfo ? 
+    hasInfo.title.toLocaleLowerCase() !== title.toLocaleLowerCase() ?
+      categoryExistsByTitle(categoriesData, title, transactionType) ? true : false
+    :
+      false
+  : 
+    categoryExistsByTitle(categoriesData, title, transactionType) ? true : false;
 
   // whenever info changes update fields
   useEffect(() => {
@@ -44,9 +50,14 @@ const AddCategoryPrompt = (props: {
 
   // detect if button should be disabled or not on title change.
   useEffect(() => {
-    !existsAlready && title ? setIsButtonDisabled(false) : setIsButtonDisabled(true);
-    hasInfo && hasInfo.title.toLocaleLowerCase() === title.toLocaleLowerCase() ? setIsButtonDisabled(true) : setIsButtonDisabled(false);
-  }, [title]);
+    titleAlert.error || 
+    showRequiredAlert ||
+    existsAlready ||
+    (hasInfo && hasInfo.title === title) ? 
+      setIsButtonDisabled(true) 
+    : 
+      setIsButtonDisabled(false);
+  }, [title, transactionType]);
 
   const clearValues = () => clearFormStringValues(setTitle);
   const clearAlerts = () => {
@@ -104,8 +115,10 @@ const AddCategoryPrompt = (props: {
 
   const proceedSave = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
-    if(isCategoryInUse) setShowSavePrompt(true);
-    else handleSave();
+    if(!existsAlready && !titleAlert.error){
+      if(isCategoryInUse) setShowSavePrompt(true);
+      else handleSave();
+    }
   }
 
   return (

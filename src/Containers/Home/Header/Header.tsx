@@ -38,7 +38,9 @@ const Header = () => {
     <>
       <div className="homepage-header mt-4 mt-xl-0 container-fluid">
         <div className="row justify-content-between align-items-cente position-relative">
-          <h1 role="button" onClick={() => setNavigateTo("")} className="homepage-mini-logo pb-2 col col-lg-2 col-xl-4 col-xxl-4 fw-bold">Budgetify</h1>
+          <div className="col col-lg-2 col-xl-4 col-xxl-4 pb-2">
+            <h1 role="button" onClick={() => setNavigateTo("")} className="homepage-mini-logo fw-bold">Budgetify</h1>
+          </div>
           {width >= 992 &&
             <div className="position-relative col-lg-7 col-xl-6 col-xxl-5 p-0">
               <div className={`toast-message ${showToastMessage.show && "active"} d-flex justify-content-between align-items-center rounded fs-5 py-3 px-5`}>

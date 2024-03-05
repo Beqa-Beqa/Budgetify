@@ -7,7 +7,7 @@ export const accountExistsByTitle = (accArr: AccountData[], title: string) => {
 
 export const categoryExistsByTitle = (categArr: CategoryData[], title: string, transactionType: string) => {
   const foundCateg = categArr.find(categ => categ.title.toLocaleLowerCase() === title.toLocaleLowerCase() && categ.transactionType === transactionType);
-  return foundCateg
+  return foundCateg;
 }
 
 export const makeFirstCapitals = (str: string) => {

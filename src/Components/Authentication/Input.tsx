@@ -3,8 +3,8 @@ import { Eye } from "../../Assets/Authentication/Svgs";
 import { useState } from "react";
 
 const Input = (props: {
-  value: any, 
-  setValue: React.Dispatch<React.SetStateAction<any>>,
+  value: string, 
+  setValue: React.Dispatch<React.SetStateAction<string>>,
   type: string,
   name: string,
   setFormAlert: React.Dispatch<React.SetStateAction<{
