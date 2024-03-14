@@ -7,11 +7,13 @@ import { handleDescriptionChange, handleTitleChange, handleAmountChange } from "
 import { clearFormStringValues, divideByThousands, getGlobalTimeUnix, removeThousandsCommas, updateTransactionsData, updateAccountsData, getCategoryNameById } from "../../../Functions";
 import { HiXMark } from "react-icons/hi2";
 import { AuthContext } from "../../../Contexts/AuthContextProvider";
-import { handleTransactionTypeChange, handleDateChange, handleCategorySelect, handleCategoryUnselect } from "../sharedFunctions";
+import { handleTransactionTypeChange, handleDateChange, handleCategorySelect, handleCategoryUnselect} from "../sharedFunctions";
 import { createTransactionApi, editAccountApi, editTransactionApi } from "../../../apiURLs";
 import IndicatorButton from "../../../Components/Home/IndicatorButton/IndicatorButton";
 import { GeneralContext } from "../../../Contexts/GeneralContextProvider";
 import { defExpenseCategories, defIncomeCategories } from "../../../Data";
+// import { PdfIcon } from "../../../Assets/Home";
+import {v4 as uuid} from "uuid";
 
 const AddTransactionPrompt = (props: {
   setShowAddTransactionPrompt: React.Dispatch<React.SetStateAction<boolean>>,
@@ -76,26 +78,29 @@ const AddTransactionPrompt = (props: {
   const titleRef = useRef<HTMLInputElement | null>(null);
 
   // transaction type holder state.
-  const [transactionType, setTransactionType] = useState<string>(hasInfo ? hasInfo.transactionType : "Expenses");
+  const [transactionType, setTransactionType] = useState<string>("Expenses");
   // title holder state.
-  const [title, setTitle] = useState<string>(hasInfo ? hasInfo.title : "");
+  const [title, setTitle] = useState<string>("");
   // title alert holder.
   const [titleAlert, setTitleAlert] = useState<InputBasicAlert>({error: false, text: ""});
   // description holder.
-  const [description, setDescription] = useState<string>(hasInfo && hasInfo.description ? hasInfo.description : "");
+  const [description, setDescription] = useState<string>("");
   // description alert holder.
   const [descriptionAlert, setDescriptionAlert] = useState<InputBasicAlert>({error: false, text: ""});
   // amount holder.
-  const [amount, setAmount] = useState<string>(hasInfo ? hasInfo.amount : "");
+  const [amount, setAmount] = useState<string>("");
   // amount alert holder.
   const [amountAlert, setAmountAlert] = useState<InputBasicAlert>({error: false, text: ""});
   // date holder.
-  const [date, setDate] = useState<string>(hasInfo ? hasInfo.date : "");
+  const [date, setDate] = useState<string>("");
   // payee state
-  const [payee, setPayee] = useState<string>(hasInfo ? hasInfo.payee : "");
+  const [payee, setPayee] = useState<string>("");
   // date alert holder.
   const [dateAlert, setDateAlert] = useState<InputBasicAlert>({error: false, text: ""});
-
+  // file holder
+  const [files, setFiles] = useState<TransactionFilesData[]>([]);
+  // files alert
+  const [filesAlert, setFilesAlert] = useState<InputBasicAlert>({error: false, text: ""});
 
   // custom expense categories
   const customExpenseCategories = categoriesData.filter((category: CategoryData) => category.transactionType === "Expenses" && category).map((category: CategoryData) => category._id);
@@ -126,12 +131,18 @@ const AddTransactionPrompt = (props: {
   const [showRequiredAlert, setShowRequiredAlert] = useState<boolean>(false);
 
 
-  const clearValues = () => clearFormStringValues(setTitle, setDescription, setDate, setAmount, setPayee);
+  const clearValues = () => {
+    clearFormStringValues(setTitle, setDescription, setDate, setAmount, setPayee);
+    setChosenCategories([]);
+    setCategoriesAvailable(transactionType === "Income" ? incomeCategories : expenseCategories);
+    setFiles([]);
+  };
   const clearAlerts = () => {
     setDateAlert({error: false, text: ""});
     setTitleAlert({error: false, text: ""});
     setAmountAlert({error: false, text: ""});
     setDescriptionAlert({error: false, text: ""});
+    setFilesAlert({error: false, text: ""});
     setShowRequiredAlert(false);
   }
 
@@ -156,7 +167,7 @@ const AddTransactionPrompt = (props: {
     // if it's create prompt and mandatroy fields are filled, enable button.
     // useffect runs after any of the field value change.
     hasInfo ? 
-      (hasInfo.amount !== amount || JSON.stringify(hasInfo.chosenCategories) !== JSON.stringify(chosenCategories) || hasInfo.date !== date
+      (hasInfo.files !== files || hasInfo.amount !== amount || JSON.stringify(hasInfo.chosenCategories) !== JSON.stringify(chosenCategories) || hasInfo.date !== date
       || hasInfo.description !== description || hasInfo.title !== title || hasInfo.transactionType !== transactionType) 
         ?
           setIsButtonDisabled(false) 
@@ -165,40 +176,40 @@ const AddTransactionPrompt = (props: {
       :
         mandatoriesFilled && setIsButtonDisabled(false);
 
-  }, [title, transactionType, description, date, amount, chosenCategories]);
+  }, [title, transactionType, description, date, amount, chosenCategories, files]);
 
   // Save transaction
   const handleSave = async (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     event.preventDefault();
     if(mandatoriesFilled) {
       // if mandatories are filled
-      if(!titleAlert.error && !descriptionAlert.error && !amountAlert.error && !dateAlert.error) {
+      if(!titleAlert.error && !descriptionAlert.error && !amountAlert.error && !dateAlert.error && !filesAlert.error) {
         // and no errors are present.
         try {
+          // custom unique id
+          const uid = uuid();
           // for an edit prompt, build body for /edit-transaction endpoint
           // expected format from server: {transactionId: string, belongsToId: string, fields: {fields to update}}
           // for create prompt, build body for creating transaction.
           // expected format: {transactionData: {all the fields}}
-          console.log(hasInfo)
           const transactionBody = hasInfo ? 
             JSON.stringify({
-              transactionId: hasInfo._id,
+              transactionId: hasInfo.id,
               belongsToId: hasInfo.belongsToAccountWithId,
               fields: {transactionType, title, description, amount, date, chosenCategories, payee}
             })
           :
             JSON.stringify({
-              transactionData: {
-                belongsToAccountWithId: props.accountData._id,
-                transactionType, 
-                title, 
-                description, 
-                amount, 
-                date, 
-                chosenCategories,
-                payee
-              }
-            })
+              id: uid,
+              belongsToAccountWithId: props.accountData._id,
+              transactionType, 
+              title, 
+              description, 
+              amount, 
+              date, 
+              chosenCategories,
+              payee
+            });
 
           // make request.
           const transactionResult = await fetch(hasInfo ? editTransactionApi : createTransactionApi, {
@@ -294,7 +305,7 @@ const AddTransactionPrompt = (props: {
               <HiXMark style={{width: 30, height: 30}}/>
             </div>
           </div>
-          <form className="w-100 d-flex flex-column align-items-center gap-4">
+          <form className="w-100 d-flex flex-column align-items-center gap-4" encType="multipart/form-data">
             <div className="w-100 d-flex align-items-center mb-2">
               <button 
                 onClick={(e) => handleTransactionTypeChange(e, "Expenses", setTransactionType, () => {setCategoriesAvailable(expenseCategories); setChosenCategories([])})} 
@@ -407,11 +418,27 @@ const AddTransactionPrompt = (props: {
               </FormInput>
               {descriptionAlert.error && <span style={{color: "var(--danger)"}} className="w-100 mt-2">{descriptionAlert.text}</span>}
             </div>
-            <div className="w-100 d-flex flex-column align-items-center">
-              <FormInput classname="w-100 input" title="Attachment">
-                <input type="file" className="px-3 pt-3" />
-              </FormInput>
-            </div>
+            {/* <div className="w-100 d-flex gap-3 flex-wrap align-items-start justify-content-start">
+              {files.map((file: TransactionFilesData, key: number) => {
+                return <div className="d-flex position-relative flex-column w-100" key={key} style={{maxWidth: 90}}>
+                  <div onClick={() => handleFileRemove(file, files, setFiles, setFilesAlert)} role="button" style={{right: 0}} className="position-absolute rounded-start rounded-bottom bg-light">
+                    <HiXMark style={{width: 20, height: 20}} />
+                  </div>
+                  <img 
+                    style={{minHeight: 80}}
+                    src={file.type === "application/pdf" ? PdfIcon : URL.createObjectURL(file as unknown as File)} 
+                    className="w-100 h-100 rounded object-fit-cover"
+                    alt="uploaded file image" 
+                  />
+                  <span style={{fontSize: 13}} className="text-break text-center mt-2">{file.name}</span>
+                </div>
+              })}
+              <label role="button" style={{border: "1px dashed var(--border)", maxWidth: 90, height: 80}} className="d-flex w-100 align-items-center justify-content-center rounded" htmlFor="file-field-input">
+                <span className="fs-1 fw-bold">+</span>
+              </label>
+              <input name="file-input" onChange={(e) => handleFilesChange(e, files, setFiles, setFilesAlert)} hidden id="file-field-input" type="file" accept="image/*, application/pdf" />
+              {filesAlert.error && <span style={{color: "var(--danger)"}} className="w-100 mt-2">{filesAlert.text}</span>}
+            </div> */}
           </form>
           <div className="w-100 mt-auto d-flex justify-content-end gap-3">
             <button onClick={(e) => {e.preventDefault(); setShowCancelPrompt(true);}} className="action-button negative">Cancel</button>

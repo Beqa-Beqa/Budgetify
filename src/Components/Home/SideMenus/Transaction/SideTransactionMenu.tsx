@@ -20,7 +20,7 @@ const SideTransactionMenu = (props: {
     data: TransactionData | null;
   }>>,
   transactionInfo: TransactionData | null,
-  accountData: AccountData | false,
+  accountData: AccountData,
   classname?: string
 }) => {
   const iconSizes = {width: 25, height: 25};
@@ -40,7 +40,7 @@ const SideTransactionMenu = (props: {
       // if we have transaction info present
       // body to send for transaction delete request
       const transactionBody = JSON.stringify({
-        transactionId: info._id, 
+        transactionId: info.id, 
         belongsToId: info.belongsToAccountWithId
       });
 

@@ -2,7 +2,7 @@ import "./indicatorButton.css";
 import { GoArrowDown, GoArrowUp } from "react-icons/go";
 
 const IndicatorButton = (props: {
-  type: "Income" | "Expenses" | "Add Transaction" | "Add Category",
+  type: "Income" | "Expenses" | "Add Transaction" | "Add Category" | "Add Subscription",
   classname?: string, 
   onclick?: () => void,
   role?: string
@@ -10,11 +10,11 @@ const IndicatorButton = (props: {
   return (
     <div
       onClick={props.onclick}
-      role={props.type === "Add Transaction" || props.type === "Add Category" ? "button" : props.role ? props.role : ""} 
-      className={`indicator-button ${props.type === "Add Transaction" || props.type === "Add Category" ? "transaction" : ""} ${props.classname} rounded d-flex align-items-center gap-2`}
+      role={props.type === "Add Transaction" || props.type === "Add Category" || props.type === "Add Subscription" ? "button" : props.role ? props.role : ""} 
+      className={`indicator-button ${props.type === "Add Transaction" || props.type === "Add Category" || props.type === "Add Subscription" ? "indicator-button-clickable" : ""} ${props.classname} rounded d-flex align-items-center gap-2`}
     >
-      {props.type === "Add Transaction" || props.type === "Add Category" ? 
-        <div className="transaction-icon">+</div>
+      {props.type === "Add Transaction" || props.type === "Add Category" || props.type === "Add Subscription" ? 
+        <div className="indicator-button-clickable-icon">+</div>
       :
         <div
           style={{width: 35, height: 35}}

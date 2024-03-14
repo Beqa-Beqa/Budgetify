@@ -6,7 +6,7 @@ import { AuthContext } from "../../Contexts/AuthContextProvider";
 import { loginApi } from "../../apiURLs";
 
 const Authentication = () => {
-  const {setCurrentUserData, setAccountsData, setTransactionsData, setCategoriesData} = useContext(AuthContext);
+  const {setCurrentUserData, setAccountsData, setTransactionsData, setCategoriesData, setSubscriptionsData} = useContext(AuthContext);
 
   // Email value holder state.
   const [email, setEmail] = useState<string>("");
@@ -41,6 +41,7 @@ const Authentication = () => {
       const accountsData: AccountData[] = responseData.accountsData;
       const transactionsData: TransactionData[] = responseData.transactionsData;
       const categoriesData: CategoryData[] = responseData.categoriesData;
+      const subscriptionsData: SubscriptionData[] = responseData.subscriptionsData;
 
       // If response data res array is empty then show toast message and return.
       if(!Object.keys(userData).length) {
@@ -53,12 +54,12 @@ const Authentication = () => {
       window.sessionStorage.setItem("Budgetify-user-accounts-data", JSON.stringify(accountsData));
       window.sessionStorage.setItem("Budgetify-user-transactions-data", JSON.stringify(transactionsData));
       window.sessionStorage.setItem("Budgetify-user-categories-data", JSON.stringify(categoriesData));
+      window.sessionStorage.setItem("Budgetify-user-subscriptions-data", JSON.stringify(subscriptionsData));
       setCurrentUserData(userData);
       setAccountsData(accountsData);
       setTransactionsData(transactionsData);
       setCategoriesData(categoriesData);
-
-      console.log(categoriesData);
+      setSubscriptionsData(subscriptionsData);
     } catch (err) {
       setShowToast(true);
     }

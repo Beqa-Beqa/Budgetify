@@ -8,15 +8,15 @@ export const GeneralContext = createContext<{
     show: boolean;
     text: string;
   }>>,
-  navigateTo: "" | "Categories" | "Subscriptions" | "Obligatory" | "Statistic" | "Admin",
-  setNavigateTo: React.Dispatch<React.SetStateAction<"" | "Categories" | "Subscriptions" | "Obligatory" | "Statistic" | "Admin">>,
+  navigateTo: "none" | "Categories" | "Subscriptions" | "Obligatory" | "Statistic" | "Admin",
+  setNavigateTo: React.Dispatch<React.SetStateAction<"none" | "Categories" | "Subscriptions" | "Obligatory" | "Statistic" | "Admin">>,
   showAddCategoryPrompt: boolean,
   setShowAddCategoryPrompt: React.Dispatch<React.SetStateAction<boolean>>
 }>({
   width: 0,
   showToastMessage: {show: false, text: ""},
   setShowToastMessage: () => {},
-  navigateTo: "",
+  navigateTo: "none",
   setNavigateTo: () => {},
   showAddCategoryPrompt: false,
   setShowAddCategoryPrompt: () => {}
@@ -29,7 +29,7 @@ const GeneralContextProvider = ({children}: {children: React.ReactNode}) => {
   // state for showing toast message.
   const [showToastMessage, setShowToastMessage] = useState<{show: boolean, text: string}>({show: false, text: ""});
   // state for navigation bar.
-  const [navigateTo, setNavigateTo] = useState<"" | "Categories" | "Subscriptions" | "Obligatory" | "Statistic" | "Admin">("");
+  const [navigateTo, setNavigateTo] = useState<"none" | "Categories" | "Subscriptions" | "Obligatory" | "Statistic" | "Admin">("none");
   // category state
   const [showAddCategoryPrompt, setShowAddCategoryPrompt] = useState<boolean>(false);
 

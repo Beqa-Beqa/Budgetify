@@ -4,12 +4,14 @@ import { createContext, useState } from "react";
 export const AuthContext = createContext<{
   currentUserData: CurrentUserData | {},
   setCurrentUserData: React.Dispatch<React.SetStateAction<CurrentUserData | {}>>,
-  accountsData: [] | AccountData[],
-  setAccountsData: React.Dispatch<React.SetStateAction<[] | AccountData[]>>,
-  transactionsData: [] | TransactionData[],
-  setTransactionsData: React.Dispatch<React.SetStateAction<[] | TransactionData[]>>,
-  categoriesData: [] | CategoryData[],
-  setCategoriesData: React.Dispatch<React.SetStateAction<[] | CategoryData[]>>
+  accountsData: AccountData[],
+  setAccountsData: React.Dispatch<React.SetStateAction<AccountData[]>>,
+  transactionsData: TransactionData[],
+  setTransactionsData: React.Dispatch<React.SetStateAction<TransactionData[]>>,
+  categoriesData: CategoryData[],
+  setCategoriesData: React.Dispatch<React.SetStateAction<CategoryData[]>>
+  subscriptionsData: SubscriptionData[],
+  setSubscriptionsData: React.Dispatch<React.SetStateAction<SubscriptionData[]>>
 }>({
   currentUserData: {},
   setCurrentUserData: () => {},
@@ -18,20 +20,38 @@ export const AuthContext = createContext<{
   transactionsData: [],
   setTransactionsData: () => {},
   categoriesData: [],
-  setCategoriesData: () => {}
+  setCategoriesData: () => {},
+  subscriptionsData: [],
+  setSubscriptionsData: () => {}
 });
 
 const AuthContextProvider = (props: {children: React.ReactNode}) => {
   const [currentUserData, setCurrentUserData] = useState<CurrentUserData | {}>(JSON.parse(window.sessionStorage.getItem("Budgetify-user-data") || "{}"));
-  const [accountsData, setAccountsData] = useState<AccountData[] | []>(JSON.parse(window.sessionStorage.getItem("Budgetify-user-accounts-data") || "{}") || []);
-  const [transactionsData, setTransactionsData] = useState<TransactionData[] | []>(JSON.parse(window.sessionStorage.getItem("Budgetify-user-transactions-data") || "{}") || [])
-  const [categoriesData, setCategoriesData] = useState<CategoryData[] | []>(JSON.parse(window.sessionStorage.getItem("Budgetify-user-categories-data") || "{}") || []);
+  const [accountsData, setAccountsData] = useState<AccountData[]>(JSON.parse(window.sessionStorage.getItem("Budgetify-user-accounts-data") || "{}") || []);
+  const [transactionsData, setTransactionsData] = useState<TransactionData[]>(JSON.parse(window.sessionStorage.getItem("Budgetify-user-transactions-data") || "{}") || [])
+  const [categoriesData, setCategoriesData] = useState<CategoryData[]>(JSON.parse(window.sessionStorage.getItem("Budgetify-user-categories-data") || "{}") || []);
+  const [subscriptionsData, setSubscriptionsData] = useState<SubscriptionData[]>(JSON.parse(window.sessionStorage.getItem("Budgetify-user-subscriptions-data") || "{}") || []);
 
   // This context provider, provides currentUserData and accountsData (as well as their setters).
 
-  return <AuthContext.Provider value={{currentUserData, setCurrentUserData, accountsData, setAccountsData, transactionsData, setTransactionsData, categoriesData, setCategoriesData}}>
-    {props.children}
-  </AuthContext.Provider>
+  return (
+    <AuthContext.Provider 
+      value={{
+        currentUserData,
+        setCurrentUserData, 
+        accountsData, 
+        setAccountsData, 
+        transactionsData, 
+        setTransactionsData, 
+        categoriesData, 
+        setCategoriesData,
+        subscriptionsData,
+        setSubscriptionsData
+      }}
+    >
+      {props.children}
+    </AuthContext.Provider>
+  );
 }
 
 export default AuthContextProvider;

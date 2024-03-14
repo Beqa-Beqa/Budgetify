@@ -31,6 +31,7 @@ declare interface AccountData {
 
 declare interface TransactionData {
   _id: string,
+  id: string,
   belongsToAccountWithId: string,
   transactionType: string,
   title: string,
@@ -40,7 +41,15 @@ declare interface TransactionData {
   chosenCategories: string[],
   creationDate: string,
   updateDate: string,
-  description?: string
+  description?: string,
+  files?: TransactionFilesData[]
+}
+
+declare interface TransactionFilesData {
+  name: string,
+  path: string,
+  type: string,
+  size: number
 }
 
 declare interface CategoryData {
@@ -48,6 +57,18 @@ declare interface CategoryData {
   owner: string,
   transactionType: string,
   title: string
+}
+
+declare interface SubscriptionData {
+  _id: string,
+  belongsToAccountWithId: string,
+  title: string,
+  chosenCategories: string[],
+  amount: string,
+  dateRange: [Date | null, Date | null],
+  startDate: string,
+  endDate: string,
+  description?: string
 }
 
 declare interface InputBasicAlert {

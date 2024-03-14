@@ -12,12 +12,15 @@ import { GeneralContext } from "../../../Contexts/GeneralContextProvider";
 import AddCategoryPrompt from "../AddCategoryPrompt/AddCategoryPrompt";
 import Category from "../../../Components/Home/Category/Category";
 import { sortArrOfObjectByKey } from "../../../Functions";
+import AddSubscriptionPrompt from "../AddSubscriptionPrompt/AddSubscriptionPrompt";
+import Subscription from "../../../Components/Home/Subscription/Subscription";
+import SideSubscriptionMenu from "../../../Components/Home/SideMenus/Subscription/SideSubscriptionMenu";
 
 const Main = () => {
   // navigation
   const {navigateTo, showAddCategoryPrompt, setShowAddCategoryPrompt} = useContext(GeneralContext);
   // list of accounts data.
-  const {accountsData, transactionsData, categoriesData} = useContext(AuthContext);
+  const {accountsData, transactionsData, categoriesData, subscriptionsData} = useContext(AuthContext);
   // sort setting holder state.
   const [sortByPamentDate, setSortByPaymentDate] = useState<"desc" | "asc">("desc");
   const [sortByTransaction, setSortByTransaction] = useState<"Income" | "Expenses" | "">("");
@@ -37,12 +40,20 @@ const Main = () => {
   const [showAddTransactionPrompt, setShowAddTransactionPrompt] = useState<boolean>(false);
   // transaction side info menu.
   const [showTransactionInfo, setShowTransactionInfo] = useState<{show: boolean, data: TransactionData | null}>({show: false, data: null});
+  // subscription add prompt holder state
+  const [showAddSubscriptionPrompt, setShowAddSubscriptionPrompt] = useState<boolean>(false);
+  // subscription side info meni
+  const [showSubscriptionInfo, setShowSubscriptionInfo] = useState<{show: boolean, data: SubscriptionData | null}>({show: false, data: null});
 
   const filteredTransactionsByCard = transactionsData.filter((transaction: TransactionData) => accountsData[activeCard] && transaction.belongsToAccountWithId === accountsData[activeCard]._id)
-                                                     .filter((transaction: TransactionData) => sortByTransaction === "Income" ? transaction.transactionType === "Income" : sortByTransaction === "Expenses" ? transaction.transactionType === "Expenses" : transaction);
+                                                     .filter((transaction: TransactionData) => sortByTransaction === "Income" ? transaction.transactionType === "Income" : sortByTransaction === "Expenses" ? transaction.transactionType === "Expenses" : transaction)
+                                                     .filter((transaction: TransactionData) => searchValue.length >= 2 ? transaction.title.toLowerCase().includes(searchValue.toLowerCase().trim()) : transaction);
 
   const filteredCategories = categoriesData.filter((category: CategoryData) => sortByTransaction === "Expenses" ? category.transactionType === "Expenses" : sortByTransaction === "Income" ? category.transactionType === "Income" : category)
                                            .filter((category: CategoryData) => searchValue.length >= 2 ? category.title.toLowerCase().includes(searchValue.toLowerCase().trim()) : category);
+
+  const filteredSubscriptions = subscriptionsData.filter((subscription: SubscriptionData) => searchValue.length >= 2 ? subscription.title.toLowerCase().includes(searchValue.toLowerCase().trim()) : subscription);
+  
   return (
     <>
       <div className="homepage-main container-fluid">
@@ -79,17 +90,40 @@ const Main = () => {
                   <div className="w-100 text-center my-3 overflow-hidden">
                     <h2 style={{color: "var(--placeholder)"}} className="fs-2 opacity-25">You don't have any categories. Please, add a category</h2>
                   </div>
-              :
-                filteredTransactionsByCard.length ?
-                  <div className="d-flex flex-column gap-4">
-                    {filteredTransactionsByCard                      
-                    .sort((a: TransactionData, b: TransactionData) => sortByPamentDate === "desc" ? new Date(b.date).getTime() - new Date(a.date).getTime() : new Date(a.date).getTime() - new Date(b.date).getTime())
-                    .map((transaction: TransactionData, key: number) => {
-                      const currency = accountsData[activeCard].currency;
+              : navigateTo === "Subscriptions" ?
+                  subscriptionsData.length ?
+                    filteredSubscriptions.length ?
+                      <div className="d-flex flex-column gap-4">
+                        {filteredSubscriptions.map((subscription: SubscriptionData, key: number) => {
+                          const currency = accountsData[activeCard].currency;
 
-                      return <Transaction key={key} transaction={transaction} currency={currency} onclick={() => {setShowTransactionInfo({show: true, data: transaction})}} />
-                      })}
-                  </div>
+                          return <Subscription key={key} subscription={subscription} currency={currency} onclick={() => setShowSubscriptionInfo({show: true, data: subscription})} />
+                        })}
+                      </div>
+                    :
+                      <div className="w-100 text-center my-3 overflow-hidden">
+                        <h2 style={{color: "var(--placeholder)"}} className="fs-2 opacity-25">No records to display</h2>
+                      </div>
+                  :
+                    <div className="w-100 text-center my-3 overflow-hidden">
+                      <h2 style={{color: "var(--placeholder)"}} className="fs-2 opacity-25">You don't have any subscriptions. Please, add a subscription</h2>
+                    </div>
+              :
+                transactionsData.length ?
+                  filteredTransactionsByCard.length ?
+                    <div className="d-flex flex-column gap-4">
+                      {filteredTransactionsByCard                      
+                      .sort((a: TransactionData, b: TransactionData) => sortByPamentDate === "desc" ? new Date(b.date).getTime() - new Date(a.date).getTime() : new Date(a.date).getTime() - new Date(b.date).getTime())
+                      .map((transaction: TransactionData, key: number) => {
+                        const currency = accountsData[activeCard].currency;
+
+                        return <Transaction key={key} transaction={transaction} currency={currency} onclick={() => {setShowTransactionInfo({show: true, data: transaction})}} />
+                        })}
+                    </div>
+                  :
+                    <div className="w-100 text-center my-3 overflow-hidden">
+                      <h2 style={{color: "var(--placeholder)"}} className="fs-2 opacity-25">No records to display</h2>
+                    </div>
                 :
                   <div className="w-100 text-center my-3 overflow-hidden">
                     <h2 style={{color: "var(--placeholder)"}} className="fs-2 opacity-25">You don't have any transactions. Please, add a transaction.</h2>
@@ -101,15 +135,22 @@ const Main = () => {
             <div className="d-flex flex-column align-items-end gap-3">
               <IndicatorButton classname="p-2 fs-5 w-100" type="Income" />
               <IndicatorButton classname="p-2 fs-5 w-100" type="Expenses"/>
-              {activeCard >= 0 && !navigateTo ? <IndicatorButton classname="p-2 fs-5 w-100" onclick={() => setShowAddTransactionPrompt(true)} type="Add Transaction"/> : null}
+              {activeCard >= 0 && navigateTo === "none" ? <IndicatorButton classname="p-2 fs-5 w-100" onclick={() => setShowAddTransactionPrompt(true)} type="Add Transaction"/> : null}
               {navigateTo === "Categories" && <IndicatorButton onclick={() => setShowAddCategoryPrompt(true)} classname="p-2 fs-5 w-100" type="Add Category" />}
+              {navigateTo === "Subscriptions" && <IndicatorButton onclick={() => setShowAddSubscriptionPrompt(true)} classname="p-2 fs-5 w-100" type="Add Subscription" />}
             </div>
           </div>
         </div>
       </div>
       <AddAccountPrompt classname={showAddAccountPrompt ? "show" : ""} setShowAddAccountPrompt={setShowAddAccountPrompt} />
-      <AddTransactionPrompt classname={`${showAddTransactionPrompt ? "show" : ""}`} accountData={accountsData[activeCard]} setShowAddTransactionPrompt={setShowAddTransactionPrompt} />
-      <SideTransactionMenu accountData={!isNaN(activeCard) && accountsData[activeCard]} transactionInfo={showTransactionInfo.data && showTransactionInfo.data} setShowSideTransactionMenu={setShowTransactionInfo} classname={`${showTransactionInfo.show && "show"}`} />
+      {!isNaN(activeCard) && 
+        <>
+          <AddTransactionPrompt classname={`${showAddTransactionPrompt ? "show" : ""}`} accountData={accountsData[activeCard]} setShowAddTransactionPrompt={setShowAddTransactionPrompt} />
+          <SideTransactionMenu accountData={accountsData[activeCard]} transactionInfo={showTransactionInfo.data && showTransactionInfo.data} setShowSideTransactionMenu={setShowTransactionInfo} classname={`${showTransactionInfo.show && "show"}`} />
+          <AddSubscriptionPrompt accountData={accountsData[activeCard]} classname={showAddSubscriptionPrompt ? "show" : ""} setShowAddSubscriptionPrompt={setShowAddSubscriptionPrompt} />
+          <SideSubscriptionMenu accountData={accountsData[activeCard]} subscriptionInfo={showSubscriptionInfo.data} setShowSideSubscriptionMenu={setShowSubscriptionInfo} classname={showSubscriptionInfo.show ? "show" : ""} />
+        </>
+      }
       <AddCategoryPrompt classname={showAddCategoryPrompt ? "show" : ""} setShowAddCategoryPrompt={setShowAddCategoryPrompt} />
     </>
   );

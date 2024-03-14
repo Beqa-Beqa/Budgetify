@@ -39,7 +39,7 @@ const Header = () => {
       <div className="homepage-header mt-4 mt-xl-0 container-fluid">
         <div className="row justify-content-between align-items-cente position-relative">
           <div className="col col-lg-2 col-xl-4 col-xxl-4 pb-2">
-            <h1 role="button" onClick={() => setNavigateTo("")} className="homepage-mini-logo fw-bold">Budgetify</h1>
+            <h1 role="button" onClick={() => setNavigateTo("none")} className="homepage-mini-logo fw-bold">Budgetify</h1>
           </div>
           {width >= 992 &&
             <div className="position-relative col-lg-7 col-xl-6 col-xxl-5 p-0">

@@ -2,12 +2,12 @@
   background-color: var(--component-background);
 }
 
-.indicator-button.transaction {
+.indicator-button.indicator-button-clickable {
   background-color: var(--button) !important;
   color: var(--button);
 }
 
-.indicator-button.transaction .transaction-icon {
+.indicator-button.indicator-button-clickable .indicator-button-clickable-icon {
   width: 35px;
   height: 35px;
   background-color: var(--component-background);

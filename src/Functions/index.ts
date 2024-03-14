@@ -51,7 +51,7 @@ export const removeThousandsCommas = (val: string) => {
 }
 
 // update accounts data in cache and update state
-export const updateAccountsData = (currentData: AccountData[], setData: React.Dispatch<React.SetStateAction<AccountData[] | []>>, data: {new: AccountData, old: AccountData | undefined}, type: "Insert" | "Update" | "Delete") => {
+export const updateAccountsData = (currentData: AccountData[], setData: React.Dispatch<React.SetStateAction<AccountData[]>>, data: {new: AccountData, old: AccountData | undefined}, type: "Insert" | "Update" | "Delete") => {
   const newAccountsData = [...currentData];
   if(type === "Insert") {
     newAccountsData.push(data.new);
@@ -66,7 +66,7 @@ export const updateAccountsData = (currentData: AccountData[], setData: React.Di
 }
 
 // update transactions data in cache and update state
-export const updateTransactionsData = (currentData: TransactionData[], setData: React.Dispatch<React.SetStateAction<[] | TransactionData[]>>, data: {new: TransactionData, old: TransactionData | undefined}, type: "Insert" | "Update" | "Delete") => {
+export const updateTransactionsData = (currentData: TransactionData[], setData: React.Dispatch<React.SetStateAction<TransactionData[]>>, data: {new: TransactionData, old: TransactionData | undefined}, type: "Insert" | "Update" | "Delete") => {
   const newTransactionsData = [...currentData];
   if(type === "Insert") {
     newTransactionsData.push(data.new);
@@ -80,8 +80,23 @@ export const updateTransactionsData = (currentData: TransactionData[], setData: 
   setData(newTransactionsData);
 }
 
+// update subscriptions data in cache and update state
+export const updateSubscriptionsData = (currentData: SubscriptionData[], setData: React.Dispatch<React.SetStateAction<SubscriptionData[]>>, data: {new: SubscriptionData, old: SubscriptionData | undefined}, type: "Insert" | "Update" | "Delete") => {
+  const newSubscriptionsData = [...currentData];
+  if(type === "Insert") {
+    newSubscriptionsData.push(data.new);
+  } else if (type === "Update") {
+    newSubscriptionsData[newSubscriptionsData.indexOf(data.old!)] = data.new;
+  } else if (type === "Delete") {
+    newSubscriptionsData.splice(newSubscriptionsData.indexOf(data.new), 1);
+  }
+
+  window.sessionStorage.setItem("Budgetify-user-subscriptions-data", JSON.stringify(newSubscriptionsData));
+  setData(newSubscriptionsData);
+}
+
 // update categories data in cache and update state
-export const updateCategoriesData = (currentData: CategoryData[], setData: React.Dispatch<React.SetStateAction<[] | CategoryData[]>>, data: {new: CategoryData, old: CategoryData | undefined}, type: "Insert" | "Update" | "Delete") => {
+export const updateCategoriesData = (currentData: CategoryData[], setData: React.Dispatch<React.SetStateAction<CategoryData[]>>, data: {new: CategoryData, old: CategoryData | undefined}, type: "Insert" | "Update" | "Delete") => {
   const newCategoriesData = [...currentData];
   if(type === "Insert") {
     newCategoriesData.push(data.new);

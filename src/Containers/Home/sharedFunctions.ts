@@ -81,6 +81,44 @@ export const handleTransactionTypeChange = (event: React.MouseEvent<HTMLButtonEl
   cb && cb();
 }
 
+// date change alert handler
+export const handleDateChangeAlert = (
+  curYear: string, 
+  curMonth: string, 
+  curDay: string, 
+  year: string, 
+  month: string, 
+  day: string, 
+  setDateAlert: React.Dispatch<React.SetStateAction<InputBasicAlert>>, 
+  type: "More" | "Less",
+  options?: {
+    moreTypeCustomText?: string,
+    lessTypeCustomText?: string
+  }
+) => {
+  const alertText = type === "Less" ? 
+    options && options.lessTypeCustomText ? options.lessTypeCustomText : "Invalid date entered"
+  :
+    options && options.moreTypeCustomText ? options.moreTypeCustomText : "Invalid date entered"
+
+  if(type === "Less" ? parseInt(year) > parseInt(curYear) : parseInt(year) < parseInt(curYear)) {
+    // if input year is more than current year update date alert.
+    setDateAlert({error: true, text: alertText});
+  } else if (parseInt(year) === parseInt(curYear)) {
+    // if years are same and later month is entered than the current one, or months are also same
+    // and later day is entered than the current one, update date alert.
+    if(type === "Less" ? parseInt(month) > parseInt(curMonth) || (parseInt(month) === parseInt(curMonth) && parseInt(day) > parseInt(curDay))
+    : parseInt(month) < parseInt(curMonth) || (parseInt(month) === parseInt(curMonth) && parseInt(day) < parseInt(curDay))) {
+      setDateAlert({error: true, text: alertText});
+    } else {
+      setDateAlert({error: false, text: ""});
+    }
+  } else {
+    // otherwise clear alert
+    setDateAlert({error: false, text: ""});
+  }
+}
+
 // date onChange handler.
 export const handleDateChange = (event: React.ChangeEvent<HTMLInputElement>, curDate: string, setDate: React.Dispatch<React.SetStateAction<string>>, setDateAlert?: React.Dispatch<React.SetStateAction<InputBasicAlert>>) => {
   event.preventDefault();
@@ -93,21 +131,7 @@ export const handleDateChange = (event: React.ChangeEvent<HTMLInputElement>, cur
   const [curMonth, curDay, curYear] = curDate.split("/");
   
   if(setDateAlert) {
-    if(parseInt(year) > parseInt(curYear)) {
-      // if input year is more than current year update date alert.
-      setDateAlert({error: true, text: "Invalid date entered"});
-    } else if (parseInt(year) === parseInt(curYear)) {
-      // if years are same and later month is entered than the current one, or months are also same
-      // and later day is entered than the current one, update date alert.
-      if(parseInt(month) > parseInt(curMonth) || (parseInt(month) === parseInt(curMonth) && parseInt(day) > parseInt(curDay))) {
-        setDateAlert({error: true, text: "Invalid date entered"});
-      } else {
-        setDateAlert({error: false, text: ""});
-      }
-    } else {
-      // otherwise clear alert
-      setDateAlert({error: false, text: ""});
-    }
+    handleDateChangeAlert(curYear, curMonth, curDay, year, month, day, setDateAlert, "Less");
   }
 }
 
@@ -144,5 +168,49 @@ export const handleCategoryUnselect = (value: string, categoriesAvailable: strin
     renewedChosenCategories.splice(renewedChosenCategories.indexOf(value), 1);
     // update state.
     setChosenCategories(renewedChosenCategories);
+  }
+}
+
+// handle files change
+export const handleFilesChange = (event: React.ChangeEvent<HTMLInputElement>, currentData: TransactionFilesData[], setData: React.Dispatch<React.SetStateAction<TransactionFilesData[]>>, setAlert: React.Dispatch<React.SetStateAction<InputBasicAlert>>) => {
+  // at first val won't have "_id" key and "path" key since they are not yet pushed on the server.
+  const val = event.target.files && event.target.files[0] as unknown as TransactionFilesData;
+  const foundAttachment = val && currentData.find((attach: TransactionFilesData) => attach.name === val.name && attach.size === val.size && attach.type === val.type);
+
+  const totalSize = val && [val, ...currentData].reduce((size: number, data: TransactionFilesData) => {
+    return size += data.size;
+  }, 0);
+
+  const totalSizeInMbs = totalSize && parseFloat((totalSize / 1024 / 1024).toFixed(2));
+  if(totalSizeInMbs && totalSizeInMbs > 5) {
+    setAlert({error: true, text: "Size of attachments exceeds 5mb!"})
+  } 
+
+  setData(prev => {
+    return val && !foundAttachment ? [val, ...prev] : prev
+  });
+  if(!foundAttachment && currentData.length >= 5) {
+    setAlert({error: true, text: "The Number is more than 5 units. Please check it"});
+  } 
+ }
+
+// handle added files removal
+export const handleFileRemove = (file: TransactionFilesData, currentData: TransactionFilesData[], setData: React.Dispatch<React.SetStateAction<TransactionFilesData[]>>, setAlert: React.Dispatch<React.SetStateAction<InputBasicAlert>>) => {
+  const newFileData = currentData.slice();
+  newFileData.splice(currentData.indexOf(file), 1);
+  setData(newFileData);
+
+  const totalSize = newFileData.reduce((size: number, data: TransactionFilesData) => {
+    return size += data.size;
+  }, 0);
+  
+  const totalSizeInMbs = totalSize && parseFloat((totalSize / 1024 / 1024).toFixed(2));
+
+  if(totalSizeInMbs && totalSizeInMbs <= 10 && newFileData.length <= 5) {
+    setAlert({error: false, text: ""});
+  } else if (totalSizeInMbs && totalSizeInMbs > 10) {
+    setAlert({error: true, text: "Size of attachments exceeds 10mb!"});
+  } else if (newFileData.length > 5) {
+    setAlert({error: true, text: "The Number is more than 5 units. Please check it"});
   }
 }
