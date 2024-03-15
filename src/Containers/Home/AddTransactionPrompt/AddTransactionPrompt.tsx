@@ -24,8 +24,7 @@ const AddTransactionPrompt = (props: {
   // if info is present this prompt is for edit.
   const hasInfo = props.transactionData;
 
-  // Update state based on the transactionData prop
-  useEffect(() => {
+  const initValues = () => {
     if (hasInfo) {
       const {
         transactionType,
@@ -45,6 +44,11 @@ const AddTransactionPrompt = (props: {
       setChosenCategories(chosenCategories || []);
       setPayee(payee || "");
     }
+  }
+
+  // Update state based on the transactionData prop
+  useEffect(() => {
+    initValues();
   }, [hasInfo]);
 
   // Current global time, retrieved after component mount.
@@ -150,8 +154,10 @@ const AddTransactionPrompt = (props: {
   const handleCancel = () => {
     if(!hasInfo) {
       clearValues();
-      clearAlerts();
+    } else {
+      initValues();
     }
+      clearAlerts();
     // show cancel prompt
     setShowCancelPrompt(false);
     // close add transacion prompt

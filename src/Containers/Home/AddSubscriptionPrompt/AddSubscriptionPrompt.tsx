@@ -3,7 +3,7 @@ import "./addSubscriptionPrompt.css";
 import { HiXMark } from "react-icons/hi2";
 import FormInput from "../../../Components/Home/FormInput/FormInput";
 import { handleTitleChange, handleCategorySelect, handleCategoryUnselect, handleAmountChange, handleDescriptionChange, handleDateChangeAlert } from "../sharedFunctions";
-import { getCategoryNameById, divideByThousands, clearFormStringValues, getGlobalTimeUnix, updateSubscriptionsData } from "../../../Functions";
+import { getCategoryNameById, divideByThousands, clearFormStringValues, getGlobalTimeUnix, updateSubscriptionsData, subscriptionExistsByTitle } from "../../../Functions";
 import { defExpenseCategories } from "../../../Data";
 import { AuthContext } from "../../../Contexts/AuthContextProvider";
 import ActionPrompt from "../../../Components/Home/ActionPrompt/ActionPrompt";
@@ -151,6 +151,8 @@ const AddSubscriptionPrompt = (props: {
       :
         mandatoriesFilled && setIsButtonDisabled(false);
 
+      subscriptionExistsByTitle(subscriptionsData, title) && setTitleAlert({error: true, text: "You already have a subscription with this title"});
+
   }, [title, description, amount, chosenCategories, dateRange]);
 
 
@@ -161,10 +163,6 @@ const AddSubscriptionPrompt = (props: {
       // if mandatories are filled
       if(!titleAlert.error && !descriptionAlert.error && !amountAlert.error && !startDateAlert.error && !endDateAlert.error) {
         try {
-          // for an edit prompt, build body for /edit-transaction endpoint
-          // expected format from server: {transactionId: string, belongsToId: string, fields: {fields to update}}
-          // for create prompt, build body for creating transaction.
-          // expected format: {transactionData: {all the fields}}
           const subscriptionBody = hasInfo ? 
             JSON.stringify({
               subscriptionId: hasInfo._id,
@@ -209,7 +207,7 @@ const AddSubscriptionPrompt = (props: {
            setChosenCategories([]);
            setCategoriesAvailable([]);
            setShowRequiredAlert(false);
-           setShowToastMessage({show: true, text: hasInfo ? "Subscription successfully edited" : "Subscription has been successfully added!"})
+           setShowToastMessage({show: true, text: hasInfo ? "The changes are successfully saved" : "Subscription has been successfully added!"})
            props.setShowAddSubscriptionPrompt(false);
         } catch (err) {
           console.error(err);
@@ -342,7 +340,7 @@ const AddSubscriptionPrompt = (props: {
       </div>
       {showCancelPrompt &&
         <ActionPrompt
-          text="Are you sure you want to cancel creating a[br]Subscription?"
+          text={hasInfo ? "Are you sure you want to terminate editing?[br]Your changes will not be saved" : "Are you sure you want to cancel creating a[br]Subscription?"}
           confirm={{action: () => handleCancel(), text: "Yes"}}
           cancel={{action: () => setShowCancelPrompt(false), text: "No"}}
           alert

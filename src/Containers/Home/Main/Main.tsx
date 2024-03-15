@@ -47,12 +47,15 @@ const Main = () => {
 
   const filteredTransactionsByCard = transactionsData.filter((transaction: TransactionData) => accountsData[activeCard] && transaction.belongsToAccountWithId === accountsData[activeCard]._id)
                                                      .filter((transaction: TransactionData) => sortByTransaction === "Income" ? transaction.transactionType === "Income" : sortByTransaction === "Expenses" ? transaction.transactionType === "Expenses" : transaction)
-                                                     .filter((transaction: TransactionData) => searchValue.length >= 2 ? transaction.title.toLowerCase().includes(searchValue.toLowerCase().trim()) : transaction);
+                                                     .filter((transaction: TransactionData) => searchValue.length >= 2 ? transaction.title.toLowerCase().includes(searchValue.toLowerCase().trim()) : transaction)
+                                                     .sort((a: TransactionData, b: TransactionData) => sortByPamentDate === "desc" ? new Date(b.date).getTime() - new Date(a.date).getTime() : new Date(a.date).getTime() - new Date(b.date).getTime());
 
   const filteredCategories = categoriesData.filter((category: CategoryData) => sortByTransaction === "Expenses" ? category.transactionType === "Expenses" : sortByTransaction === "Income" ? category.transactionType === "Income" : category)
                                            .filter((category: CategoryData) => searchValue.length >= 2 ? category.title.toLowerCase().includes(searchValue.toLowerCase().trim()) : category);
 
-  const filteredSubscriptions = subscriptionsData.filter((subscription: SubscriptionData) => searchValue.length >= 2 ? subscription.title.toLowerCase().includes(searchValue.toLowerCase().trim()) : subscription);
+  const filteredSubscriptionsByCard = subscriptionsData.filter((subscription: SubscriptionData) => accountsData[activeCard] && subscription.belongsToAccountWithId === accountsData[activeCard]._id)
+                                                       .filter((subscription: SubscriptionData) => searchValue.length >= 2 ? subscription.title.toLowerCase().includes(searchValue.toLowerCase().trim()) : subscription)
+                                                       .sort((a: SubscriptionData, b: SubscriptionData) => sortByPamentDate === "desc" ? parseInt(b.creationDate) - parseInt(a.creationDate) : parseInt(a.creationDate) - parseInt(b.creationDate));
   
   return (
     <>
@@ -92,9 +95,9 @@ const Main = () => {
                   </div>
               : navigateTo === "Subscriptions" ?
                   subscriptionsData.length ?
-                    filteredSubscriptions.length ?
+                    filteredSubscriptionsByCard.length ?
                       <div className="d-flex flex-column gap-4">
-                        {filteredSubscriptions.map((subscription: SubscriptionData, key: number) => {
+                        {filteredSubscriptionsByCard.map((subscription: SubscriptionData, key: number) => {
                           const currency = accountsData[activeCard].currency;
 
                           return <Subscription key={key} subscription={subscription} currency={currency} onclick={() => setShowSubscriptionInfo({show: true, data: subscription})} />
@@ -112,9 +115,7 @@ const Main = () => {
                 transactionsData.length ?
                   filteredTransactionsByCard.length ?
                     <div className="d-flex flex-column gap-4">
-                      {filteredTransactionsByCard                      
-                      .sort((a: TransactionData, b: TransactionData) => sortByPamentDate === "desc" ? new Date(b.date).getTime() - new Date(a.date).getTime() : new Date(a.date).getTime() - new Date(b.date).getTime())
-                      .map((transaction: TransactionData, key: number) => {
+                      {filteredTransactionsByCard.map((transaction: TransactionData, key: number) => {
                         const currency = accountsData[activeCard].currency;
 
                         return <Transaction key={key} transaction={transaction} currency={currency} onclick={() => {setShowTransactionInfo({show: true, data: transaction})}} />

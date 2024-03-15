@@ -61,6 +61,9 @@ declare interface CategoryData {
 
 declare interface SubscriptionData {
   _id: string,
+  creationDate: string,
+  year: number,
+  months: number[],
   belongsToAccountWithId: string,
   title: string,
   chosenCategories: string[],

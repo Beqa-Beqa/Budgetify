@@ -68,8 +68,10 @@ const AddCategoryPrompt = (props: {
   const handleCancel = () => {
     if(!hasInfo) {
       clearValues();
-      clearAlerts();
+    } else {
+      setTitle(hasInfo.title);
     }
+    clearAlerts();
     props.setShowAddCategoryPrompt(false);
   };
 

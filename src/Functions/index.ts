@@ -10,6 +10,10 @@ export const categoryExistsByTitle = (categArr: CategoryData[], title: string, t
   return foundCateg;
 }
 
+export const subscriptionExistsByTitle = (subscArr: SubscriptionData[], title: string) => {
+  return subscArr.find(data => data.title.toLocaleLowerCase() === title.toLocaleLowerCase());
+}
+
 export const makeFirstCapitals = (str: string) => {
   const returnWords = [];
   const splitStr = str.trim().split(" ");
