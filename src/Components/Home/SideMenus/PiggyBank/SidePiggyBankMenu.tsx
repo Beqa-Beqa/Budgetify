@@ -9,7 +9,7 @@ import { AuthContext } from "../../../../Contexts/AuthContextProvider";
 import AccountInfoField from "../../AccountInfoFIeld/AccountInfoFIeld";
 import { PiggyIcon } from "../../../../Assets/Home";
 import AddPiggyAmount from "../../../../Containers/Home/AddPiggyBankPrompt/AddPiggyAmount";
-import { divideByThousands, removeThousandsCommas, updateAccountsData, updateCategoriesData, updatePiggyBanksData, updateTransactionsData } from "../../../../Functions";
+import { createCategory, createTransaction, deletePiggyBank, divideByThousands, editAccount, removeThousandsCommas, updateAccountsData, updateCategoriesData, updatePiggyBanksData, updateTransactionsData } from "../../../../Functions";
 import { createCategoryApi, createTransactionApi, deletePiggyBankApi, editAccountApi } from "../../../../apiURLs";
 import {v4 as uuid} from "uuid";
 import { GeneralContext } from "../../../../Contexts/GeneralContextProvider";
@@ -52,101 +52,49 @@ const SidePiggyBankMenu = (props: {
     if(info) {
       // if info is present.
       try {
-        // category body (to create a category with a name of piggy bank goal)
-        const categoryBody = JSON.stringify({
-          owner: (currentUserData as CurrentUserData)._id,
-          transactionType: "Income",
-          title: info.goal
-        });
-
-        // piggy bank body (to delete it)
-        const piggyBody = JSON.stringify({
-          belongsToAccountWithId: info.belongsToAccountWithId,
-          piggyBankId: info._id
-        });
-
         // new account amount (piggy bank collected amount is added to the current account amount).
         const newAccAmount = divideByThousands(removeThousandsCommas(accInfo!.amount) + removeThousandsCommas(info.currentAmount));
 
-        // account body
-        const accBody = JSON.stringify({
-          infoForEdit: {
-            accId: accInfo?._id,
-            fields: {amount: newAccAmount}
-          }
-        });
-
         // delete piggy bank
-        await fetch(deletePiggyBankApi, {
-          method: "POST",
-          mode: "cors",
-          cache: "no-cache",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: piggyBody
-        });
+        await deletePiggyBank({belongsToAccountWithId: info.belongsToAccountWithId, piggyBankId: info._id});
 
         // if collected money of piggy bank is not 0, create category and edit account.
         if(info.currentAmount !== "0.00") {
           // category create request.
-          const categRes = await fetch(createCategoryApi, {
-            method: "POST",
-            mode: "cors",
-            cache: "no-cache",
-            headers: {
-              "Content-Type": "application/json"
-            },
-            body: categoryBody
+          const createdCategory: CategoryData = await createCategory({
+            owner: (currentUserData as CurrentUserData)._id,
+            transactionType: "Income",
+            title: info.goal
           });
           
           // account edit request.
-          const accRes = await fetch(editAccountApi, {
-            method: "PATCH",
-            mode: "cors",
-            cache: "no-cache",
-            headers: {
-              "Content-Type": "application/json"
-            },
-            body: accBody
-          });
-  
-          // created category
-          const categ: CategoryData = await categRes.json();
-          // edited account
-          const acc: AccountData = await accRes.json();
-  
-          // transaction body
-          const transactionBody = JSON.stringify({
-            id: uuid(),
-            belongsToAccountWithId: accInfo!._id,
-            transactionType: "Income",
-            title: info.goal,
-            description: "",
-            amount: info.currentAmount,
-            date: JSON.parse(window.sessionStorage.getItem("budgetify-current-date")!) || new Date().toString().split(",")[0],
-            chosenCategories: categ._id,
-            payee: "",
+          const editedAccount: AccountData = await editAccount({
+            infoForEdit: {
+              accId: accInfo!._id,
+              fields: {amount: newAccAmount}
+            }
           });
   
           // transaction create request.
-          const transactionRes = await fetch(createTransactionApi, {
-            method: "POST",
-            mode: "cors",
-            cache: "no-cache",
-            headers: {
-              "Content-Type": "application/json"
-            },
-            body: transactionBody
-          });
+          // const transactionRes = await createTransaction({
+          //   id: uuid(),
+          //   belongsToAccountWithId: accInfo!._id,
+          //   transactionType: "Income",
+          //   title: info.goal,
+          //   description: "",
+          //   amount: info.currentAmount,
+          //   date: JSON.parse(window.sessionStorage.getItem("budgetify-current-date")!) || new Date().toString().split(",")[0],
+          //   chosenCategories: [createdCategory._id],
+          //   payee: "",
+          // });
   
           // created transaction
-          const transaction = await transactionRes.json();
+          // const transaction = await transactionRes.json();
   
           // update all the data in cache and states.
-          updateCategoriesData(categoriesData, setCategoriesData, {new: categ, old: undefined}, "Insert");
-          updateTransactionsData(transactionsData, setTransactionsData, {new: transaction, old: undefined}, "Insert");
-          updateAccountsData(accountsData, setAccountsData, {new: acc, old: accInfo!}, "Update");
+          updateCategoriesData(categoriesData, setCategoriesData, {new: createdCategory, old: undefined}, "Insert");
+          // updateTransactionsData(transactionsData, setTransactionsData, {new: transaction, old: undefined}, "Insert");
+          updateAccountsData(accountsData, setAccountsData, {new: editedAccount, old: accInfo!}, "Update");
         }
 
         // update piggy banks data.

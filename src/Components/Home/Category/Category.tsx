@@ -5,8 +5,7 @@ import { useContext, useState } from "react";
 import AddCategoryPrompt from "../../../Containers/Home/AddCategoryPrompt/AddCategoryPrompt";
 import ActionPrompt from "../ActionPrompt/ActionPrompt";
 import { GeneralContext } from "../../../Contexts/GeneralContextProvider";
-import { deleteCategoryApi } from "../../../apiURLs";
-import { updateCategoriesData } from "../../../Functions";
+import { deleteCategory, updateCategoriesData } from "../../../Functions";
 import { AuthContext } from "../../../Contexts/AuthContextProvider";
 
 const Category = (props: {
@@ -24,15 +23,7 @@ const Category = (props: {
 
   const handleDelete = async () => {
     try {
-      await fetch(deleteCategoryApi, {
-        method: "POST",
-        mode: "cors",
-        cache: "no-cache",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({owner: props.categoryData.owner, categoryId: props.categoryData._id})
-      });
+      await deleteCategory({owner: props.categoryData.owner, categoryId: props.categoryData._id});
       
       updateCategoriesData(categoriesData, setCategoriesData, {new: props.categoryData, old: undefined}, "Delete");
       setShowDeletePrompt(false);

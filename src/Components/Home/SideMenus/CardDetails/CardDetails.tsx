@@ -6,10 +6,9 @@ import AccountInfoField from "../../AccountInfoFIeld/AccountInfoFIeld";
 import { useContext, useState } from "react";
 import { AuthContext } from "../../../../Contexts/AuthContextProvider";
 import AddAccountPrompt from "../../../../Containers/Home/AddAccountPrompt/AddAccountPrompt";
-import { divideByThousands, makeFirstCapitals, removeThousandsCommas, updateAccountsData } from "../../../../Functions";
+import { deleteAccount, divideByThousands, makeFirstCapitals, removeThousandsCommas, updateAccountsData } from "../../../../Functions";
 import ActionPrompt from "../../ActionPrompt/ActionPrompt";
 import { GeneralContext } from "../../../../Contexts/GeneralContextProvider";
-import { deleteAccountApi } from "../../../../apiURLs";
 
 const CardDetails = (props: {
   setShowDetails: React.Dispatch<React.SetStateAction<boolean>>,
@@ -36,21 +35,8 @@ const CardDetails = (props: {
     // server excepts body for deleting in format:
     // {accId: (account id), userId: (account owner id)}
     try {
-      const body = JSON.stringify({
-        accId: props.accountData._id,
-        userId: currentUserData._id
-      });
-        
-      // make request.
-      await fetch(deleteAccountApi, {
-        method: "post",
-        cache: "no-cache",
-        mode: "cors",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body
-      });
+      // make request
+      await deleteAccount({accId: props.accountData._id,userId: currentUserData._id});
 
       // Remove account
       updateAccountsData(accountsData, setAccountsData, {new: props.accountData, old: undefined}, "Delete");
