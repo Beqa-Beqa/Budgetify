@@ -74,6 +74,21 @@ declare interface SubscriptionData {
   description?: string
 }
 
+declare interface PiggyBankData {
+  _id: string,
+  belongsToAccountWithId: string,
+  goal: string,
+  goalAmount: string,
+  currentAmount: string,
+  payments: PiggyBankPayment[]
+}
+
+declare interface PiggyBankPayment {
+  _id: string,
+  date: string,
+  amount: string
+}
+
 declare interface InputBasicAlert {
   error: boolean,
   text: string

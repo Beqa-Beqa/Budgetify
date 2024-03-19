@@ -13,3 +13,10 @@
 .homepage-main .cards-container::-webkit-scrollbar {
   display: none;
 }
+
+.homepage-main .piggy-banks-container {
+  max-height: calc((64px + 1rem) * 4 + 64px);
+  overflow-y: auto;
+  text-overflow: ellipsis;
+  scrollbar-width: thin;
+}

@@ -57,9 +57,8 @@ const AddSubscriptionPrompt = (props: {
   // categories that were chosen already.
   const [chosenCategories, setChosenCategories] = useState<string[]>([]);
 
-
-  // fill info if it's edit
-  useEffect(() => {
+  // initialize values (if edit)
+  const initValues = () => {
     if(hasInfo) {
       const {title, amount, chosenCategories, dateRange, description} = hasInfo;
       setTitle(title);
@@ -69,6 +68,11 @@ const AddSubscriptionPrompt = (props: {
       setDateRange(dateRange);
       description && setDescription(description);
     }
+  }
+
+  // fill info if it's edit
+  useEffect(() => {
+    initValues();
   }, [hasInfo]);
 
 
@@ -124,8 +128,10 @@ const AddSubscriptionPrompt = (props: {
   const handleCancel = () => {
     if(!hasInfo) {
       clearValues();
-      clearAlerts();
+    } else {
+      initValues();
     }
+    clearAlerts();
     // show cancel prompt
     setShowCancelPrompt(false);
     // close add transacion prompt

@@ -15,12 +15,15 @@ import { sortArrOfObjectByKey } from "../../../Functions";
 import AddSubscriptionPrompt from "../AddSubscriptionPrompt/AddSubscriptionPrompt";
 import Subscription from "../../../Components/Home/Subscription/Subscription";
 import SideSubscriptionMenu from "../../../Components/Home/SideMenus/Subscription/SideSubscriptionMenu";
+import AddPiggyBankPrompt from "../AddPiggyBankPrompt/AddPiggyBankPrompt";
+import PiggyBank from "../../../Components/Home/PiggyBank/PiggyBank";
+import SidePiggyBankMenu from "../../../Components/Home/SideMenus/PiggyBank/SidePiggyBankMenu";
 
 const Main = () => {
   // navigation
   const {navigateTo, showAddCategoryPrompt, setShowAddCategoryPrompt} = useContext(GeneralContext);
   // list of accounts data.
-  const {accountsData, transactionsData, categoriesData, subscriptionsData} = useContext(AuthContext);
+  const {accountsData, transactionsData, categoriesData, subscriptionsData, piggyBanksData} = useContext(AuthContext);
   // sort setting holder state.
   const [sortByPamentDate, setSortByPaymentDate] = useState<"desc" | "asc">("desc");
   const [sortByTransaction, setSortByTransaction] = useState<"Income" | "Expenses" | "">("");
@@ -42,8 +45,12 @@ const Main = () => {
   const [showTransactionInfo, setShowTransactionInfo] = useState<{show: boolean, data: TransactionData | null}>({show: false, data: null});
   // subscription add prompt holder state
   const [showAddSubscriptionPrompt, setShowAddSubscriptionPrompt] = useState<boolean>(false);
-  // subscription side info meni
+  // subscription side info menu
   const [showSubscriptionInfo, setShowSubscriptionInfo] = useState<{show: boolean, data: SubscriptionData | null}>({show: false, data: null});
+  // piggy bank add prompt.
+  const [showAddPiggyBankPrompt, setShowAddPiggyBankPrompt] = useState<boolean>(false);
+  // piggy bank side menu
+  const [showPiggyBankInfo, setShowPiggyBankInfo] = useState<{show: boolean, data: PiggyBankData | null}>({show: false, data: null});
 
   const filteredTransactionsByCard = transactionsData.filter((transaction: TransactionData) => accountsData[activeCard] && transaction.belongsToAccountWithId === accountsData[activeCard]._id)
                                                      .filter((transaction: TransactionData) => sortByTransaction === "Income" ? transaction.transactionType === "Income" : sortByTransaction === "Expenses" ? transaction.transactionType === "Expenses" : transaction)
@@ -56,7 +63,11 @@ const Main = () => {
   const filteredSubscriptionsByCard = subscriptionsData.filter((subscription: SubscriptionData) => accountsData[activeCard] && subscription.belongsToAccountWithId === accountsData[activeCard]._id)
                                                        .filter((subscription: SubscriptionData) => searchValue.length >= 2 ? subscription.title.toLowerCase().includes(searchValue.toLowerCase().trim()) : subscription)
                                                        .sort((a: SubscriptionData, b: SubscriptionData) => sortByPamentDate === "desc" ? parseInt(b.creationDate) - parseInt(a.creationDate) : parseInt(a.creationDate) - parseInt(b.creationDate));
+
+  const filteredPiggyBanksByCard = piggyBanksData.filter((piggy: PiggyBankData) => accountsData[activeCard] && piggy.belongsToAccountWithId === accountsData[activeCard]._id);
   
+  const currency = accountsData[activeCard] && accountsData[activeCard].currency;
+
   return (
     <>
       <div className="homepage-main container-fluid">
@@ -98,8 +109,6 @@ const Main = () => {
                     filteredSubscriptionsByCard.length ?
                       <div className="d-flex flex-column gap-4">
                         {filteredSubscriptionsByCard.map((subscription: SubscriptionData, key: number) => {
-                          const currency = accountsData[activeCard].currency;
-
                           return <Subscription key={key} subscription={subscription} currency={currency} onclick={() => setShowSubscriptionInfo({show: true, data: subscription})} />
                         })}
                       </div>
@@ -116,10 +125,8 @@ const Main = () => {
                   filteredTransactionsByCard.length ?
                     <div className="d-flex flex-column gap-4">
                       {filteredTransactionsByCard.map((transaction: TransactionData, key: number) => {
-                        const currency = accountsData[activeCard].currency;
-
                         return <Transaction key={key} transaction={transaction} currency={currency} onclick={() => {setShowTransactionInfo({show: true, data: transaction})}} />
-                        })}
+                      })}
                     </div>
                   :
                     <div className="w-100 text-center my-3 overflow-hidden">
@@ -133,23 +140,37 @@ const Main = () => {
             </div>
           </div>
           <div className="col-xl-2 col-lg-3">
-            <div className="d-flex flex-column align-items-end gap-3">
-              <IndicatorButton classname="p-2 fs-5 w-100" type="Income" />
-              <IndicatorButton classname="p-2 fs-5 w-100" type="Expenses"/>
-              {activeCard >= 0 && navigateTo === "none" ? <IndicatorButton classname="p-2 fs-5 w-100" onclick={() => setShowAddTransactionPrompt(true)} type="Add Transaction"/> : null}
-              {navigateTo === "Categories" && <IndicatorButton onclick={() => setShowAddCategoryPrompt(true)} classname="p-2 fs-5 w-100" type="Add Category" />}
-              {navigateTo === "Subscriptions" && <IndicatorButton onclick={() => setShowAddSubscriptionPrompt(true)} classname="p-2 fs-5 w-100" type="Add Subscription" />}
+            <div className="h-100 d-flex flex-column justify-content-between gap-3">
+              <div className="d-flex flex-column align-items-end gap-3">
+                <IndicatorButton classname="p-2 fs-5 w-100" type="Income" />
+                <IndicatorButton classname="p-2 fs-5 w-100" type="Expenses"/>
+                {activeCard >= 0 && navigateTo === "none" ? <IndicatorButton classname="p-2 fs-5 w-100" onclick={() => setShowAddTransactionPrompt(true)} type="Add Transaction"/> : null}
+                {navigateTo === "Categories" && <IndicatorButton onclick={() => setShowAddCategoryPrompt(true)} classname="p-2 fs-5 w-100" type="Add Category" />}
+                {navigateTo === "Subscriptions" && <IndicatorButton onclick={() => setShowAddSubscriptionPrompt(true)} classname="p-2 fs-5 w-100" type="Add Subscription" />}
+              </div>
+              <div className="d-flex flex-column align-items-end gap-3 mb-4">
+                <IndicatorButton onclick={() => setShowAddPiggyBankPrompt(true)} classname="p-2 fs-5 w-100" type="Add Piggy Bank" />
+                {filteredPiggyBanksByCard.length ?
+                  <div className="w-100 piggy-banks-container d-flex flex-column gap-2">
+                    {filteredPiggyBanksByCard.map((piggyBank: PiggyBankData, key: number) => {
+                      return <PiggyBank currency={currency} classname="p-2" onclick={() => setShowPiggyBankInfo({show: true, data: piggyBank})} piggyBankData={piggyBank} key={key} />
+                    })}
+                  </div>
+                : null}
+              </div>
             </div>
           </div>
         </div>
       </div>
       <AddAccountPrompt classname={showAddAccountPrompt ? "show" : ""} setShowAddAccountPrompt={setShowAddAccountPrompt} />
-      {!isNaN(activeCard) && 
+      {!isNaN(activeCard) && accountsData[activeCard] &&
         <>
           <AddTransactionPrompt classname={`${showAddTransactionPrompt ? "show" : ""}`} accountData={accountsData[activeCard]} setShowAddTransactionPrompt={setShowAddTransactionPrompt} />
           <SideTransactionMenu accountData={accountsData[activeCard]} transactionInfo={showTransactionInfo.data && showTransactionInfo.data} setShowSideTransactionMenu={setShowTransactionInfo} classname={`${showTransactionInfo.show && "show"}`} />
           <AddSubscriptionPrompt accountData={accountsData[activeCard]} classname={showAddSubscriptionPrompt ? "show" : ""} setShowAddSubscriptionPrompt={setShowAddSubscriptionPrompt} />
           <SideSubscriptionMenu accountData={accountsData[activeCard]} subscriptionInfo={showSubscriptionInfo.data} setShowSideSubscriptionMenu={setShowSubscriptionInfo} classname={showSubscriptionInfo.show ? "show" : ""} />
+          <AddPiggyBankPrompt accountData={accountsData[activeCard]} classname={showAddPiggyBankPrompt ? "show" : ""} setShowAddPiggyBankPrompt={setShowAddPiggyBankPrompt}/>
+          <SidePiggyBankMenu classname={showPiggyBankInfo.show ? "show" : ""} piggyBankInfo={showPiggyBankInfo.data} setShowPiggyBankMenu={setShowPiggyBankInfo} />
         </>
       }
       <AddCategoryPrompt classname={showAddCategoryPrompt ? "show" : ""} setShowAddCategoryPrompt={setShowAddCategoryPrompt} />

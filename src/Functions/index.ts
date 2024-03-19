@@ -99,6 +99,21 @@ export const updateSubscriptionsData = (currentData: SubscriptionData[], setData
   setData(newSubscriptionsData);
 }
 
+// update piggy banks data in cache and update state
+export const updatePiggyBanksData = (currentData: PiggyBankData[], setData: React.Dispatch<React.SetStateAction<PiggyBankData[]>>, data: {new: PiggyBankData, old: PiggyBankData | undefined}, type: "Insert" | "Update" | "Delete") => {
+  const newPiggyBanksData = [...currentData];
+  if(type === "Insert") {
+    newPiggyBanksData.push(data.new);
+  } else if (type === "Update") {
+    newPiggyBanksData[newPiggyBanksData.indexOf(data.old!)] = data.new;
+  } else if (type === "Delete") {
+    newPiggyBanksData.splice(newPiggyBanksData.indexOf(data.new), 1);
+  }
+
+  window.sessionStorage.setItem("Budgetify-user-piggy-banks-data", JSON.stringify(newPiggyBanksData));
+  setData(newPiggyBanksData);
+}
+
 // update categories data in cache and update state
 export const updateCategoriesData = (currentData: CategoryData[], setData: React.Dispatch<React.SetStateAction<CategoryData[]>>, data: {new: CategoryData, old: CategoryData | undefined}, type: "Insert" | "Update" | "Delete") => {
   const newCategoriesData = [...currentData];

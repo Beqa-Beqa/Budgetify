@@ -14,7 +14,9 @@ export const AuthContext = createContext<{
   categoriesData: CategoryData[],
   setCategoriesData: React.Dispatch<React.SetStateAction<CategoryData[]>>
   subscriptionsData: SubscriptionData[],
-  setSubscriptionsData: React.Dispatch<React.SetStateAction<SubscriptionData[]>>
+  setSubscriptionsData: React.Dispatch<React.SetStateAction<SubscriptionData[]>>,
+  piggyBanksData: PiggyBankData[],
+  setPiggyBanksData: React.Dispatch<React.SetStateAction<PiggyBankData[]>>
 }>({
   currentUserData: {},
   setCurrentUserData: () => {},
@@ -25,7 +27,9 @@ export const AuthContext = createContext<{
   categoriesData: [],
   setCategoriesData: () => {},
   subscriptionsData: [],
-  setSubscriptionsData: () => {}
+  setSubscriptionsData: () => {},
+  piggyBanksData: [],
+  setPiggyBanksData: () => {}
 });
 
 const AuthContextProvider = (props: {children: React.ReactNode}) => {
@@ -34,7 +38,7 @@ const AuthContextProvider = (props: {children: React.ReactNode}) => {
   const [transactionsData, setTransactionsData] = useState<TransactionData[]>(JSON.parse(window.sessionStorage.getItem("Budgetify-user-transactions-data") || "{}") || [])
   const [categoriesData, setCategoriesData] = useState<CategoryData[]>(JSON.parse(window.sessionStorage.getItem("Budgetify-user-categories-data") || "{}") || []);
   const [subscriptionsData, setSubscriptionsData] = useState<SubscriptionData[]>(JSON.parse(window.sessionStorage.getItem("Budgetify-user-subscriptions-data") || "{}") || []);
-
+  const [piggyBanksData, setPiggyBanksData] = useState<PiggyBankData[]>(JSON.parse(window.sessionStorage.getItem("Budgetify-user-piggy-banks-data") || "{}") || []);
 
   const makeSubscriptionPayment = async (subscription: SubscriptionData, account: AccountData, monthNumber: number, curYear: string, paymentDay: number) => {
     // transaction related
@@ -161,7 +165,9 @@ const AuthContextProvider = (props: {children: React.ReactNode}) => {
         categoriesData, 
         setCategoriesData,
         subscriptionsData,
-        setSubscriptionsData
+        setSubscriptionsData,
+        piggyBanksData,
+        setPiggyBanksData
       }}
     >
       {props.children}
