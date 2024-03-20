@@ -3,14 +3,13 @@ import "./addSubscriptionPrompt.css";
 import { HiXMark } from "react-icons/hi2";
 import FormInput from "../../../Components/Home/FormInput/FormInput";
 import { handleTitleChange, handleCategorySelect, handleCategoryUnselect, handleAmountChange, handleDescriptionChange, handleDateChangeAlert } from "../sharedFunctions";
-import { getCategoryNameById, divideByThousands, clearFormStringValues, getGlobalTimeUnix, updateSubscriptionsData, subscriptionExistsByTitle } from "../../../Functions";
+import { getCategoryNameById, divideByThousands, clearFormStringValues, getGlobalTimeUnix, updateSubscriptionsData, subscriptionExistsByTitle, editSubscription, createSubscription } from "../../../Functions";
 import { defExpenseCategories } from "../../../Data";
 import { AuthContext } from "../../../Contexts/AuthContextProvider";
 import ActionPrompt from "../../../Components/Home/ActionPrompt/ActionPrompt";
 import { GeneralContext } from "../../../Contexts/GeneralContextProvider";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { createSubscriptionApi, editSubscriptionApi } from "../../../apiURLs";
 
 const AddSubscriptionPrompt = (props: {
   setShowAddSubscriptionPrompt: React.Dispatch<React.SetStateAction<boolean>>,
@@ -85,22 +84,18 @@ const AddSubscriptionPrompt = (props: {
 
 
   // Current global time, retrieved after component mount.
-  const [curDate, setCurDate] = useState<string>(JSON.parse(window.sessionStorage.getItem("budgetify-current-date") || "{}"));
+  const [curDate, setCurDate] = useState<string>("");
   // get current global time 
   useEffect(() => {
     // due to js getting date from OS, when date is changed on client's device
     // this will provide is with incorrect data, therefore we need more reliable source.
     const getDate = async () => {
-      if(typeof curDate !== "string") {
-        // get data.
-        const currentTime = await getGlobalTimeUnix();
-        // get year, month and day.
-        const dateToSave = new Date(currentTime).toLocaleString().split(",")[0];
-        // update date state.
-        setCurDate(dateToSave);
-        // save date to sessionstorage.
-        window.sessionStorage.setItem("budgetify-current-date", JSON.stringify(dateToSave));
-      }
+      // get data.
+      const currentTime = await getGlobalTimeUnix();
+      // get year, month and day.
+      const dateToSave = new Date(currentTime).toLocaleString().split(",")[0];
+      // update date state.
+      setCurDate(dateToSave);
     }
 
     getDate();
@@ -169,14 +164,22 @@ const AddSubscriptionPrompt = (props: {
       // if mandatories are filled
       if(!titleAlert.error && !descriptionAlert.error && !amountAlert.error && !startDateAlert.error && !endDateAlert.error) {
         try {
-          const subscriptionBody = hasInfo ? 
-            JSON.stringify({
+          // subscription variable that's used for updating data
+          let subscription;
+
+          if(hasInfo) {
+            // if it's edit create edit body
+            const rqbody = {
               subscriptionId: hasInfo._id,
               belongsToAccountWithId: hasInfo.belongsToAccountWithId,
               fields: {title, description, amount, dateRange, startDate: startDateString, endDate: endDateString, chosenCategories}
-            })
-          :
-            JSON.stringify({
+            }
+
+            // send edit request
+            subscription = await editSubscription(rqbody);
+          } else {
+            // otherwise create creation body
+            const rqbody = {
               belongsToAccountWithId: props.accountData._id,
               title, 
               description, 
@@ -185,21 +188,11 @@ const AddSubscriptionPrompt = (props: {
               startDate: startDateString,
               endDate: endDateString, 
               chosenCategories
-            });
+            }
 
-          // make request.
-          const subscriptionResult = await fetch(hasInfo ? editSubscriptionApi : createSubscriptionApi, {
-            method: hasInfo ? "PATCH" : "POST",
-            mode: "cors",
-            cache: "no-cache",
-            headers: {
-              "Content-Type": "application/json"
-            },
-            body: subscriptionBody
-          });
-
-          // result
-          const subscription = await subscriptionResult.json();
+            // send creation request
+            subscription = await createSubscription(rqbody);
+          }
 
           if(hasInfo) {
             updateSubscriptionsData(subscriptionsData, setSubscriptionsData, {new: subscription, old: props.subscriptionInfo}, "Update");

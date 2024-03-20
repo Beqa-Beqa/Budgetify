@@ -2,9 +2,8 @@ import { useState, useEffect, useContext } from "react";
 import "./addPiggyBankPrompt.css";
 import { HiXMark } from "react-icons/hi2";
 import FormInput from "../../../Components/Home/FormInput/FormInput";
-import { clearFormStringValues, divideByThousands, getGlobalTimeUnix, removeThousandsCommas, updateAccountsData, updatePiggyBanksData } from "../../../Functions";
+import { clearFormStringValues, divideByThousands, editAccount, editPiggyBank, getGlobalTimeUnix, removeThousandsCommas, updateAccountsData, updatePiggyBanksData } from "../../../Functions";
 import { handleAmountChange, handleDateChange } from "../sharedFunctions";
-import { editAccountApi, editPiggyBankApi } from "../../../apiURLs";
 import { AuthContext } from "../../../Contexts/AuthContextProvider";
 import { GeneralContext } from "../../../Contexts/GeneralContextProvider";
 
@@ -87,57 +86,35 @@ const AddPiggyAmount = (props: {
       if (!amountAlert.error && !dateAlert.error) {
         // if mandatories are filled and no errors.
         try {
-          // new current amount to save for piggy bank
-          const newCurrentAmount = divideByThousands(removeThousandsCommas(info.currentAmount) + removeThousandsCommas(amount));
-          // piggy body
-          const piggyBody = JSON.stringify({
-            belongsToAccountWithId: info.belongsToAccountWithId,
-            piggyBankId: info._id,
-            fields: {currentAmount: newCurrentAmount, payments: [...info.payments, {amount, date}]}
-          });
-
-
           if(acc) {
             // new account amount (subtract amount which is added to piggy bank from the account)
             const newAccAmount = divideByThousands(removeThousandsCommas(acc.amount) - removeThousandsCommas(amount));
 
             // acc body
-            const accountBody = JSON.stringify({
+            const accountBody = {
               infoForEdit: {
                 accId: info.belongsToAccountWithId,
                 fields: {amount: newAccAmount}
               }
-            });
-
-            // account edit request
-            const accountRes = await fetch(editAccountApi, {
-              method: "PATCH",
-              mode: "cors",
-              cache: "no-cache",
-              headers: {
-                "Content-Type": "application/json"
-              },
-              body: accountBody
-            });
+            };
 
             // account
-            const account = await accountRes.json();
+            const account = await editAccount(accountBody);
             // update info in cache and state
             updateAccountsData(accountsData, setAccountsData, {new: account, old: acc}, "Update");
           }
 
+          // new current amount to save for piggy bank
+          const newCurrentAmount = divideByThousands(removeThousandsCommas(info.currentAmount) + removeThousandsCommas(amount));
+          // piggy body
+          const piggyBody = {
+            belongsToAccountWithId: info.belongsToAccountWithId,
+            piggyBankId: info._id,
+            fields: {currentAmount: newCurrentAmount, payments: [...info.payments, {amount, date}]}
+          };
+          
           // piggy bank edit request.
-          const piggyRes = await fetch(editPiggyBankApi, {
-            method: "PATCH",
-            mode: "cors",
-            cache: "no-cache",
-            headers: {
-              "Content-Type": "application/json"
-            },
-            body: piggyBody
-          });
-          // edited piggy
-          const piggy = await piggyRes.json();
+          const piggy = await editPiggyBank(piggyBody);
           // update info in state and cache
           updatePiggyBanksData(piggyBanksData, setPiggyBanksData, {new: piggy, old: info}, "Update");
           // clear values

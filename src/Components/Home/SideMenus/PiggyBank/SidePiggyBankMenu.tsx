@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext, useState, useEffect } from "react";
 import "./sidePiggyBankMenu.css";
 import "../../PiggyBank/piggyBank.css";
 import { MdOutlineModeEdit } from "react-icons/md";
@@ -9,8 +9,11 @@ import { AuthContext } from "../../../../Contexts/AuthContextProvider";
 import AccountInfoField from "../../AccountInfoFIeld/AccountInfoFIeld";
 import { PiggyIcon } from "../../../../Assets/Home";
 import AddPiggyAmount from "../../../../Containers/Home/AddPiggyBankPrompt/AddPiggyAmount";
-import { createCategory, createTransaction, deletePiggyBank, divideByThousands, editAccount, removeThousandsCommas, updateAccountsData, updateCategoriesData, updatePiggyBanksData, updateTransactionsData } from "../../../../Functions";
-import { createCategoryApi, createTransactionApi, deletePiggyBankApi, editAccountApi } from "../../../../apiURLs";
+import { 
+  createCategory, createTransaction, deletePiggyBank, 
+  divideByThousands, editAccount, removeThousandsCommas, 
+  updateAccountsData, updateCategoriesData, updatePiggyBanksData, 
+  updateTransactionsData, getGlobalTimeUnix } from "../../../../Functions";
 import {v4 as uuid} from "uuid";
 import { GeneralContext } from "../../../../Contexts/GeneralContextProvider";
 
@@ -47,14 +50,30 @@ const SidePiggyBankMenu = (props: {
   const [showCrashPrompt, setShowCrashPrompt] = useState<boolean>(false);
   const [showAddAmountPrompt, setShowAddAmountPrompt] = useState<boolean>(false);
 
+  // Current global time, retrieved after component mount.
+  const [curDate, setCurDate] = useState<string>("");
+
+  // get current global time 
+  useEffect(() => {
+    // due to js getting date from OS, when date is changed on client's device
+    // this will provide is with incorrect data, therefore we need more reliable source.
+    const getDate = async () => {
+      // get data.
+      const currentTime = await getGlobalTimeUnix();
+      // get year, month and day.
+      const dateToSave = new Date(currentTime).toLocaleString().split(",")[0];
+      // update date state.
+      setCurDate(dateToSave);
+    }
+
+    getDate();
+  }, []);
+
   // handle crash
   const handleCrash = async () => {
     if(info) {
       // if info is present.
       try {
-        // new account amount (piggy bank collected amount is added to the current account amount).
-        const newAccAmount = divideByThousands(removeThousandsCommas(accInfo!.amount) + removeThousandsCommas(info.currentAmount));
-
         // delete piggy bank
         await deletePiggyBank({belongsToAccountWithId: info.belongsToAccountWithId, piggyBankId: info._id});
 
@@ -68,6 +87,8 @@ const SidePiggyBankMenu = (props: {
           });
           
           // account edit request.
+          // new account amount (piggy bank collected amount is added to the current account amount).
+          const newAccAmount = divideByThousands(removeThousandsCommas(accInfo!.amount) + removeThousandsCommas(info.currentAmount));
           const editedAccount: AccountData = await editAccount({
             infoForEdit: {
               accId: accInfo!._id,
@@ -75,25 +96,22 @@ const SidePiggyBankMenu = (props: {
             }
           });
   
-          // transaction create request.
-          // const transactionRes = await createTransaction({
-          //   id: uuid(),
-          //   belongsToAccountWithId: accInfo!._id,
-          //   transactionType: "Income",
-          //   title: info.goal,
-          //   description: "",
-          //   amount: info.currentAmount,
-          //   date: JSON.parse(window.sessionStorage.getItem("budgetify-current-date")!) || new Date().toString().split(",")[0],
-          //   chosenCategories: [createdCategory._id],
-          //   payee: "",
-          // });
-  
-          // created transaction
-          // const transaction = await transactionRes.json();
+          //create transaction
+          const createdTransaction: TransactionData = await createTransaction({
+            id: uuid(),
+            belongsToAccountWithId: accInfo!._id,
+            transactionType: "Income",
+            title: info.goal,
+            description: "",
+            amount: info.currentAmount,
+            date: curDate,
+            chosenCategories: [createdCategory._id],
+            payee: "",
+          });
   
           // update all the data in cache and states.
           updateCategoriesData(categoriesData, setCategoriesData, {new: createdCategory, old: undefined}, "Insert");
-          // updateTransactionsData(transactionsData, setTransactionsData, {new: transaction, old: undefined}, "Insert");
+          updateTransactionsData(transactionsData, setTransactionsData, {new: createdTransaction, old: undefined}, "Insert");
           updateAccountsData(accountsData, setAccountsData, {new: editedAccount, old: accInfo!}, "Update");
         }
 

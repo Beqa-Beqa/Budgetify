@@ -4,11 +4,10 @@ import { FaRegTrashCan } from "react-icons/fa6";
 import { HiXMark } from "react-icons/hi2";
 import AccountInfoField from "../../AccountInfoFIeld/AccountInfoFIeld";
 import { useContext, useState } from "react";
-import { getCategoryNameById, updateSubscriptionsData } from "../../../../Functions";
+import { deleteSubscription, getCategoryNameById, updateSubscriptionsData } from "../../../../Functions";
 import { AuthContext } from "../../../../Contexts/AuthContextProvider";
 import AddSubscriptionPrompt from "../../../../Containers/Home/AddSubscriptionPrompt/AddSubscriptionPrompt";
 import ActionPrompt from "../../ActionPrompt/ActionPrompt";
-import { deleteSubscriptionApi } from "../../../../apiURLs";
 import { GeneralContext } from "../../../../Contexts/GeneralContextProvider";
 
 const SideSubscriptionMenu = (props: {
@@ -33,23 +32,9 @@ const SideSubscriptionMenu = (props: {
   const handleDelete = async () => {
     if(info) {
       // if we have subscription info present
-      // body to send for subscription delete request
-      const subscriptionBody = JSON.stringify({
-        subscriptionId: info._id, 
-        belongsToAccountWithId: info.belongsToAccountWithId
-      });
-
       try {
-        // delete subscription request
-        await fetch(deleteSubscriptionApi, {
-          method: "POST",
-          cache: "no-cache",
-          mode: "cors",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: subscriptionBody
-        });
+        // delete subscription
+        await deleteSubscription({subscriptionId: info._id, belongsToAccountWithId: info.belongsToAccountWithId});
 
         // update subscriptions data
         updateSubscriptionsData(subscriptionsData, setSubscriptionsData, {new: info, old: undefined}, "Delete");

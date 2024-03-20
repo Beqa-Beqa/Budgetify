@@ -1,6 +1,9 @@
 import { 
   deleteAccountApi, deletePiggyBankApi, getGlobalTimeUnixApi, 
-  deleteCategoryApi, createCategoryApi, editAccountApi, createTransactionApi
+  deleteCategoryApi, createCategoryApi, editAccountApi, createTransactionApi,
+  deleteSubscriptionApi, deleteTransactionApi, createAccountApi,
+  editCategoryApi, createPiggyBankApi, editPiggyBankApi, createSubscriptionApi,
+  editSubscriptionApi, editTransactionApi
 } from "../apiURLs";
 
 export const accountExistsByTitle = (accArr: AccountData[], title: string) => {
@@ -156,10 +159,153 @@ export const getCategoryNameById = (categoriesData: CategoryData[], id: string) 
 
 // API call handlers
 
+
+// accounts
+export const addAccount = async (fields: {
+  userId: string, 
+  accountData: {
+    title: string,
+    currency: string,
+    amount: string,
+    description: string,
+  }
+}
+) => {
+const body = JSON.stringify(fields);
+const account = await fetch(createAccountApi, {
+  method: "POST",
+  mode: "cors",
+  cache: "no-cache",
+  headers: {
+    "Content-type": "application/json"
+  },
+  body
+});
+
+return await account.json();
+}
+
+export const editAccount = async (fields: {infoForEdit: {accId: string, fields: {
+owner?: string,
+title?: string,
+currency?: string,
+amount?: string,
+description?: string,
+}}}) => {
+const body = JSON.stringify(fields);
+const account = await fetch(editAccountApi, {
+  method: "PATCH",
+  mode: "cors",
+  cache: "no-cache",
+  headers: {
+    "Content-Type": "application/json"
+  },
+  body
+});
+
+return await account.json();
+}
+
+export const deleteAccount = async (fields: {accId: string, userId: string}) => {
+const body = JSON.stringify(fields);
+await fetch(deleteAccountApi, {
+  method: "POST",
+  mode: "cors",
+  cache: "no-cache",
+  headers: {
+    "Content-Type": "application/json"
+  },
+  body
+});
+}
+
+
+
+// transactions
+export const createTransaction = async (fields: {
+  id: string,
+  belongsToAccountWithId: string,
+  transactionType: string,
+  title: string,
+  amount: string,
+  date: string,
+  payee: string,
+  chosenCategories: string[],
+  description: string,
+}) => {
+  const body = JSON.stringify(fields);
+  const transaction = await fetch(createTransactionApi, {
+    method: "POST",
+    mode: "cors",
+    cache: "no-cache",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body
+  });
+
+  return await transaction.json();
+}
+
+export const editTransaction = async (fields: {}) => {
+  const body = JSON.stringify(fields);
+  const transaction = await fetch(editTransactionApi, {
+    method: "PATCH",
+    mode: "cors",
+    cache: "no-cache",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body
+  });
+
+  return await transaction.json();
+}
+
+export const deleteTransaction = async (fields: {transactionId: string, belongsToId: string}) => {
+  const body = JSON.stringify(fields);
+  await fetch(deleteTransactionApi, {
+    method: "POST",
+    cache: "no-cache",
+    mode: "cors",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body
+  });
+}
+
+
+
+// categories
 export const createCategory = async (fields: {owner: string, transactionType: string, title: string}) => {
   const body = JSON.stringify(fields);
   const category = await fetch(createCategoryApi, {
     method: "POST",
+    mode: "cors",
+    cache: "no-cache",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body
+  });
+
+  return await category.json();
+}
+
+export const editCategory = async (fields: {
+  infoForEdit: {
+    owner: string,
+    categoryId: string,
+    fields: {
+      title?: string,
+      transactionType?: string
+    }
+  }
+}) => {
+  const body = JSON.stringify(fields);
+  const category = await fetch(editCategoryApi, {
+    method: "PATCH",
     mode: "cors",
     cache: "no-cache",
     headers: {
@@ -184,15 +330,51 @@ export const deleteCategory = async (fields: {owner: string, categoryId: string}
   });
 }
 
-export const editAccount = async (fields: {infoForEdit: {accId: string, fields: {
-  owner?: string,
-  title?: string,
-  currency?: string,
-  amount?: string,
-  description?: string,
-}}}) => {
+
+
+// subscriptions
+export const createSubscription = async (fields: {
+  belongsToAccountWithId: string,
+  title: string,
+  description: string,
+  amount: string,
+  dateRange: [Date | null, Date | null],
+  startDate: string | null,
+  endDate: string | null,
+  chosenCategories: string[]
+}) => {
   const body = JSON.stringify(fields);
-  const account = await fetch(editAccountApi, {
+  const subscription = await fetch(createSubscriptionApi, {
+    method: "POST",
+    mode: "cors",
+    cache: "no-cache",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body
+  });
+
+  return await subscription.json();
+}
+
+export const editSubscription = async (fields: {
+  subscriptionId: string,
+  belongsToAccountWithId: string,
+  fields: {
+    year?: number,
+    months?: number[],
+    belongsToAccountWithId?: string,
+    title?: string,
+    chosenCategories?: string[],
+    amount?: string,
+    dateRange?: [Date | null, Date | null],
+    startDate?: string | null,
+    endDate?: string | null,
+    description?: string
+  }
+}) => {
+  const body = JSON.stringify(fields);
+  const subscription = await fetch(editSubscriptionApi, {
     method: "PATCH",
     mode: "cors",
     cache: "no-cache",
@@ -202,12 +384,28 @@ export const editAccount = async (fields: {infoForEdit: {accId: string, fields: 
     body
   });
 
-  return await account.json();
+  return await subscription.json();
 }
 
-export const deleteAccount = async (fields: {accId: string, userId: string}) => {
+export const deleteSubscription = async (fields: {subscriptionId: string, belongsToAccountWithId: string}) => {
   const body = JSON.stringify(fields);
-  await fetch(deleteAccountApi, {
+  await fetch(deleteSubscriptionApi, {
+    method: "POST",
+    cache: "no-cache",
+    mode: "cors",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body
+  });
+}
+
+
+
+// piggy banks
+export const createPiggyBank = async (fields: {belongsToAccountWithId: string, goal: string, goalAmount: string}) => {
+  const body = JSON.stringify(fields);
+  const piggyBank = await fetch(createPiggyBankApi, {
     method: "POST",
     mode: "cors",
     cache: "no-cache",
@@ -215,7 +413,33 @@ export const deleteAccount = async (fields: {accId: string, userId: string}) => 
       "Content-Type": "application/json"
     },
     body
+  })
+
+  return await piggyBank.json();
+}
+
+export const editPiggyBank = async (fields: {
+  belongsToAccountWithId: string,
+  piggyBankId: string,
+  fields: {
+    goal?: string,
+    goalAmount?: string,
+    currentAmount?: string,
+    payments?: {amount: string, date: string}[] 
+  }
+}) => {
+  const body = JSON.stringify(fields);
+  const piggyBank = await fetch(editPiggyBankApi, {
+    method:"PATCH",
+    mode: "cors",
+    cache: "no-cache",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body
   });
+
+  return await piggyBank.json();
 }
 
 export const deletePiggyBank = async (fields: {belongsToAccountWithId: string, piggyBankId: string}) => {
@@ -229,31 +453,4 @@ export const deletePiggyBank = async (fields: {belongsToAccountWithId: string, p
     },
     body
   });
-}
-
-export const createTransaction = async (fields: {
-  id: string,
-  belongsToAccountWithId: string,
-  transactionType: string,
-  title: string,
-  amount: string,
-  date: string,
-  payee: string,
-  chosenCategories: string[],
-  creationDate: string,
-  updateDate: string,
-  description: string,
-}) => {
-  const body = JSON.stringify(fields);
-  const transaction = await fetch(createTransactionApi, {
-    method: "POST",
-    mode: "cors",
-    cache: "no-cache",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body
-  });
-
-  return await transaction.json();
 }

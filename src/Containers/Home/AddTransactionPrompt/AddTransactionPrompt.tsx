@@ -4,11 +4,10 @@ import "../AddAccountPrompt/addAccountPrompt.css";
 import "./addTransactionPrompt.css";
 import ActionPrompt from "../../../Components/Home/ActionPrompt/ActionPrompt";
 import { handleDescriptionChange, handleTitleChange, handleAmountChange } from "../sharedFunctions";
-import { clearFormStringValues, divideByThousands, getGlobalTimeUnix, removeThousandsCommas, updateTransactionsData, updateAccountsData, getCategoryNameById } from "../../../Functions";
+import { clearFormStringValues, divideByThousands, getGlobalTimeUnix, removeThousandsCommas, updateTransactionsData, updateAccountsData, getCategoryNameById, editTransaction, createTransaction, editAccount } from "../../../Functions";
 import { HiXMark } from "react-icons/hi2";
 import { AuthContext } from "../../../Contexts/AuthContextProvider";
 import { handleTransactionTypeChange, handleDateChange, handleCategorySelect, handleCategoryUnselect} from "../sharedFunctions";
-import { createTransactionApi, editAccountApi, editTransactionApi } from "../../../apiURLs";
 import IndicatorButton from "../../../Components/Home/IndicatorButton/IndicatorButton";
 import { GeneralContext } from "../../../Contexts/GeneralContextProvider";
 import { defExpenseCategories, defIncomeCategories } from "../../../Data";
@@ -52,23 +51,19 @@ const AddTransactionPrompt = (props: {
   }, [hasInfo]);
 
   // Current global time, retrieved after component mount.
-  const [curDate, setCurDate] = useState<string>(JSON.parse(window.sessionStorage.getItem("budgetify-current-date") || "{}"));
+  const [curDate, setCurDate] = useState<string>("");
 
   // get current global time 
   useEffect(() => {
     // due to js getting date from OS, when date is changed on client's device
     // this will provide is with incorrect data, therefore we need more reliable source.
     const getDate = async () => {
-      if(typeof curDate !== "string") {
-        // get data.
-        const currentTime = await getGlobalTimeUnix();
-        // get year, month and day.
-        const dateToSave = new Date(currentTime).toLocaleString().split(",")[0];
-        // update date state.
-        setCurDate(dateToSave);
-        // save date to sessionstorage.
-        window.sessionStorage.setItem("budgetify-current-date", JSON.stringify(dateToSave));
-      }
+      // get data.
+      const currentTime = await getGlobalTimeUnix();
+      // get year, month and day.
+      const dateToSave = new Date(currentTime).toLocaleString().split(",")[0];
+      // update date state.
+      setCurDate(dateToSave);
     }
 
     getDate();
@@ -198,14 +193,22 @@ const AddTransactionPrompt = (props: {
           // expected format from server: {transactionId: string, belongsToId: string, fields: {fields to update}}
           // for create prompt, build body for creating transaction.
           // expected format: {transactionData: {all the fields}}
-          const transactionBody = hasInfo ? 
-            JSON.stringify({
+
+          let transaction;
+
+          if(hasInfo) {
+            const rqbody = {
               transactionId: hasInfo.id,
               belongsToId: hasInfo.belongsToAccountWithId,
               fields: {transactionType, title, description, amount, date, chosenCategories, payee}
-            })
-          :
-            JSON.stringify({
+            }
+
+            transaction = await editTransaction(rqbody);
+
+            // if it was edit, update transactions data.
+            updateTransactionsData(transactionsData, setTransactionsData, {new: transaction, old: props.transactionData}, "Update");
+          } else {
+            const rqbody = {
               id: uid,
               belongsToAccountWithId: props.accountData._id,
               transactionType, 
@@ -215,18 +218,13 @@ const AddTransactionPrompt = (props: {
               date, 
               chosenCategories,
               payee
-            });
+            }
 
-          // make request.
-          const transactionResult = await fetch(hasInfo ? editTransactionApi : createTransactionApi, {
-            method: hasInfo ? "PATCH" : "POST",
-            mode: "cors",
-            cache: "no-cache",
-            headers: {
-              "Content-Type": "application/json"
-            },
-            body: transactionBody
-          });
+            transaction = await createTransaction(rqbody);
+
+            // if it was creation, insert new data.
+            updateTransactionsData(transactionsData, setTransactionsData, {new: transaction, old: undefined}, "Insert");
+          }
 
           // Amount to send is for account (when transaction is made, account balance should be updated too)
           // if it's an edit prompt and in edit we set transaction type to income and previous type was also income
@@ -252,33 +250,13 @@ const AddTransactionPrompt = (props: {
             : accVal - editTransVal;
 
           // body to send for account update request.
-          const accountBody = JSON.stringify({infoForEdit: {
+          const accountBody = {infoForEdit: {
             accId: props.accountData._id,
             fields: {amount: amountToSend.toString()}
-          }})
+          }};
+          
+          const account = await editAccount(accountBody);
 
-          // send account update request.
-          const accountResult = await fetch(editAccountApi, {
-            method: "PATCH",
-            mode: "cors",
-            cache: "no-cache",
-            headers: {
-              "Content-Type": "application/json"
-            },
-            body: accountBody
-          });
-
-          // results.
-          const transaction = await transactionResult.json();
-          const account = await accountResult.json();
-
-          if(hasInfo) {
-            // if it was edit, update transactions data.
-            updateTransactionsData(transactionsData, setTransactionsData, {new: transaction, old: props.transactionData}, "Update");
-          } else {
-            // if it was creation, insert new data.
-            updateTransactionsData(transactionsData, setTransactionsData, {new: transaction, old: undefined}, "Insert");
-          }
           // update accounts data.
           updateAccountsData(accountsData, setAccountsData, {new: account, old: props.accountData}, "Update");
 

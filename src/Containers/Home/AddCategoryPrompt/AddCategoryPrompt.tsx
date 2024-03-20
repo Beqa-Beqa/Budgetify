@@ -5,9 +5,8 @@ import IndicatorButton from "../../../Components/Home/IndicatorButton/IndicatorB
 import FormInput from "../../../Components/Home/FormInput/FormInput";
 import { useContext, useEffect, useRef, useState } from "react";
 import { handleTitleChange } from "../sharedFunctions";
-import { categoryExistsByTitle, clearFormStringValues, updateCategoriesData } from "../../../Functions";
+import { categoryExistsByTitle, clearFormStringValues, createCategory, editCategory, updateCategoriesData } from "../../../Functions";
 import { AuthContext } from "../../../Contexts/AuthContextProvider";
-import { createCategoryApi, editCategoryApi } from "../../../apiURLs";
 import { GeneralContext } from "../../../Contexts/GeneralContextProvider";
 import ActionPrompt from "../../../Components/Home/ActionPrompt/ActionPrompt";
 
@@ -78,27 +77,25 @@ const AddCategoryPrompt = (props: {
   const handleSave = async () => {
     if(title) {
       const owner = (currentUserData as CurrentUserData)._id
-      const createBody = JSON.stringify({owner, title, transactionType});
-      const editBody = hasInfo && JSON.stringify({infoForEdit: {
-        owner: hasInfo.owner,
-        categoryId: hasInfo._id,
-        fields: {title, transactionType}
-      }});
 
       try {
-        const response = await fetch(hasInfo ? editCategoryApi : createCategoryApi, {
-          method: hasInfo ? "PATCH" : "POST",
-          mode: "cors",
-          cache: "no-cache",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: editBody || createBody
-        });
+        let categoryResponse;
 
-        const createdCategory = await response.json();
+        if(hasInfo) {
+          const rqbody = {infoForEdit: {
+            owner: hasInfo.owner,
+            categoryId: hasInfo._id,
+            fields: {title, transactionType}
+          }}
+
+          categoryResponse = await editCategory(rqbody);
+        } else {
+          const rqbody = {owner, title, transactionType}
+          
+          categoryResponse = await createCategory(rqbody);
+        }
   
-        updateCategoriesData(categoriesData, setCategoriesData, {new: createdCategory, old: hasInfo}, hasInfo ? "Update" : "Insert");
+        updateCategoriesData(categoriesData, setCategoriesData, {new: categoryResponse, old: hasInfo}, hasInfo ? "Update" : "Insert");
         setShowToastMessage({show: true, text: hasInfo ? "Updates saved successfully" :  "A category created successfully"});
         clearValues();
         props.setShowAddCategoryPrompt(false);

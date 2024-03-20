@@ -8,9 +8,8 @@ import AccountInfoField from "../../AccountInfoFIeld/AccountInfoFIeld";
 import { FaImage } from "react-icons/fa";
 import { GoArrowDown } from "react-icons/go";
 import AddTransactionPrompt from "../../../../Containers/Home/AddTransactionPrompt/AddTransactionPrompt";
-import { deleteTransactionApi, editAccountApi } from "../../../../apiURLs";
 import ActionPrompt from "../../ActionPrompt/ActionPrompt";
-import { getCategoryNameById, removeThousandsCommas, updateAccountsData, updateTransactionsData } from "../../../../Functions";
+import { deleteTransaction, divideByThousands, editAccount, getCategoryNameById, removeThousandsCommas, updateAccountsData, updateTransactionsData } from "../../../../Functions";
 import { AuthContext } from "../../../../Contexts/AuthContextProvider";
 import { GeneralContext } from "../../../../Contexts/GeneralContextProvider";
 
@@ -38,52 +37,26 @@ const SideTransactionMenu = (props: {
   const handleDelete = async () => {
     if(info) {
       // if we have transaction info present
-      // body to send for transaction delete request
-      const transactionBody = JSON.stringify({
-        transactionId: info.id, 
-        belongsToId: info.belongsToAccountWithId
-      });
-
-      // amount with which we update account
-      const amountToSend = info.transactionType === "Income" ?
-      removeThousandsCommas(acc.amount) - removeThousandsCommas(info.amount)
-      : removeThousandsCommas(acc.amount) + removeThousandsCommas(info.amount);
-      // account edit request body
-      const accountBody = JSON.stringify({infoForEdit: {
-        accId: acc._id,
-        fields: {amount: amountToSend}
-      }});
 
       try {
         // delete transaction request
-        await fetch(deleteTransactionApi, {
-          method: "POST",
-          cache: "no-cache",
-          mode: "cors",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: transactionBody
-        });
+        deleteTransaction({transactionId: info.id, belongsToId: info.belongsToAccountWithId});
+
+        // amount with which we update account
+        const amountToSend = info.transactionType === "Income" ?
+        divideByThousands(removeThousandsCommas(acc.amount) - removeThousandsCommas(info.amount))
+        : divideByThousands(removeThousandsCommas(acc.amount) + removeThousandsCommas(info.amount));
 
         // edit account request
-        const accRes = await fetch(editAccountApi, {
-          method: "PATCH",
-          cache: "no-cache",
-          mode: "cors",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: accountBody
-        });
-
-        // this result will be updated account.
-        const updatedAccount = await accRes.json();
+        const editedAccount = await editAccount({infoForEdit: {
+          accId: acc._id,
+          fields: {amount: amountToSend}
+        }});
 
         // update transactions data
         updateTransactionsData(transactionsData, setTransactionsData, {new: info, old: undefined}, "Delete");
         // update accounts data
-        updateAccountsData(accountsData, setAccountsData, {new: updatedAccount, old: acc}, "Update");
+        updateAccountsData(accountsData, setAccountsData, {new: editedAccount, old: acc}, "Update");
         // show confirmation message
         setShowToastMessage({show: true, text: "Transaction was successfully removed"});
         // close delete confirmation prompt

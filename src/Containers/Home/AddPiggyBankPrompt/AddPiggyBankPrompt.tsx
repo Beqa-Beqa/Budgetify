@@ -4,8 +4,7 @@ import FormInput from "../../../Components/Home/FormInput/FormInput";
 import { useRef, useState, useEffect, useContext } from "react";
 import { handleTitleChange, handleAmountChange } from "../sharedFunctions";
 import ActionPrompt from "../../../Components/Home/ActionPrompt/ActionPrompt";
-import { divideByThousands, clearFormStringValues, updatePiggyBanksData } from "../../../Functions";
-import { createPiggyBankApi, editPiggyBankApi } from "../../../apiURLs";
+import { divideByThousands, clearFormStringValues, updatePiggyBanksData, editPiggyBank, createPiggyBank } from "../../../Functions";
 import { AuthContext } from "../../../Contexts/AuthContextProvider";
 import { GeneralContext } from "../../../Contexts/GeneralContextProvider";
 
@@ -84,26 +83,20 @@ const AddPiggyBankPrompt = (props: {
     if(mandatoriesFilled) {
       if(!goalAlert.error && !goalAmountAlert.error) {
         try {
-          const piggyBankBody = hasInfo ?
-            JSON.stringify({
+          let piggyBank;
+
+          if(hasInfo) {
+            const rqbody = {
               belongsToAccountWithId: hasInfo.belongsToAccountWithId, 
               piggyBankId: hasInfo._id,
               fields: {goal, goalAmount}
-            })
-          :
-            JSON.stringify({belongsToAccountWithId: props.accountData._id, goal, goalAmount});
+            }
 
-          const piggyBankResult = await fetch(hasInfo ? editPiggyBankApi : createPiggyBankApi, {
-            method: hasInfo ? "PATCH" : "POST",
-            mode: "cors",
-            cache: "no-cache",
-            headers: {
-              "Content-Type": "application/json"
-            },
-            body: piggyBankBody
-          });
-
-          const piggyBank = await piggyBankResult.json();
+            piggyBank = await editPiggyBank(rqbody);
+          } else {
+            const rqbody = {belongsToAccountWithId: props.accountData._id, goal, goalAmount};
+            piggyBank = await createPiggyBank(rqbody);
+          }
 
           clearValues();
           clearAlerts();

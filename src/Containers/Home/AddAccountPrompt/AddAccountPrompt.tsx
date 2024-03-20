@@ -3,12 +3,12 @@ import { HiXMark } from "react-icons/hi2";
 import FormInput from "../../../Components/Home/FormInput/FormInput";
 import { useContext, useEffect, useRef, useState } from "react";
 import { AuthContext } from "../../../Contexts/AuthContextProvider";
-import { accountExistsByTitle, clearFormStringValues, updateAccountsData } from "../../../Functions";
+import { accountExistsByTitle, addAccount, clearFormStringValues, editAccount, updateAccountsData } from "../../../Functions";
 import ActionPrompt from "../../../Components/Home/ActionPrompt/ActionPrompt";
 import { GeneralContext } from "../../../Contexts/GeneralContextProvider";
 import { divideByThousands } from "../../../Functions";
 import { handleAmountChange, handleDescriptionChange, handleTitleChange } from "../sharedFunctions";
-import { createAccountApi, currenciesApiKey, editAccountApi, fetchCurrenciesApi } from "../../../apiURLs";
+import { currenciesApiKey, fetchCurrenciesApi } from "../../../apiURLs";
 
 const AddAccountPrompt = (props: {
   setShowAddAccountPrompt: React.Dispatch<React.SetStateAction<boolean>>,
@@ -80,45 +80,40 @@ const AddAccountPrompt = (props: {
   const handleSave = async () => {
     // Check if button is disabled or not (Disabled attribute can be removed from dev tools, hence this is additional protection).
     if(!isButtonDisabled) {
-      // Request body to send for post request.
-      // if props.data is present we send edit body on edit api.
-      // edit api is waiting for body in following format:
-      // {accId: string (id of account in db), fields: {title: string, currency: string, description: string}}
-      // otherwise it is new account prompt.
-      // account creation api is waiting for body in format:
-      // {userId: string (creator of acc), accountData: {title: string, currency: string, description: string}}
-      const requestBody = props.data ? JSON.stringify({
-        infoForEdit: {
-          accId: props.data._id,
-          fields: {title, currency, description, amount}
-        }
-      }) : JSON.stringify({
-        userId: currentUserData._id,
-        accountData: {title, currency, description, amount}
-      });
-
       // Clear title and description fields.
       clearFormStringValues(setTitle, setDescription, setAmount);
 
       try {
         // make post request and get result (result will be data that was saved in db).
-        const result = await fetch(props.data ? editAccountApi : createAccountApi, {
-          method: props.data ? "PATCH" : "POST",
-          mode: "cors",
-          cache: "no-cache",
-          headers: {
-            "Content-type": "application/json"
-          },
-          body: requestBody
-        });
+        let accountResult;
 
-        // Result will be of type AccountData (check interfaces.d.ts in src folder).
-        const accData: AccountData = await result.json();
+        if(props.data) {
+          // if props.data is present we send edit body on edit api.
+          // edit api is waiting for body in following format:
+          // {accId: string (id of account in db), fields: {title: string, currency: string, description: string}}
+          const rqbody = {infoForEdit: {
+            accId: props.data._id,
+            fields: {title, currency, description, amount}
+          }};
+
+          accountResult = await editAccount(rqbody);
+        } else {
+          // otherwise it is new account prompt.
+          // account creation api is waiting for body in format:
+          // {userId: string (creator of acc), accountData: {title: string, currency: string, description: string}}
+          const rqbody = {
+            userId: currentUserData._id,
+            accountData: {title, currency, description, amount}
+          }
+
+          accountResult = await addAccount(rqbody);
+        }
+
         // if props.data is present it was an edit operation, therefore we do not add
         // anything new in accounts state. otherwise it was a new account prompt and we update state
         // and add new account.
-        props.data ? updateAccountsData(accountsData, setAccountsData, {new: accData, old: props.data}, "Update")
-        : updateAccountsData(accountsData, setAccountsData, {new: accData, old: undefined}, "Insert");
+        props.data ? updateAccountsData(accountsData, setAccountsData, {new: accountResult, old: props.data}, "Update")
+        : updateAccountsData(accountsData, setAccountsData, {new: accountResult, old: undefined}, "Insert");
         // close prompt.
         props.setShowAddAccountPrompt(false);
         // close confirmation pop up.
