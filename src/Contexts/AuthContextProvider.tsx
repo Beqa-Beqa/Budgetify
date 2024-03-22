@@ -1,6 +1,5 @@
 import { createContext, useState, useEffect } from "react";
-import { getGlobalTimeUnix, updateTransactionsData, removeThousandsCommas, updateAccountsData, updateSubscriptionsData } from "../Functions";
-import { createTransactionApi, editAccountApi, editSubscriptionApi } from "../apiURLs";
+import { getGlobalTimeUnix, updateTransactionsData, removeThousandsCommas, updateAccountsData, updateSubscriptionsData, editAccount, editSubscription, createTransaction } from "../Functions";
 import {v4 as uuid} from "uuid";
 
 // Initial context.
@@ -17,6 +16,8 @@ export const AuthContext = createContext<{
   setSubscriptionsData: React.Dispatch<React.SetStateAction<SubscriptionData[]>>,
   piggyBanksData: PiggyBankData[],
   setPiggyBanksData: React.Dispatch<React.SetStateAction<PiggyBankData[]>>
+  obligatoriesData: ObligatoryData[],
+  setObligatoriesData: React.Dispatch<React.SetStateAction<ObligatoryData[]>>
 }>({
   currentUserData: {},
   setCurrentUserData: () => {},
@@ -29,7 +30,9 @@ export const AuthContext = createContext<{
   subscriptionsData: [],
   setSubscriptionsData: () => {},
   piggyBanksData: [],
-  setPiggyBanksData: () => {}
+  setPiggyBanksData: () => {},
+  obligatoriesData: [],
+  setObligatoriesData: () => {}
 });
 
 const AuthContextProvider = (props: {children: React.ReactNode}) => {
@@ -39,12 +42,13 @@ const AuthContextProvider = (props: {children: React.ReactNode}) => {
   const [categoriesData, setCategoriesData] = useState<CategoryData[]>(JSON.parse(window.sessionStorage.getItem("Budgetify-user-categories-data") || "{}") || []);
   const [subscriptionsData, setSubscriptionsData] = useState<SubscriptionData[]>(JSON.parse(window.sessionStorage.getItem("Budgetify-user-subscriptions-data") || "{}") || []);
   const [piggyBanksData, setPiggyBanksData] = useState<PiggyBankData[]>(JSON.parse(window.sessionStorage.getItem("Budgetify-user-piggy-banks-data") || "{}") || []);
+  const [obligatoriesData, setObligatoriesData] = useState<ObligatoryData[]>(JSON.parse(window.sessionStorage.getItem("Budgetify-user-obligatories-data") || "{}") || []);
 
   const makeSubscriptionPayment = async (subscription: SubscriptionData, account: AccountData, monthNumber: number, curYear: string, paymentDay: number) => {
     // transaction related
     try {
       const uid = uuid();
-      const transactionBody = JSON.stringify({
+      const transactionBody = {
         id: uid,
         belongsToAccountWithId: account!._id,
         transactionType: "Expenses", 
@@ -53,63 +57,43 @@ const AuthContextProvider = (props: {children: React.ReactNode}) => {
         amount: subscription.amount, 
         date: `${curYear}-${monthNumber + 1}-${paymentDay}`, 
         chosenCategories: subscription.chosenCategories,
-      });
-      const transactionRes = await fetch(createTransactionApi, {
-        method: "POST",
-        mode: "cors",
-        cache: "no-cache",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: transactionBody
-      });
-
+        payee: ""
+      };
+      const transaction = await createTransaction(transactionBody);
 
       // accounts related
       const accVal = removeThousandsCommas(account!.amount);
       const editTransVal = removeThousandsCommas(subscription.amount);
       const amountToSend = accVal - editTransVal;
-      const accountBody = JSON.stringify({infoForEdit: {
+      const accountBody = {infoForEdit: {
           accId: account!._id,
           fields: {amount: amountToSend.toString()}
-      }});
+      }};
       // send account update request.
-      const accountResult = await fetch(editAccountApi, {
-        method: "PATCH",
-        mode: "cors",
-        cache: "no-cache",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: accountBody
-      });
-
+      const acc= await editAccount(accountBody);
 
       // subscription related
-      const subscriptionBody = JSON.stringify({
+      const subscriptionBody = {
         subscriptionId: subscription._id,
         belongsToAccountWithId: subscription.belongsToAccountWithId,
-        fields: {months: [...subscription.months, monthNumber]}
-      });
-      const subscriptionResult = await fetch(editSubscriptionApi, {
-        method: "PATCH",
-        mode: "cors",
-        cache: "no-cache",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: subscriptionBody
-      });
+        fields: subscription.months.indexOf(11) === -1 ? 
+          {
+            months: [...subscription.months, monthNumber]
+          }
+        : 
+          {
+            year: subscription.year + 1,
+            months: [monthNumber]
+          }
+      };
+      const subscriptionRes = await editSubscription(subscriptionBody);
 
       // updates
       // update transactions data
-      const transaction = await transactionRes.json();
       updateTransactionsData(transactionsData, setTransactionsData, {new: transaction, old: undefined}, "Insert");
       // update accounts data
-      const acc = await accountResult.json();
       updateAccountsData(accountsData, setAccountsData, {new: acc, old: account}, "Update");
       // update subscriptions data
-      const subscriptionRes = await subscriptionResult.json();
       updateSubscriptionsData(subscriptionsData, setSubscriptionsData, {new: subscriptionRes, old: subscription}, "Update");
     } catch (err) {
       console.error(err);
@@ -167,7 +151,9 @@ const AuthContextProvider = (props: {children: React.ReactNode}) => {
         subscriptionsData,
         setSubscriptionsData,
         piggyBanksData,
-        setPiggyBanksData
+        setPiggyBanksData,
+        obligatoriesData,
+        setObligatoriesData
       }}
     >
       {props.children}

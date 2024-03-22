@@ -3,7 +3,7 @@ import "./indicatorButton.css";
 import { GoArrowDown, GoArrowUp } from "react-icons/go";
 
 const IndicatorButton = (props: {
-  type: "Income" | "Expenses" | "Add Transaction" | "Add Category" | "Add Subscription" | "Add Piggy Bank",
+  type: "Income" | "Expenses" | "Add Transaction" | "Add Category" | "Add Subscription" | "Add Piggy Bank" | "Add Obligatory",
   classname?: string, 
   onclick?: () => void,
   role?: string

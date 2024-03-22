@@ -34,15 +34,15 @@ const MainSearch = (props: {
         </div>
       </div>
       <div className="my-2 mx-3 sort-container d-flex align-items-center gap-4">
-        {(navigateTo === "none" || navigateTo === "Subscriptions") && <span 
+        {(navigateTo === "none" || navigateTo === "Subscriptions" || navigateTo === "Obligatory") && <span 
           role="button" 
-          className="user-select-none d-flex align-items-center gap-2" 
+          className="user-select-none d-flex align-items-center gap-2 p-2" 
           style={{opacity: 0.7}}
           onClick={() => setSortByPaymentDate(prev => prev === "asc" ? "desc" : "asc")}
         >
-          {sortByPaymentDate === "desc" ? <GoSortDesc/> : <GoSortAsc />} {navigateTo !== "Subscriptions" ? "Transaction" : "Creation"} Date
+          {sortByPaymentDate === "desc" ? <GoSortDesc/> : <GoSortAsc />} {navigateTo !== "Subscriptions" && navigateTo !== "Obligatory" ? "Transaction" : "Creation"} Date
         </span>}
-        {navigateTo !== "Subscriptions" &&
+        {navigateTo !== "Subscriptions" && navigateTo !== "Obligatory" &&
           <>
             <div className="rounded px-2 py-1" style={props.sortByTransaction === "Income" ? border : emptyBorder}>
               <IndicatorButton onclick={() => props.setSortByTransaction(prev => prev !== "Income" ? "Income" : "")} role="button" classname="bg-transparent" type="Income" />

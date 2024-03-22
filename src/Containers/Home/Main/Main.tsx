@@ -18,12 +18,15 @@ import SideSubscriptionMenu from "../../../Components/Home/SideMenus/Subscriptio
 import AddPiggyBankPrompt from "../AddPiggyBankPrompt/AddPiggyBankPrompt";
 import PiggyBank from "../../../Components/Home/PiggyBank/PiggyBank";
 import SidePiggyBankMenu from "../../../Components/Home/SideMenus/PiggyBank/SidePiggyBankMenu";
+import AddObligatoryPrompt from "../AddObligatoryPrompt/AddObligatoryPrompt";
+import Obligatory from "../../../Components/Home/Obligatory/Obligatory";
+import SideObligatoryMenu from "../../../Components/Home/SideMenus/Obligatory/SideObligatoryMenu";
 
 const Main = () => {
   // navigation
   const {navigateTo, showAddCategoryPrompt, setShowAddCategoryPrompt} = useContext(GeneralContext);
   // list of accounts data.
-  const {accountsData, transactionsData, categoriesData, subscriptionsData, piggyBanksData} = useContext(AuthContext);
+  const {accountsData, transactionsData, categoriesData, subscriptionsData, piggyBanksData, obligatoriesData} = useContext(AuthContext);
   // sort setting holder state.
   const [sortByPamentDate, setSortByPaymentDate] = useState<"desc" | "asc">("desc");
   const [sortByTransaction, setSortByTransaction] = useState<"Income" | "Expenses" | "">("");
@@ -51,6 +54,11 @@ const Main = () => {
   const [showAddPiggyBankPrompt, setShowAddPiggyBankPrompt] = useState<boolean>(false);
   // piggy bank side menu
   const [showPiggyBankInfo, setShowPiggyBankInfo] = useState<{show: boolean, data: PiggyBankData | null}>({show: false, data: null});
+  // obligatory prompt
+  const [showAddObligatoryPrompt, setShowAddObligatoryPrompt] = useState<boolean>(false);
+  // obligatory info state
+  const [showObligatoryInfo, setShowObligatoryInfo] = useState<{show: boolean, data: ObligatoryData | null}>({show: false, data: null});
+
 
   const filteredTransactionsByCard = transactionsData.filter((transaction: TransactionData) => accountsData[activeCard] && transaction.belongsToAccountWithId === accountsData[activeCard]._id)
                                                      .filter((transaction: TransactionData) => sortByTransaction === "Income" ? transaction.transactionType === "Income" : sortByTransaction === "Expenses" ? transaction.transactionType === "Expenses" : transaction)
@@ -65,6 +73,9 @@ const Main = () => {
                                                        .sort((a: SubscriptionData, b: SubscriptionData) => sortByPamentDate === "desc" ? parseInt(b.creationDate) - parseInt(a.creationDate) : parseInt(a.creationDate) - parseInt(b.creationDate));
 
   const filteredPiggyBanksByCard = piggyBanksData.filter((piggy: PiggyBankData) => accountsData[activeCard] && piggy.belongsToAccountWithId === accountsData[activeCard]._id);
+
+  const filteredObligatoriesByCard = obligatoriesData.filter((obligatory: ObligatoryData) => accountsData[activeCard] && obligatory.belongsToAccountWithId === accountsData[activeCard]._id)
+                                     .sort((a: ObligatoryData, b: ObligatoryData) => sortByPamentDate === "desc" ? parseInt(b.createdOn) - parseInt(a.createdOn) : parseInt(a.createdOn) - parseInt(b.createdOn));
   
   const currency = accountsData[activeCard] && accountsData[activeCard].currency;
 
@@ -78,7 +89,7 @@ const Main = () => {
                 const isActive = key === activeCard;
                 const handleClick = () => setActiveCard(key);
 
-                return <Card accountData={account} onclick={handleClick} active={isActive} classname="col-xxl col-xl-12 col-md-6 col-12" key={key}  />
+                return <Card accountData={account} onclick={handleClick} active={isActive} classname="col-xxl col-xl-12 col-md-6 col-12" key={account._id}  />
               })}
             </div> : null}
             <div className="w-100 pe-xl-3">
@@ -108,8 +119,8 @@ const Main = () => {
                   subscriptionsData.length ?
                     filteredSubscriptionsByCard.length ?
                       <div className="d-flex flex-column gap-4">
-                        {filteredSubscriptionsByCard.map((subscription: SubscriptionData, key: number) => {
-                          return <Subscription key={key} subscription={subscription} currency={currency} onclick={() => setShowSubscriptionInfo({show: true, data: subscription})} />
+                        {filteredSubscriptionsByCard.map((subscription: SubscriptionData) => {
+                          return <Subscription key={subscription._id} subscription={subscription} currency={currency} onclick={() => setShowSubscriptionInfo({show: true, data: subscription})} />
                         })}
                       </div>
                     :
@@ -120,12 +131,28 @@ const Main = () => {
                     <div className="w-100 text-center my-3 overflow-hidden">
                       <h2 style={{color: "var(--placeholder)"}} className="fs-2 opacity-25">You don't have any subscriptions. Please, add a subscription</h2>
                     </div>
+              : navigateTo === "Obligatory" ?
+                  obligatoriesData.length ?
+                    filteredObligatoriesByCard.length ?
+                      <div className="d-flex flex-column gap-4">
+                        {filteredObligatoriesByCard.map((obligatory: ObligatoryData) => {
+                          return <Obligatory key={obligatory._id} onclick={() => setShowObligatoryInfo({show: true, data: obligatory})} currency={accountsData[activeCard].currency} obligatoryData={obligatory} />
+                        })}
+                      </div>
+                    :
+                      <div className="w-100 text-center my-3 overflow-hidden">
+                        <h2 style={{color: "var(--placeholder)"}} className="fs-2 opacity-25">No records to display</h2>
+                      </div>
+                  :
+                    <div className="w-100 text-center my-3 overflow-hidden">
+                      <h2 style={{color: "var(--placeholder)"}} className="fs-2 opacity-25">You don't have any obligatories.</h2>
+                    </div>           
               :
                 transactionsData.length ?
                   filteredTransactionsByCard.length ?
                     <div className="d-flex flex-column gap-4">
-                      {filteredTransactionsByCard.map((transaction: TransactionData, key: number) => {
-                        return <Transaction key={key} transaction={transaction} currency={currency} onclick={() => {setShowTransactionInfo({show: true, data: transaction})}} />
+                      {filteredTransactionsByCard.map((transaction: TransactionData) => {
+                        return <Transaction key={transaction._id} transaction={transaction} currency={currency} onclick={() => {setShowTransactionInfo({show: true, data: transaction})}} />
                       })}
                     </div>
                   :
@@ -147,6 +174,7 @@ const Main = () => {
                 {activeCard >= 0 && navigateTo === "none" ? <IndicatorButton classname="p-2 fs-5 w-100" onclick={() => setShowAddTransactionPrompt(true)} type="Add Transaction"/> : null}
                 {navigateTo === "Categories" && <IndicatorButton onclick={() => setShowAddCategoryPrompt(true)} classname="p-2 fs-5 w-100" type="Add Category" />}
                 {navigateTo === "Subscriptions" && <IndicatorButton onclick={() => setShowAddSubscriptionPrompt(true)} classname="p-2 fs-5 w-100" type="Add Subscription" />}
+                {navigateTo === "Obligatory" && <IndicatorButton onclick={() => setShowAddObligatoryPrompt(true)} classname="p-2 fs-5 w-100" type="Add Obligatory" />}
               </div>
               <div className="d-flex flex-column align-items-end gap-3 mb-4">
                 <IndicatorButton onclick={() => setShowAddPiggyBankPrompt(true)} classname="p-2 fs-5 w-100" type="Add Piggy Bank" />
@@ -171,6 +199,8 @@ const Main = () => {
           <SideSubscriptionMenu accountData={accountsData[activeCard]} subscriptionInfo={showSubscriptionInfo.data} setShowSideSubscriptionMenu={setShowSubscriptionInfo} classname={showSubscriptionInfo.show ? "show" : ""} />
           <AddPiggyBankPrompt accountData={accountsData[activeCard]} classname={showAddPiggyBankPrompt ? "show" : ""} setShowAddPiggyBankPrompt={setShowAddPiggyBankPrompt}/>
           <SidePiggyBankMenu classname={showPiggyBankInfo.show ? "show" : ""} piggyBankInfo={showPiggyBankInfo.data} setShowPiggyBankMenu={setShowPiggyBankInfo} />
+          <AddObligatoryPrompt classname={showAddObligatoryPrompt ? "show" : ""} accountData={accountsData[activeCard]} setShowAddObligatoryPrompt={setShowAddObligatoryPrompt} />
+          <SideObligatoryMenu accountData={accountsData[activeCard]} classname={showObligatoryInfo.show ? "show" : ""} obligatoryInfo={showObligatoryInfo.data} setShowObligatoryMenu={setShowObligatoryInfo} />
         </>
       }
       <AddCategoryPrompt classname={showAddCategoryPrompt ? "show" : ""} setShowAddCategoryPrompt={setShowAddCategoryPrompt} />

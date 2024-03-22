@@ -23,9 +23,9 @@ const Subscription = (props: {
         </div>
         <div className="d-flex align-items-center gap-2">
           <span>Next payment date: </span>
-          <span>{subscription.startDate.split("-").reverse().join(".")}</span>
+          <span>{subscription.startDate.split("/").reverse().join(".")}</span>
           -
-          <span>{subscription.endDate.split("-").reverse().join(".")}</span>
+          <span>{subscription.endDate.split("/").reverse().join(".")}</span>
         </div>
       </div>
     </div>

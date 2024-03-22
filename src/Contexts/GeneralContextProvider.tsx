@@ -11,7 +11,9 @@ export const GeneralContext = createContext<{
   navigateTo: "none" | "Categories" | "Subscriptions" | "Obligatory" | "Statistic" | "Admin",
   setNavigateTo: React.Dispatch<React.SetStateAction<"none" | "Categories" | "Subscriptions" | "Obligatory" | "Statistic" | "Admin">>,
   showAddCategoryPrompt: boolean,
-  setShowAddCategoryPrompt: React.Dispatch<React.SetStateAction<boolean>>
+  setShowAddCategoryPrompt: React.Dispatch<React.SetStateAction<boolean>>,
+  isLoading: boolean,
+  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>
 }>({
   width: 0,
   showToastMessage: {show: false, text: ""},
@@ -19,7 +21,9 @@ export const GeneralContext = createContext<{
   navigateTo: "none",
   setNavigateTo: () => {},
   showAddCategoryPrompt: false,
-  setShowAddCategoryPrompt: () => {}
+  setShowAddCategoryPrompt: () => {},
+  isLoading: false,
+  setIsLoading: () => {}
 });
 
 // General context provider.
@@ -32,6 +36,8 @@ const GeneralContextProvider = ({children}: {children: React.ReactNode}) => {
   const [navigateTo, setNavigateTo] = useState<"none" | "Categories" | "Subscriptions" | "Obligatory" | "Statistic" | "Admin">("none");
   // category state
   const [showAddCategoryPrompt, setShowAddCategoryPrompt] = useState<boolean>(false);
+  // loading state
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   useEffect(() => {
     // resize handler.
@@ -52,7 +58,7 @@ const GeneralContextProvider = ({children}: {children: React.ReactNode}) => {
     return () => timeout ? clearTimeout(timeout) : undefined;
   }, [showToastMessage]);
 
-  return <GeneralContext.Provider value={{width, showToastMessage, setShowToastMessage, navigateTo, setNavigateTo, showAddCategoryPrompt, setShowAddCategoryPrompt}}>
+  return <GeneralContext.Provider value={{width, showToastMessage, setShowToastMessage, navigateTo, setNavigateTo, showAddCategoryPrompt, setShowAddCategoryPrompt, isLoading, setIsLoading}}>
     {children}
   </GeneralContext.Provider>
 }

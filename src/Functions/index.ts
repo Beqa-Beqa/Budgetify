@@ -3,7 +3,7 @@ import {
   deleteCategoryApi, createCategoryApi, editAccountApi, createTransactionApi,
   deleteSubscriptionApi, deleteTransactionApi, createAccountApi,
   editCategoryApi, createPiggyBankApi, editPiggyBankApi, createSubscriptionApi,
-  editSubscriptionApi, editTransactionApi
+  editSubscriptionApi, editTransactionApi, createObligatoryApi, editObligatoryApi, deleteObligatoryApi
 } from "../apiURLs";
 
 export const accountExistsByTitle = (accArr: AccountData[], title: string) => {
@@ -18,6 +18,10 @@ export const categoryExistsByTitle = (categArr: CategoryData[], title: string, t
 
 export const subscriptionExistsByTitle = (subscArr: SubscriptionData[], title: string) => {
   return subscArr.find(data => data.title.toLocaleLowerCase() === title.toLocaleLowerCase());
+}
+
+export const obligatoryExistsByTitle = (obligArr: ObligatoryData[], title: string) => {
+  return obligArr.find(data => data.title.toLocaleLowerCase() === title.toLocaleLowerCase());
 }
 
 export const makeFirstCapitals = (str: string) => {
@@ -133,6 +137,20 @@ export const updateCategoriesData = (currentData: CategoryData[], setData: React
 
   window.sessionStorage.setItem("Budgetify-user-categories-data", JSON.stringify(newCategoriesData));
   setData(newCategoriesData);
+}
+
+export const updateObligatoriesData = (currentData: ObligatoryData[], setData: React.Dispatch<React.SetStateAction<ObligatoryData[]>>, data: {new: ObligatoryData, old: ObligatoryData | undefined}, type: "Insert" | "Update" | "Delete") => {
+  const newObligatoriesData = [...currentData];
+  if(type === "Insert") {
+    newObligatoriesData.push(data.new);
+  } else if (type === "Update") {
+    newObligatoriesData[newObligatoriesData.indexOf(data.old!)] = data.new;
+  } else if (type === "Delete") {
+    newObligatoriesData.splice(newObligatoriesData.indexOf(data.new), 1);
+  }
+
+  window.sessionStorage.setItem("Budgetify-user-obligatories-data", JSON.stringify(newObligatoriesData));
+  setData(newObligatoriesData);
 }
 
 export const clearFormStringValues = (...valueSetters: React.SetStateAction<any>) => {
@@ -445,6 +463,70 @@ export const editPiggyBank = async (fields: {
 export const deletePiggyBank = async (fields: {belongsToAccountWithId: string, piggyBankId: string}) => {
   const body = JSON.stringify(fields);
   await fetch(deletePiggyBankApi, {
+    method: "POST",
+    mode: "cors",
+    cache: "no-cache",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body
+  });
+}
+
+
+// obligatory
+export const createObligatory = async (fields: {
+  belongsToAccountWithId: string,
+  title: string,
+  amount?: string,
+  dateRange: [Date | null, Date | null],
+  startDate: string,
+  endDate: string,
+  description?: string
+}) => {
+  const body = JSON.stringify(fields);
+  const obligatory = await fetch(createObligatoryApi, {
+    method: "POST",
+    mode: "cors",
+    cache: "no-cache",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body
+  });
+
+  return await obligatory.json();
+}
+
+export const editObligatory = async (fields: {
+  belongsToAccountWithId: string,
+  obligatoryId: string,
+  fields: {
+    title?: string,
+    amount?: string,
+    dateRange?: [Date | null, Date | null],
+    startDate?: string,
+    endDate?: string,
+    description?: string
+  }
+}) => {
+  const body = JSON.stringify(fields);
+  const obligatory = await fetch(editObligatoryApi, {
+    method: "PATCH",
+    mode: "cors",
+    cache: "no-cache",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body
+  });
+
+  return await obligatory.json();
+}
+
+export const deleteObligatory = async (fields: {belongsToAccountWithId: string, obligatoryId: string}) => {
+  const body = JSON.stringify(fields);
+  await fetch (deleteObligatoryApi, {
     method: "POST",
     mode: "cors",
     cache: "no-cache",

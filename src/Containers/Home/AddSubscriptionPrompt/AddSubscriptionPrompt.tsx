@@ -3,7 +3,7 @@ import "./addSubscriptionPrompt.css";
 import { HiXMark } from "react-icons/hi2";
 import FormInput from "../../../Components/Home/FormInput/FormInput";
 import { handleTitleChange, handleCategorySelect, handleCategoryUnselect, handleAmountChange, handleDescriptionChange, handleDateChangeAlert } from "../sharedFunctions";
-import { getCategoryNameById, divideByThousands, clearFormStringValues, getGlobalTimeUnix, updateSubscriptionsData, subscriptionExistsByTitle, editSubscription, createSubscription } from "../../../Functions";
+import { getCategoryNameById, divideByThousands, clearFormStringValues, getGlobalTimeUnix, updateSubscriptionsData, subscriptionExistsByTitle, editSubscription, createSubscription, removeThousandsCommas } from "../../../Functions";
 import { defExpenseCategories } from "../../../Data";
 import { AuthContext } from "../../../Contexts/AuthContextProvider";
 import ActionPrompt from "../../../Components/Home/ActionPrompt/ActionPrompt";
@@ -136,7 +136,7 @@ const AddSubscriptionPrompt = (props: {
 
   // form save button cancelation based on alerts and filled info.
   const [isButtonDisabled, setIsButtonDisabled] = useState<boolean>(false);
-  const mandatoriesFilled = title && parseFloat(amount) && chosenCategories.length && startDateString && endDateString && true || false;
+  const mandatoriesFilled = title && removeThousandsCommas(amount) && chosenCategories.length && startDateString && endDateString && true || false;
   useEffect(() => {
     // if it's edit prompt and all the fields are same disable save button.
     // otherwise enable it.
@@ -152,7 +152,7 @@ const AddSubscriptionPrompt = (props: {
       :
         mandatoriesFilled && setIsButtonDisabled(false);
 
-      subscriptionExistsByTitle(subscriptionsData, title) && setTitleAlert({error: true, text: "You already have a subscription with this title"});
+      !hasInfo && subscriptionExistsByTitle(subscriptionsData, title) && setTitleAlert({error: true, text: "You already have a subscription with this title"});
 
   }, [title, description, amount, chosenCategories, dateRange]);
 

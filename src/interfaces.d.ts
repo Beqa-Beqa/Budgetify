@@ -46,10 +46,11 @@ declare interface TransactionData {
 }
 
 declare interface TransactionFilesData {
+  belongsToTransactionWithId: string,
   name: string,
-  path: string,
   type: string,
-  size: number
+  size: number,
+  data: Buffer
 }
 
 declare interface CategoryData {
@@ -87,6 +88,18 @@ declare interface PiggyBankPayment {
   _id: string,
   date: string,
   amount: string
+}
+
+declare interface ObligatoryData {
+  _id: string,
+  belongsToAccountWithId: string,
+  title: string,
+  description?: string,
+  amount?: string,
+  dateRange: [Date | null, Date | null],
+  startDate: string,
+  endDate: string,
+  createdOn: string
 }
 
 declare interface InputBasicAlert {

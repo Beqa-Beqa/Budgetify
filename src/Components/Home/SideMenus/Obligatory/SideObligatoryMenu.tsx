@@ -1,52 +1,47 @@
-import "./sideSubscriptionMenu.css";
+import "./sideObligatoryMenu.css";
 import { MdOutlineModeEdit } from "react-icons/md";
 import { FaRegTrashCan } from "react-icons/fa6";
 import { HiXMark } from "react-icons/hi2";
-import AccountInfoField from "../../AccountInfoFIeld/AccountInfoFIeld";
 import { useContext, useState } from "react";
-import { deleteSubscription, getCategoryNameById, updateSubscriptionsData } from "../../../../Functions";
-import { AuthContext } from "../../../../Contexts/AuthContextProvider";
-import AddSubscriptionPrompt from "../../../../Containers/Home/AddSubscriptionPrompt/AddSubscriptionPrompt";
+import AccountInfoField from "../../AccountInfoFIeld/AccountInfoFIeld";
+import AddObligatoryPrompt from "../../../../Containers/Home/AddObligatoryPrompt/AddObligatoryPrompt";
 import ActionPrompt from "../../ActionPrompt/ActionPrompt";
+import { deleteObligatory, updateObligatoriesData } from "../../../../Functions";
+import { AuthContext } from "../../../../Contexts/AuthContextProvider";
 import { GeneralContext } from "../../../../Contexts/GeneralContextProvider";
 
-const SideSubscriptionMenu = (props: {
-  subscriptionInfo: SubscriptionData | null,
-  accountData: AccountData,
-  setShowSideSubscriptionMenu: React.Dispatch<React.SetStateAction<{
+const SideObligatoryMenu = (props: {
+  obligatoryInfo: ObligatoryData | null,
+  accountData: AccountData | false,
+  setShowObligatoryMenu: React.Dispatch<React.SetStateAction<{
     show: boolean;
-    data: SubscriptionData | null;
-  }>>,
+    data: ObligatoryData | null;
+  }>>
   classname?: string
 }) => {
+  const info = props.obligatoryInfo;
   const iconSizes = {width: 25, height: 25};
-  const info = props.subscriptionInfo;
-  const currency = (props.accountData as AccountData).currency;
+  const accInfo = props.accountData as AccountData;
+  const currency = accInfo.currency;
 
-  const {categoriesData, subscriptionsData, setSubscriptionsData} = useContext(AuthContext);
+  const {obligatoriesData, setObligatoriesData} = useContext(AuthContext);
   const {setShowToastMessage} = useContext(GeneralContext);
 
   const [showEditPrompt, setShowEditPrompt] = useState<boolean>(false);
+
   const [showDeletePrompt, setShowDeletePrompt] = useState<boolean>(false);
 
   const handleDelete = async () => {
-    if(info) {
-      // if we have subscription info present
-      try {
-        // delete subscription
-        await deleteSubscription({subscriptionId: info._id, belongsToAccountWithId: info.belongsToAccountWithId});
-
-        // update subscriptions data
-        updateSubscriptionsData(subscriptionsData, setSubscriptionsData, {new: info, old: undefined}, "Delete");
-        // show confirmation message
-        setShowToastMessage({show: true, text: "Subscription was successfully removed"});
-        // close delete confirmation prompt
+    try {
+      if(info) {
+        await deleteObligatory({belongsToAccountWithId: info.belongsToAccountWithId, obligatoryId: info._id});
+        updateObligatoriesData(obligatoriesData, setObligatoriesData, {new: info, old: undefined}, "Delete");
+        setShowToastMessage({show: true, text: "Obligatory deleted successfully"});
         setShowDeletePrompt(false);
-        // close transaction menu
-        props.setShowSideSubscriptionMenu({data: null, show: false});
-      } catch (err) {
-        console.error(err);
+        props.setShowObligatoryMenu({show: false, data: null});
       }
+    } catch (err) {
+      console.error(err);
     }
   }
 
@@ -63,7 +58,7 @@ const SideSubscriptionMenu = (props: {
               <div onClick={() => setShowDeletePrompt(true)} role="button">
                 <FaRegTrashCan style={iconSizes} />
               </div>
-              <div role="button" onClick={() => props.setShowSideSubscriptionMenu({show: false, data: null})}>
+              <div role="button" onClick={() => props.setShowObligatoryMenu({show: false, data: null})}>
                 <HiXMark style={iconSizes} />
               </div>
             </div>
@@ -75,13 +70,6 @@ const SideSubscriptionMenu = (props: {
                   <h4 className="fs-4">{info.title}</h4>
                   <span style={{color: "var(--danger)"}} className="fs-3">{info.amount}{currency.split(" ")[1]}</span>
                 </div>
-                <div className="d-flex align-items-center flex-wrap gap-4">
-                  {info.chosenCategories.map((category: string, key: number) => {
-                    return <div style={{maxWidth: 160, border: "1px solid var(--border)"}} className="py-4 w-100 rounded d-flex justify-content-center align-items-center" key={key}>
-                      <span className="fw-bold text-center text-break px-2">{getCategoryNameById(categoriesData, category) || category}</span>
-                    </div>
-                  })}
-                </div>
               </div>
               <div className="mt-5 d-flex flex-column">
                 <AccountInfoField title="Payment Dates" text={`${info.startDate.replace(/\//g, ".")} - ${info.endDate.replace(/\//g, ".")}`} hasLine />
@@ -91,7 +79,7 @@ const SideSubscriptionMenu = (props: {
           )}
         </div>
       </div>
-      <AddSubscriptionPrompt classname={`${showEditPrompt && "show"}`} subscriptionInfo={info ? info : undefined} accountData={props.accountData as AccountData} setShowAddSubscriptionPrompt={setShowEditPrompt} />
+      <AddObligatoryPrompt classname={`${showEditPrompt && "show"}`} obligatoryData={info ? info : undefined} accountData={accInfo} setShowAddObligatoryPrompt={setShowEditPrompt} />
       {showDeletePrompt && 
         <ActionPrompt
           text="Are you sure you want to delete transaction?"
@@ -104,4 +92,4 @@ const SideSubscriptionMenu = (props: {
   );
 }
 
-export default SideSubscriptionMenu;
+export default SideObligatoryMenu;
