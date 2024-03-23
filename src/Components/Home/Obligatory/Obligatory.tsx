@@ -7,6 +7,9 @@ const Obligatory = (props: {
 }) => {
   const info = props.obligatoryData;
 
+  const [startMonth, startDay, startYear] = info.startDate.split("/");
+  const [endMonth, endDay, endYear] = info.endDate.split("/");
+
   return (
     <div onClick={props.onclick && props.onclick} className="subscription w-100 p-3 rounded d-flex align-items-center gap-3">
       <div className="w-100 h-100 d-flex flex-column gap-3">
@@ -16,9 +19,9 @@ const Obligatory = (props: {
         </div>
         <div className="d-flex align-items-center gap-2">
           <span>Payment Dates: </span>
-          <span className="fw-bold">{info.startDate.split("/").reverse().join(".")}</span>
+          <span className="fw-bold">{[startDay, startMonth, startYear].join(".")}</span>
           -
-          <span className="fw-bold">{info.endDate.split("/").reverse().join(".")}</span>
+          <span className="fw-bold">{[endDay, endMonth, endYear].join(".")}</span>
         </div>
       </div>
     </div>

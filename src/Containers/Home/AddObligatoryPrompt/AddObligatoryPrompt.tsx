@@ -16,11 +16,14 @@ const AddObligatoryPrompt = (props: {
   classname?: string,
   obligatoryData?: ObligatoryData
 }) => {
+  // General info
   const hasInfo = props.obligatoryData;
   const currency = props.accountData.currency.split(" ")[1];
 
+  // title input ref
   const titleRef = useRef<HTMLInputElement | null>(null);
 
+  // context data
   const {obligatoriesData, setObligatoriesData} = useContext(AuthContext);
   const {setShowToastMessage} = useContext(GeneralContext);
 
@@ -42,27 +45,35 @@ const AddObligatoryPrompt = (props: {
     getDate();
   }, []);
 
+  // Title
   const [title, setTitle] = useState<string>("");
   const [titleAlert, setTitleAlert] = useState<InputBasicAlert>({error: false, text: ""});
 
+  // amount
   const [amount, setAmount] = useState<string>("");
   const [amountAlert, setAmountAlert] = useState<InputBasicAlert>({error: false, text: ""});
 
+  // date data.
   const [dateRange, setDateRange] = useState<[Date | null, Date | null]>([null, null]);
   const [startDate, endDate] = dateRange;
   const [startDateString, endDateString] = dateRange.map((date: Date | null) => date && new Date(date).toLocaleString().split(",")[0]);
   const [startDateAlert, setStartDateAlert] = useState<InputBasicAlert>({error: false, text: ""});
   const [endDateAlert, setEndDateAlert] = useState<InputBasicAlert>({error: false, text: ""});
 
+  // description
   const [description, setDescription] = useState<string>("");
   const [descriptionAlert, setDescriptionAlert] = useState<InputBasicAlert>({error: false, text: ""});
 
+  // required alert (empty fields)
   const [showRequiredAlert, setShowRequiredAlert] = useState<boolean>(false);
 
+  // is button disabled or not state
   const [isButtonDisabled, setIsButtonDisabled] = useState<boolean>(false);
 
+  // cancel prompt state
   const [showCancelPrompt, setShowCancelPrompt] = useState<boolean>(false);
 
+  // if it's edit - input values initialization function
   const initValues = () => {
     if(hasInfo) {
       const {title, amount, dateRange, description} = hasInfo;

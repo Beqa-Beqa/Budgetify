@@ -1,5 +1,5 @@
 import { createContext, useState, useEffect } from "react";
-import { getGlobalTimeUnix, updateTransactionsData, removeThousandsCommas, updateAccountsData, updateSubscriptionsData, editAccount, editSubscription, createTransaction } from "../Functions";
+import { getGlobalTimeUnix, updateTransactionsData, removeThousandsCommas, updateAccountsData, updateSubscriptionsData, editAccount, editSubscription, createTransaction, deleteSubscription } from "../Functions";
 import {v4 as uuid} from "uuid";
 
 // Initial context.
@@ -70,7 +70,7 @@ const AuthContextProvider = (props: {children: React.ReactNode}) => {
           fields: {amount: amountToSend.toString()}
       }};
       // send account update request.
-      const acc= await editAccount(accountBody);
+      const acc = await editAccount(accountBody);
 
       // subscription related
       const subscriptionBody = {
@@ -107,19 +107,28 @@ const AuthContextProvider = (props: {children: React.ReactNode}) => {
           const currentDate = new Date(await getGlobalTimeUnix()).toLocaleString().split(",")[0];
           const [curMonth, curDay, curYear] = currentDate.split("/");
 
-          subscriptionsData.forEach((subscription: SubscriptionData) => {
-            if(parseInt(curYear) === subscription.year) {
-              // in db month is saved with one subtracted to it. (like array indexes, they sart from 0)
-              const month = parseInt(curMonth) - 1;
-              const paymentDay = parseInt(subscription.startDate.split("/")[1]);
-              const account = accountsData.find((acc: AccountData) => subscription.belongsToAccountWithId === acc._id);
+          subscriptionsData.forEach(async (subscription: SubscriptionData) => {
+            // in db month is saved with one subtracted to it. (like array indexes, they sart from 0)
+            const month = parseInt(curMonth) - 1;
+            const paymentDay = parseInt(subscription.startDate.split("/")[1]);
+            const account = accountsData.find((acc: AccountData) => subscription.belongsToAccountWithId === acc._id);
 
-              if(subscription.months.indexOf(month) === -1 && account) {
+            const [endMonth, endDay, endYear] = subscription.endDate.split("/");
+
+            // if current month is not included in subscription.months (paid months), account exists and subscription end year
+            // is less than current year (or are equal and subscription end month is not included in paid months), make subscription payment
+            // otherwise delete subscription.
+            if(parseInt(curYear) === parseInt(endYear) && subscription.months.indexOf(parseInt(endMonth) - 1) !== -1) {
+              await deleteSubscription({belongsToAccountWithId: subscription.belongsToAccountWithId, subscriptionId: subscription._id});
+              updateSubscriptionsData(subscriptionsData, setSubscriptionsData, {new: subscription, old: undefined}, "Delete");
+            } else {
+              if(subscription.months.indexOf(month) === -1) {
                 for(let monthNumber = subscription.months[subscription.months.length - 1]; monthNumber < month; monthNumber++) {
-                  makeSubscriptionPayment(subscription, account, monthNumber, curYear, paymentDay);
+                  makeSubscriptionPayment(subscription, account!, monthNumber, curYear, paymentDay);
                 }
-
-                if(parseInt(curDay) >= paymentDay) makeSubscriptionPayment(subscription, account, month, curYear, paymentDay);
+                if(parseInt(curDay) >= paymentDay || (parseInt(curYear) === parseInt(endYear) && parseInt(curMonth) === parseInt(endMonth) && parseInt(endDay) < paymentDay && parseInt(curDay) >= parseInt(endDay))) {
+                  makeSubscriptionPayment(subscription, account!, month, curYear, paymentDay);
+                } 
               }
             }
           });
@@ -133,7 +142,7 @@ const AuthContextProvider = (props: {children: React.ReactNode}) => {
 
       return () => clearInterval(interval);
     }
-  }, []);
+  }, [subscriptionsData]);
 
   // This context provider provides with user related info.
 

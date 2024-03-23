@@ -69,6 +69,8 @@ const SideTransactionMenu = (props: {
     }
   }
 
+  const [year, month, day] = info && info.date.split("-") || [];
+
   return (
     <>
       <div className={`${props.classname === "show" ? "prompt" : ""}`}>
@@ -104,7 +106,7 @@ const SideTransactionMenu = (props: {
                 </div>
               </div>
               <div className="mt-5 d-flex flex-column">
-                <AccountInfoField title="Payment Date" text={info.date} hasLine />
+                <AccountInfoField title="Payment Date" text={[day, month, year].join(".")} hasLine />
                 <AccountInfoField title="Payee" text={info.payee} hasLine />
                 <AccountInfoField title="Description" text={info.description || ""} />
               </div>

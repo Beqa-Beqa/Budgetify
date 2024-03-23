@@ -45,12 +45,15 @@ const SideObligatoryMenu = (props: {
     }
   }
 
+  const [startMonth, startDay, startYear] = info && info.startDate.split("/") || [];
+  const [endMonth, endDay, endYear] = info && info.endDate.split("/") || [];
+
   return (
     <>
       <div className={`${props.classname === "show" ? "prompt" : ""}`}>
         <div style={{overflowY: "auto"}} className={`prompt-box ${props.classname} w-100 h-100 p-2 p-sm-3 p-lg-4`}>
           <div className="w-100 d-flex justify-content-between align-items-center gap-2">
-            <h3 className="fs-4">Subscription Information</h3>
+            <h3 className="fs-4">Obligatory Information</h3>
             <div className="d-flex gap-2">
               <div onClick={() => setShowEditPrompt(true)} role="button">
                 <MdOutlineModeEdit style={iconSizes} />
@@ -72,7 +75,7 @@ const SideObligatoryMenu = (props: {
                 </div>
               </div>
               <div className="mt-5 d-flex flex-column">
-                <AccountInfoField title="Payment Dates" text={`${info.startDate.replace(/\//g, ".")} - ${info.endDate.replace(/\//g, ".")}`} hasLine />
+                <AccountInfoField title="Payment Dates" text={`${[startDay, startMonth, startYear].join(".")} - ${[endDay, endMonth, endYear].join(".")}`} hasLine />
                 <AccountInfoField title="Description" text={info.description || ""} />
               </div>
             </>

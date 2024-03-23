@@ -11,6 +11,9 @@ const Subscription = (props: {
   const {subscription, currency} = props;
   const {categoriesData} = useContext(AuthContext);
 
+  const [startMonth, startDay, startYear] = subscription.startDate.split("/");
+  const [endMonth, endDay, endYear] = subscription.endDate.split("/");
+
   return (
     <div onClick={props.onclick && props.onclick} className="subscription w-100 p-3 rounded d-flex align-items-center gap-3">
       <div className="rounded subscription-title w-100 py-4 d-flex justify-content-center">
@@ -23,9 +26,9 @@ const Subscription = (props: {
         </div>
         <div className="d-flex align-items-center gap-2">
           <span>Next payment date: </span>
-          <span>{subscription.startDate.split("/").reverse().join(".")}</span>
+          <span>{[startDay, startMonth, startYear].join(".")}</span>
           -
-          <span>{subscription.endDate.split("/").reverse().join(".")}</span>
+          <span>{[endDay, endMonth, endYear].join(".")}</span>
         </div>
       </div>
     </div>

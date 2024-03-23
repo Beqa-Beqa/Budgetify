@@ -50,6 +50,9 @@ const SideSubscriptionMenu = (props: {
     }
   }
 
+  const [startMonth, startDay, startYear] = info && info.startDate.split("/") || [];
+  const [endMonth, endDay, endYear] = info && info.endDate.split("/") || [];
+
   return (
     <>
       <div className={`${props.classname === "show" ? "prompt" : ""}`}>
@@ -84,7 +87,7 @@ const SideSubscriptionMenu = (props: {
                 </div>
               </div>
               <div className="mt-5 d-flex flex-column">
-                <AccountInfoField title="Payment Dates" text={`${info.startDate.replace(/\//g, ".")} - ${info.endDate.replace(/\//g, ".")}`} hasLine />
+                <AccountInfoField title="Payment Dates" text={`${[startDay, startMonth, startYear].join(".")} - ${[endDay, endMonth, endYear].join(".")}`} hasLine />
                 <AccountInfoField title="Description" text={info.description || ""} />
               </div>
             </>
