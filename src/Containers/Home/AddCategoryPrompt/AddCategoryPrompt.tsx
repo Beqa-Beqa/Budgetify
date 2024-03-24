@@ -49,6 +49,7 @@ const AddCategoryPrompt = (props: {
 
   // detect if button should be disabled or not on title change.
   useEffect(() => {
+    // if there is and error and no field is changed, disable the button
     titleAlert.error || 
     showRequiredAlert ||
     existsAlready ||
@@ -56,6 +57,7 @@ const AddCategoryPrompt = (props: {
       setIsButtonDisabled(true) 
     : 
       setIsButtonDisabled(false);
+    // otherwise enable it
   }, [title, transactionType]);
 
   const clearValues = () => clearFormStringValues(setTitle);
@@ -76,33 +78,39 @@ const AddCategoryPrompt = (props: {
 
   const handleSave = async () => {
     if(title) {
-      const owner = (currentUserData as CurrentUserData)._id
+      // if title is filled (only field for category)
+      const owner = (currentUserData as CurrentUserData)._id;
 
       try {
         let categoryResponse;
 
         if(hasInfo) {
+          // if it's edit (has info) create edit body
           const rqbody = {infoForEdit: {
             owner: hasInfo.owner,
             categoryId: hasInfo._id,
             fields: {title, transactionType}
           }}
 
+          // send request
           categoryResponse = await editCategory(rqbody);
         } else {
+          // otherwise create creation body
           const rqbody = {owner, title, transactionType}
-          
+          // send request
           categoryResponse = await createCategory(rqbody);
         }
-  
+        
+        // update data in state and cache, show successfull toast message, clear values and close prompt
         updateCategoriesData(categoriesData, setCategoriesData, {new: categoryResponse, old: hasInfo}, hasInfo ? "Update" : "Insert");
         setShowToastMessage({show: true, text: hasInfo ? "Updates saved successfully" :  "A category created successfully"});
         clearValues();
         props.setShowAddCategoryPrompt(false);
       } catch (err) {
-        console.error((err as Error).message);
+        console.error(err);
       }
     } else {
+      // otherwise set required alert and disable button
       setIsButtonDisabled(true);
       setShowRequiredAlert(true);
     }
@@ -115,7 +123,10 @@ const AddCategoryPrompt = (props: {
   const proceedSave = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
     if(!existsAlready && !titleAlert.error){
+      // if category does not exist and there is no error
+      // if category is in use show prompt (can not delete until in use)
       if(isCategoryInUse) setShowSavePrompt(true);
+      // otherwise handle save
       else handleSave();
     }
   }

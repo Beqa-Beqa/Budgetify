@@ -502,6 +502,8 @@ export const editObligatory = async (fields: {
   belongsToAccountWithId: string,
   obligatoryId: string,
   fields: {
+    year?: number,
+    months?: number[],
     title?: string,
     amount?: string,
     dateRange?: [Date | null, Date | null],

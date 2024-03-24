@@ -118,6 +118,7 @@ const AddObligatoryPrompt = (props: {
   const mandatoriesFilled = title && startDateString && endDateString && true || false;
 
   useEffect(() => {
+    // if at least one field is changed enable button (edit)
     hasInfo ? 
       (hasInfo.amount !== amount || hasInfo.description !== description || 
       hasInfo.title !== title || hasInfo.startDate !== startDateString || 
@@ -128,16 +129,20 @@ const AddObligatoryPrompt = (props: {
           setIsButtonDisabled(true)
       :
         mandatoriesFilled && setIsButtonDisabled(false);
+      // otherwise if mandatories are filled enable button
 
-      !hasInfo && obligatoryExistsByTitle(obligatoriesData, title) && setTitleAlert({error: true, text: "You already have a subscription with this title"});
+      !hasInfo && obligatoryExistsByTitle(obligatoriesData, title) && setTitleAlert({error: true, text: "You already have an obligatory with this title"});
+      // if obligatory exists with the same title, show error.
   }, [title, description, amount, dateRange])
 
   const handleSave = async (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
     if(mandatoriesFilled) {
       if(!titleAlert.error && !startDateAlert.error && !endDateAlert.error) {
+        // if mandatories are filled and no error is present
         try {
           if(hasInfo) {
+            // obligatory request body
             const rqbody = {
               obligatoryId: hasInfo._id,
               belongsToAccountWithId: hasInfo.belongsToAccountWithId,
@@ -148,20 +153,25 @@ const AddObligatoryPrompt = (props: {
               }
             };
             
+            // make obligatory edit request and update data in state and cache
             const editedObligatory = await editObligatory(rqbody);
             updateObligatoriesData(obligatoriesData, setObligatoriesData, {new: editedObligatory, old: hasInfo}, "Update");
           } else {
+            // obligatory request body
             const rqbody = {
               belongsToAccountWithId: props.accountData._id,
               title, description, amount, dateRange, 
               startDate: startDateString!, 
               endDate: endDateString!
             };
+
+            // create obligatory and update data in state and cache
             const createdObligatory = await createObligatory(rqbody);
             updateObligatoriesData(obligatoriesData, setObligatoriesData, {new: createdObligatory, old: undefined}, "Insert");
           }
           
-
+          // clear values and alerts and close add obligatory prompt
+          // show successfull toast message.
           clearValues();
           clearAlerts();
           setShowRequiredAlert(false);
@@ -172,6 +182,7 @@ const AddObligatoryPrompt = (props: {
         }
       }
     } else {
+      // otherwise disable button and disable button
       setIsButtonDisabled(true);
       setShowRequiredAlert(true);
     }
@@ -204,13 +215,12 @@ const AddObligatoryPrompt = (props: {
               {showRequiredAlert && !title && <span className="w-100 mt-2" style={{color: "var(--danger)"}}>Title is required field!</span>}
             </div>
             <div className="w-100 d-flex flex-column align-items-center position-relative">
-              <FormInput alert={amountAlert.error || (showRequiredAlert && !amount)} required classname="w-100 input" title="Amount">
+              <FormInput alert={amountAlert.error || (showRequiredAlert && !amount)} classname="w-100 input" title="Amount">
                 <span className="position-absolute h-100 d-flex align-items-center ps-2 fw-bold">{currency}</span>
                 <input 
                   value={amount}
                   onBlur={() => setAmount(divideByThousands(parseFloat(amount)))}
                   onChange={(e) => handleAmountChange(e, setAmount, setAmountAlert)} 
-                  required 
                   type="text" 
                   className="px-4" />
               </FormInput>

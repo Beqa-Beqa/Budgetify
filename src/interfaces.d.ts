@@ -92,6 +92,8 @@ declare interface PiggyBankPayment {
 
 declare interface ObligatoryData {
   _id: string,
+  year: number,
+  months: number[],
   belongsToAccountWithId: string,
   title: string,
   description?: string,
