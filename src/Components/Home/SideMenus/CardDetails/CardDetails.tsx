@@ -6,7 +6,7 @@ import AccountInfoField from "../../AccountInfoFIeld/AccountInfoFIeld";
 import { useContext, useState } from "react";
 import { AuthContext } from "../../../../Contexts/AuthContextProvider";
 import AddAccountPrompt from "../../../../Containers/Home/AddAccountPrompt/AddAccountPrompt";
-import { deleteAccount, divideByThousands, makeFirstCapitals, removeThousandsCommas, updateAccountsData } from "../../../../Functions";
+import { deleteAccount, deleteObligatory, deleteSubscription, deleteTransaction, divideByThousands, makeFirstCapitals, removeThousandsCommas, updateAccountsData } from "../../../../Functions";
 import ActionPrompt from "../../ActionPrompt/ActionPrompt";
 import { GeneralContext } from "../../../../Contexts/GeneralContextProvider";
 
@@ -18,7 +18,7 @@ const CardDetails = (props: {
   // authcontext provides with user data and accountsdata. also accounts data setter.
   const authContext = useContext(AuthContext);
   const currentUserData = authContext.currentUserData as CurrentUserData;
-  const {accountsData, setAccountsData} = authContext;
+  const {accountsData, setAccountsData, transactionsData, setTransactionsData, subscriptionsData, setSubscriptionsData, obligatoriesData, setObligatoriesData} = authContext;
 
   // general context provides with toast message setter.
   const {setShowToastMessage} = useContext(GeneralContext);
@@ -36,6 +36,30 @@ const CardDetails = (props: {
     // {accId: (account id), userId: (account owner id)}
     try {
       // make request
+      const deleteData = async (accountId: string) => {
+        // transactions
+        for(let transaction of transactionsData) {
+          await deleteTransaction({belongsToId: accountId, transactionId: transaction.id});
+        }
+        const updatedTransactionsData = transactionsData.filter(transaction => transaction.belongsToAccountWithId !== props.accountData._id);
+        setTransactionsData(updatedTransactionsData);
+
+        // subscriptions
+        for(let subscription of subscriptionsData) {
+          await deleteSubscription({belongsToAccountWithId: accountId, subscriptionId: subscription._id});
+        }
+        const updatedSubscriptionsData = subscriptionsData.filter(subscription => subscription.belongsToAccountWithId !== props.accountData._id);
+        setSubscriptionsData(updatedSubscriptionsData);
+
+        // obligatories
+        for(let obligatory of obligatoriesData) {
+          await deleteObligatory({belongsToAccountWithId: accountId, obligatoryId: obligatory._id});
+        }
+        const updatedObligatoriesData = obligatoriesData.filter(obligatory => obligatory.belongsToAccountWithId !== props.accountData._id);
+        setObligatoriesData(updatedObligatoriesData);
+      }
+
+      deleteData(props.accountData._id);
       await deleteAccount({accId: props.accountData._id,userId: currentUserData._id});
 
       // Remove account

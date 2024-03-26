@@ -156,16 +156,19 @@ const AuthContextProvider = (props: {children: React.ReactNode}) => {
       const checkDuePayments = async () => {
         const currentDate = new Date(await getGlobalTimeUnix()).toLocaleString().split(",")[0];
         const [curMonth, curDay, curYear] = currentDate.split("/");
+        const month = parseInt(curMonth) - 1;
+        const day = parseInt(curDay);
+        const year = parseInt(curYear);
 
         // subscription payments
         if(subscriptionsData && subscriptionsData.length) {
           subscriptionsData.forEach(async (subscription: SubscriptionData) => {
             // in db month is saved with one subtracted to it. (like array indexes, they sart from 0)
-            const month = parseInt(curMonth) - 1;
-            const paymentDay = parseInt(subscription.startDate.split("/")[1]);
             const account = accountsData.find((acc: AccountData) => subscription.belongsToAccountWithId === acc._id);
 
             const [endMonth, endDay, endYear] = subscription.endDate.split("/");
+            const [startMonth, startDay, startYear] = subscription.startDate.split("/");
+            const paymentDay = parseInt(startDay);
 
             // if current year is equal to subscription end year and end month is included in paid months
             // delete subscription and update subscription data.
@@ -174,7 +177,7 @@ const AuthContextProvider = (props: {children: React.ReactNode}) => {
               await deleteSubscription({belongsToAccountWithId: subscription.belongsToAccountWithId, subscriptionId: subscription._id});
               updateSubscriptionsData(subscriptionsData, setSubscriptionsData, {new: subscription, old: undefined}, "Delete");
             } else {
-              if(subscription.months.indexOf(month) === -1) {
+              if(((month >= parseInt(startMonth) - 1 && year === parseInt(startYear) && day > paymentDay) || (day > paymentDay && year > parseInt(startYear))) && subscription.months.indexOf(month) === -1) {
                 for(let monthNumber = subscription.months[subscription.months.length - 1]; monthNumber < month; monthNumber++) {
                   makeDuePayment({subscription}, account!, monthNumber, curYear, paymentDay);
                 }
@@ -191,17 +194,17 @@ const AuthContextProvider = (props: {children: React.ReactNode}) => {
           obligatoriesData.forEach(async (obligatory: ObligatoryData) => {
             if(obligatory.amount !== "0.00") {
               // in db month is saved with one subtracted to it. (like array indexes, they sart from 0)
-              const month = parseInt(curMonth) - 1;
-              const paymentDay = parseInt(obligatory.startDate.split("/")[1]);
               const account = accountsData.find((acc: AccountData) => obligatory.belongsToAccountWithId === acc._id);
 
               const [endMonth, endDay, endYear] = obligatory.endDate.split("/");
+              const [startMonth, startDay, startYear] = obligatory.startDate.split("/")[1];
+              const paymentDay = parseInt(startDay);
 
-              if(parseInt(curYear) === parseInt(endYear) && obligatory.months.indexOf(parseInt(endMonth) - 1) !== -1) {
+              if(parseInt(curYear) >= parseInt(endYear) && obligatory.months.indexOf(parseInt(endMonth) - 1) !== -1) {
                 await deleteObligatory({belongsToAccountWithId: obligatory.belongsToAccountWithId, obligatoryId: obligatory._id});
                 updateObligatoriesData(obligatoriesData, setObligatoriesData, {new: obligatory, old: undefined}, "Delete");
               } else {
-                if(obligatory.months.indexOf(month) === -1) {
+                if(((month >= parseInt(startMonth) - 1 && year === parseInt(startYear) && day > paymentDay) || (day > paymentDay && year > parseInt(startYear))) && obligatory.months.indexOf(month) === -1 && obligatory.amount && parseFloat(obligatory.amount)) {
                   for(let monthNumber = obligatory.months[obligatory.months.length - 1]; monthNumber < month; monthNumber++) {
                     makeDuePayment({obligatory}, account!, monthNumber, curYear, paymentDay);
                   }

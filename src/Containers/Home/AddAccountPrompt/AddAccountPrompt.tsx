@@ -77,6 +77,15 @@ const AddAccountPrompt = (props: {
   // check if currency is changed.
   const isCurrencyChanged = props.data && props.data.currency !== currency;
 
+  const handleCancel = () => {
+    clearFormStringValues(setTitle, setDescription, setAmount);
+    setCurrency("USD $");
+    setTitleAlert({error: false, text: ""});
+    setDescriptionAlert({error: false, text: ""});
+    setAmountAlert({error: false, text: ""});
+    props.setShowAddAccountPrompt(false);
+  }
+
   const handleSave = async () => {
     // Check if button is disabled or not (Disabled attribute can be removed from dev tools, hence this is additional protection).
     if(!isButtonDisabled) {
@@ -192,7 +201,7 @@ const AddAccountPrompt = (props: {
           </div>
         </form>
         <div className="prompt-box-actions-container mt-auto d-flex gap-3 justify-content-end">
-          <button onClick={() => props.setShowAddAccountPrompt(false)} className="action-button negative">
+          <button onClick={handleCancel} className="action-button negative">
             Cancel
           </button>
           <button onClick={handleSubmit} type="submit" disabled={isButtonDisabled} className="action-button positive">

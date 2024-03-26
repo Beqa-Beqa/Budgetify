@@ -166,3 +166,7 @@ html {
 .sidemenu.show {
   right: 0;
 }
+
+.cursor-pointer {
+	cursor: pointer !important;
+}

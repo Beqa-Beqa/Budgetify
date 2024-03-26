@@ -26,6 +26,7 @@ declare interface AccountData {
   currency: string,
   amount: string,
   description: string,
+  creationDate: string,
   _id: string
 }
 

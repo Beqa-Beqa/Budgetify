@@ -225,7 +225,6 @@ const AddObligatoryPrompt = (props: {
                   className="px-4" />
               </FormInput>
               {amountAlert.error && <span className="w-100 mt-2" style={{color: "var(--danger)"}}>{amountAlert.text}</span>}
-              {showRequiredAlert && !amount && <span className="w-100 mt-2" style={{color: "var(--danger)"}}>Amount is required field!</span>}
             </div>
             <div className="w-100 d-flex flex-column align-items-center">
               <FormInput alert={startDateAlert.error || endDateAlert.error || (showRequiredAlert && (!startDateString || !endDateString))} required classname="w-100 input" title="Payment Date">
