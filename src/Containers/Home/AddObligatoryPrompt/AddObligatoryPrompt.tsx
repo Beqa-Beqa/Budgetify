@@ -139,6 +139,9 @@ const AddObligatoryPrompt = (props: {
     event.preventDefault();
     if(mandatoriesFilled) {
       if(!titleAlert.error && !startDateAlert.error && !endDateAlert.error) {
+        clearValues();
+        clearAlerts();
+        props.setShowAddObligatoryPrompt(false);
         // if mandatories are filled and no error is present
         try {
           if(hasInfo) {
@@ -170,12 +173,8 @@ const AddObligatoryPrompt = (props: {
             updateObligatoriesData(obligatoriesData, setObligatoriesData, {new: createdObligatory, old: undefined}, "Insert");
           }
           
-          // clear values and alerts and close add obligatory prompt
           // show successfull toast message.
-          clearValues();
-          clearAlerts();
           setShowRequiredAlert(false);
-          props.setShowAddObligatoryPrompt(false);
           setShowToastMessage({show: true, text: hasInfo ? "Obligatory edited successfully" : "Obligatory created successfully"});
         } catch (err) {
           console.error(err);

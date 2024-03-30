@@ -1,0 +1,11 @@
+#category-chart {
+  flex-shrink: none;
+  width: 450px;
+  height: 400px;
+  background-color: var(--component-background);
+}
+
+#category-chart svg,
+#category-chart svg path {
+  width: 100%;
+}

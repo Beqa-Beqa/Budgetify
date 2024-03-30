@@ -1,0 +1,5 @@
+#monthly-chart {
+  width: 600px !important;
+  height: 400px;
+  background-color: var(--component-background);
+}

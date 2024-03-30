@@ -93,6 +93,8 @@ const AddAccountPrompt = (props: {
       clearFormStringValues(setTitle, setDescription, setAmount);
 
       try {
+        props.setShowAddAccountPrompt(false);
+        setShowConfirmPopUp(false);
         // make post request and get result (result will be data that was saved in db).
         let accountResult;
 
@@ -123,10 +125,6 @@ const AddAccountPrompt = (props: {
         // and add new account.
         props.data ? updateAccountsData(accountsData, setAccountsData, {new: accountResult, old: props.data}, "Update")
         : updateAccountsData(accountsData, setAccountsData, {new: accountResult, old: undefined}, "Insert");
-        // close prompt.
-        props.setShowAddAccountPrompt(false);
-        // close confirmation pop up.
-        setShowConfirmPopUp(false);
         // set toast message.
         setShowToastMessage({show: true, text: props.data ? "The account edited successfully" : "The account created"});
       } catch (err) {

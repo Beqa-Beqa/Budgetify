@@ -84,6 +84,9 @@ const AddPiggyAmount = (props: {
     event.preventDefault();
     if(mandatoriesFilled) {
       if (!amountAlert.error && !dateAlert.error) {
+        clearValues();
+        clearAlerts();
+        props.setShowAddAmountPrompt(false);
         // if mandatories are filled and no errors.
         try {
           if(acc) {
@@ -117,10 +120,6 @@ const AddPiggyAmount = (props: {
           const piggy = await editPiggyBank(piggyBody);
           // update info in state and cache
           updatePiggyBanksData(piggyBanksData, setPiggyBanksData, {new: piggy, old: info}, "Update");
-          // clear values
-          clearValues();
-          // close prompt
-          props.setShowAddAmountPrompt(false);
           // set toast message
           setShowToastMessage({show: true, text: "Money has been succesffully added to piggy bank"});
         } catch (err) {

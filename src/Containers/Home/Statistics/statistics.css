@@ -18,3 +18,7 @@
 .statistics .expenses-container {
   background-color: var(--component-background);
 }
+
+.table-container {
+  overflow-x: auto;
+}

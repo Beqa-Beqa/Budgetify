@@ -163,6 +163,9 @@ const AddSubscriptionPrompt = (props: {
     if(mandatoriesFilled) {
       // if mandatories are filled
       if(!titleAlert.error && !descriptionAlert.error && !amountAlert.error && !startDateAlert.error && !endDateAlert.error) {
+        clearValues();
+        clearAlerts();
+        props.setShowAddSubscriptionPrompt(false);
         try {
           // subscription variable that's used for updating data
           let subscription;
@@ -201,13 +204,10 @@ const AddSubscriptionPrompt = (props: {
           }
 
            // clear fields.
-           clearValues();
-           clearAlerts();
            setChosenCategories([]);
            setCategoriesAvailable([]);
            setShowRequiredAlert(false);
            setShowToastMessage({show: true, text: hasInfo ? "The changes are successfully saved" : "Subscription has been successfully added!"})
-           props.setShowAddSubscriptionPrompt(false);
         } catch (err) {
           console.error(err);
         }

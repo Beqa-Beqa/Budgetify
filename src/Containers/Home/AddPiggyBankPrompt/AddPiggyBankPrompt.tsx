@@ -82,6 +82,9 @@ const AddPiggyBankPrompt = (props: {
     event.preventDefault();
     if(mandatoriesFilled) {
       if(!goalAlert.error && !goalAmountAlert.error) {
+        clearValues();
+        clearAlerts();
+        props.setShowAddPiggyBankPrompt(false);
         try {
           let piggyBank;
 
@@ -98,8 +101,6 @@ const AddPiggyBankPrompt = (props: {
             piggyBank = await createPiggyBank(rqbody);
           }
 
-          clearValues();
-          clearAlerts();
           setShowRequiredAlert(false);
           if(hasInfo) {
             updatePiggyBanksData(piggyBanksData, setPiggyBanksData, {new: piggyBank, old: hasInfo}, "Update");
@@ -107,7 +108,6 @@ const AddPiggyBankPrompt = (props: {
             updatePiggyBanksData(piggyBanksData, setPiggyBanksData, {new: piggyBank, old: undefined}, "Insert");
           }
           setShowToastMessage({show: true, text: hasInfo ? "Piggy bank edited successfully" : "Piggy bank added successfully!"});
-          props.setShowAddPiggyBankPrompt(false);
         } catch (err) {
           console.error(err);
         }

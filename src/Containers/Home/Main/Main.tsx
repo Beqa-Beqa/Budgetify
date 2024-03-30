@@ -21,7 +21,7 @@ import SidePiggyBankMenu from "../../../Components/Home/SideMenus/PiggyBank/Side
 import AddObligatoryPrompt from "../AddObligatoryPrompt/AddObligatoryPrompt";
 import Obligatory from "../../../Components/Home/Obligatory/Obligatory";
 import SideObligatoryMenu from "../../../Components/Home/SideMenus/Obligatory/SideObligatoryMenu";
-import StatisticsTable from "../Statistics/StatisticsTable";
+import Statistics from "../Statistics/Statistics";
 
 const Main = () => {
   // navigation
@@ -97,7 +97,7 @@ const Main = () => {
               <Card onclick={() => setShowAddAccountPrompt(true)} classname="active align-self-md-center col-xxl col-xl-12 col-md-6 col mb-4 mb-xl-0" />
             </div>
           </div>
-          <div className={`h-100 ${navigateTo === "Statistic" ? "col-xxl-4 col-xl-5 col-lg-7" : "col-xxl-5 col-xl-6 col-lg-9"} p-xl-0 pe-2 mb-3 mb-lg-0`}>
+          <div className={`h-100 ${navigateTo === "Statistic" ? "col-xl-8 col-lg-12" : "col-xxl-5 col-xl-6 col-lg-9"} p-xl-0 pe-2 mb-3 mb-lg-0`}>
             {navigateTo !== "Statistic" && <MainSearch searchValue={searchValue} setSearchValue={setSearchValue} sortByTransaction={sortByTransaction} setSortByTransaction={setSortByTransaction} sortByPaymentDate={sortByPamentDate} setSortByPaymentDate={setSortByPaymentDate}/>}
             <div className="main-content-container mt-1">
               {navigateTo === "Categories" ?
@@ -149,7 +149,7 @@ const Main = () => {
                       <h2 style={{color: "var(--placeholder)"}} className="fs-2 opacity-25">You don't have any obligatories.</h2>
                     </div>
               : navigateTo === "Statistic" ?
-                  <StatisticsTable accountData={accountsData[activeCard]} />
+                  <Statistics accountData={accountsData[activeCard]} />
               :
                 transactionsData.length ?
                   filteredTransactionsByCard.length ?
@@ -169,7 +169,7 @@ const Main = () => {
               }
             </div>
           </div>
-          <div className={`${navigateTo === "Statistic" ? "col-xl-3 col-lg-5" : "col-xl-2 col-lg-3"}`}>
+          <div className={`${navigateTo === "Statistic" ? "col-0 d-none" : "col-xl-2 col-lg-3"}`}>
             {navigateTo !== "Statistic" ? 
               <div className="h-100 d-flex flex-column justify-content-between gap-3">
                 <div className="d-flex flex-column align-items-end gap-3">

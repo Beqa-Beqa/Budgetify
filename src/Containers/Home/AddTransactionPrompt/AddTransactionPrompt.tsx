@@ -185,6 +185,9 @@ const AddTransactionPrompt = (props: {
     if(mandatoriesFilled) {
       // if mandatories are filled
       if(!titleAlert.error && !descriptionAlert.error && !amountAlert.error && !dateAlert.error && !filesAlert.error) {
+        clearValues();
+        clearAlerts();
+        props.setShowAddTransactionPrompt(false);
         // and no errors are present.
         try {
           // custom unique id
@@ -261,13 +264,10 @@ const AddTransactionPrompt = (props: {
           updateAccountsData(accountsData, setAccountsData, {new: account, old: props.accountData}, "Update");
 
           // clear fields.
-          clearValues();
-          clearAlerts();
           setChosenCategories([]);
           setCategoriesAvailable([]);
           setShowRequiredAlert(false);
           setShowToastMessage({show: true, text: hasInfo ? "Transaction successfully edited" : `${transactionType} transaction has been successfully added!`})
-          props.setShowAddTransactionPrompt(false);
         } catch (err) {
           console.error(err);
         }

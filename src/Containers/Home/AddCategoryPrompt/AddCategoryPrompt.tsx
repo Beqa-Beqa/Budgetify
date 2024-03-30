@@ -77,7 +77,10 @@ const AddCategoryPrompt = (props: {
   };
 
   const handleSave = async () => {
-    if(title) {
+    if(title && !titleAlert.error) {
+      clearValues();
+      clearAlerts();
+      props.setShowAddCategoryPrompt(false);
       // if title is filled (only field for category)
       const owner = (currentUserData as CurrentUserData)._id;
 
@@ -104,8 +107,6 @@ const AddCategoryPrompt = (props: {
         // update data in state and cache, show successfull toast message, clear values and close prompt
         updateCategoriesData(categoriesData, setCategoriesData, {new: categoryResponse, old: hasInfo}, hasInfo ? "Update" : "Insert");
         setShowToastMessage({show: true, text: hasInfo ? "Updates saved successfully" :  "A category created successfully"});
-        clearValues();
-        props.setShowAddCategoryPrompt(false);
       } catch (err) {
         console.error(err);
       }
