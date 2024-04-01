@@ -4,7 +4,9 @@
 <p>
   Welcome to Budgetify. This web application is built by "React", "D3.js", "TS" and "CSS".
   The app let's you manage your budget effectively.
-  P.S - There are only predefined user's that can log in - for credentials contact the owner.
+  P.S - There are only predefined user's that can log in - example credential you can use:
+  email: <strong>tester@test.com</strong>
+  pass: <strong>testerAccess</strong>
   <br/>
   
   [Live URL](https://beqa-beqa.github.io/Budgetify/) - Click here to visit the live application.  
