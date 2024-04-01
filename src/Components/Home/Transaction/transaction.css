@@ -1,9 +1,0 @@
-.transaction {
-  background-color: var(--component-background);
-  color: var(--text);
-}
-
-.transaction .transaction-title {
-  max-width: 160px;
-  background-color: #ECEDED;
-}
