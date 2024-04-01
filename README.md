@@ -1,5 +1,5 @@
 ## Introduction
-![](https://github.com/Beqa-Beqa/Budgetify/master/Budgetify-banner.png)
+![](https://github.com/Beqa-Beqa/Budgetify/blob/master/Budgetify-banner.png)
 <hr/>
 <p>
   Welcome to Budgetify. This web application is built by "React", "D3.js", "TS" and "CSS".
