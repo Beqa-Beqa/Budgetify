@@ -100,73 +100,74 @@ const Main = () => {
           <div className={`h-100 ${navigateTo === "Statistic" ? "col-xl-8 col-lg-12" : "col-xxl-5 col-xl-6 col-lg-9"} p-xl-0 pe-2 mb-3 mb-lg-0`}>
             {navigateTo !== "Statistic" && <MainSearch searchValue={searchValue} setSearchValue={setSearchValue} sortByTransaction={sortByTransaction} setSortByTransaction={setSortByTransaction} sortByPaymentDate={sortByPamentDate} setSortByPaymentDate={setSortByPaymentDate}/>}
             <div className="main-content-container mt-1">
-              {navigateTo === "Categories" ?
-                categoriesData.length ?
-                  filteredCategories.length ?
-                    <div className="d-flex flex-wrap justify-content-start gap-2">
-                      {sortArrOfObjectByKey("title", filteredCategories).map((category: CategoryData) => {
-                        return <Category key={category._id} categoryData={category} />
-                      })}
-                    </div>
-                  :
-                    <div className="w-100 text-center my-3 overflow-hidden">
-                      <h2 style={{color: "var(--placeholder)"}} className="fs-2 opacity-25">No records to display</h2>
-                    </div>
-                : 
-                  <div className="w-100 text-center my-3 overflow-hidden">
-                    <h2 style={{color: "var(--placeholder)"}} className="fs-2 opacity-25">You don't have any categories. Please, add a category</h2>
-                  </div>
-              : navigateTo === "Subscriptions" ?
-                  subscriptionsData.length ?
-                    filteredSubscriptionsByCard.length ?
-                      <div className="d-flex flex-column gap-4">
-                        {filteredSubscriptionsByCard.map((subscription: SubscriptionData) => {
-                          return <Subscription key={subscription._id} subscription={subscription} currency={currency} onclick={() => setShowSubscriptionInfo({show: true, data: subscription})} />
+              {!isNaN(activeCard) && accountsData[activeCard] ?
+                navigateTo === "Categories" ?
+                  categoriesData.length ?
+                    filteredCategories.length ?
+                      <div className="d-flex flex-wrap justify-content-start gap-2">
+                        {sortArrOfObjectByKey("title", filteredCategories).map((category: CategoryData) => {
+                          return <Category key={category._id} categoryData={category} />
                         })}
                       </div>
                     :
                       <div className="w-100 text-center my-3 overflow-hidden">
                         <h2 style={{color: "var(--placeholder)"}} className="fs-2 opacity-25">No records to display</h2>
                       </div>
-                  :
+                  : 
                     <div className="w-100 text-center my-3 overflow-hidden">
-                      <h2 style={{color: "var(--placeholder)"}} className="fs-2 opacity-25">You don't have any subscriptions. Please, add a subscription</h2>
+                      <h2 style={{color: "var(--placeholder)"}} className="fs-2 opacity-25">You don't have any categories. Please, add a category</h2>
                     </div>
-              : navigateTo === "Obligatory" ?
-                  obligatoriesData.length ?
-                    filteredObligatoriesByCard.length ?
-                      <div className="d-flex flex-column gap-4">
-                        {filteredObligatoriesByCard.map((obligatory: ObligatoryData) => {
-                          return <Obligatory key={obligatory._id} onclick={() => setShowObligatoryInfo({show: true, data: obligatory})} currency={accountsData[activeCard].currency} obligatoryData={obligatory} />
-                        })}
-                      </div>
+                : navigateTo === "Subscriptions" ?
+                    subscriptionsData.length ?
+                      filteredSubscriptionsByCard.length ?
+                        <div className="d-flex flex-column gap-4">
+                          {filteredSubscriptionsByCard.map((subscription: SubscriptionData) => {
+                            return <Subscription key={subscription._id} subscription={subscription} currency={currency} onclick={() => setShowSubscriptionInfo({show: true, data: subscription})} />
+                          })}
+                        </div>
+                      :
+                        <div className="w-100 text-center my-3 overflow-hidden">
+                          <h2 style={{color: "var(--placeholder)"}} className="fs-2 opacity-25">No records to display</h2>
+                        </div>
                     :
                       <div className="w-100 text-center my-3 overflow-hidden">
-                        <h2 style={{color: "var(--placeholder)"}} className="fs-2 opacity-25">No records to display</h2>
+                        <h2 style={{color: "var(--placeholder)"}} className="fs-2 opacity-25">You don't have any subscriptions. Please, add a subscription</h2>
                       </div>
-                  :
-                    <div className="w-100 text-center my-3 overflow-hidden">
-                      <h2 style={{color: "var(--placeholder)"}} className="fs-2 opacity-25">You don't have any obligatories.</h2>
-                    </div>
-              : navigateTo === "Statistic" ?
-                  <Statistics accountData={accountsData[activeCard]} />
-              :
-                transactionsData.length ?
-                  filteredTransactionsByCard.length ?
-                    <div className="d-flex flex-column gap-4">
-                      {filteredTransactionsByCard.map((transaction: TransactionData) => {
-                        return <Transaction key={transaction._id} transaction={transaction} currency={currency} onclick={() => {setShowTransactionInfo({show: true, data: transaction})}} />
-                      })}
-                    </div>
-                  :
-                    <div className="w-100 text-center my-3 overflow-hidden">
-                      <h2 style={{color: "var(--placeholder)"}} className="fs-2 opacity-25">No records to display</h2>
-                    </div>
+                : navigateTo === "Obligatory" ?
+                    obligatoriesData.length ?
+                      filteredObligatoriesByCard.length ?
+                        <div className="d-flex flex-column gap-4">
+                          {filteredObligatoriesByCard.map((obligatory: ObligatoryData) => {
+                            return <Obligatory key={obligatory._id} onclick={() => setShowObligatoryInfo({show: true, data: obligatory})} currency={accountsData[activeCard].currency} obligatoryData={obligatory} />
+                          })}
+                        </div>
+                      :
+                        <div className="w-100 text-center my-3 overflow-hidden">
+                          <h2 style={{color: "var(--placeholder)"}} className="fs-2 opacity-25">No records to display</h2>
+                        </div>
+                    :
+                      <div className="w-100 text-center my-3 overflow-hidden">
+                        <h2 style={{color: "var(--placeholder)"}} className="fs-2 opacity-25">You don't have any obligatories.</h2>
+                      </div>
+                : navigateTo === "Statistic" ?
+                    <Statistics accountData={accountsData[activeCard]} />
                 :
-                  <div className="w-100 text-center my-3 overflow-hidden">
-                    <h2 style={{color: "var(--placeholder)"}} className="fs-2 opacity-25">You don't have any transactions. Please, add a transaction.</h2>
-                  </div>
-              }
+                  transactionsData.length ?
+                    filteredTransactionsByCard.length ?
+                      <div className="d-flex flex-column gap-4">
+                        {filteredTransactionsByCard.map((transaction: TransactionData) => {
+                          return <Transaction key={transaction._id} transaction={transaction} currency={currency} onclick={() => {setShowTransactionInfo({show: true, data: transaction})}} />
+                        })}
+                      </div>
+                    :
+                      <div className="w-100 text-center my-3 overflow-hidden">
+                        <h2 style={{color: "var(--placeholder)"}} className="fs-2 opacity-25">No records to display</h2>
+                      </div>
+                  :
+                    <div className="w-100 text-center my-3 overflow-hidden">
+                      <h2 style={{color: "var(--placeholder)"}} className="fs-2 opacity-25">You don't have any transactions. Please, add a transaction.</h2>
+                    </div>
+              : null}
             </div>
           </div>
           <div className={`${navigateTo === "Statistic" ? "col-0 d-none" : "col-xl-2 col-lg-3"}`}>
@@ -176,9 +177,9 @@ const Main = () => {
                   <IndicatorButton classname="p-2 fs-5 w-100" type="Income" />
                   <IndicatorButton classname="p-2 fs-5 w-100" type="Expenses"/>
                   {activeCard >= 0 && navigateTo === "none" ? <IndicatorButton classname="p-2 fs-5 w-100" onclick={() => setShowAddTransactionPrompt(true)} type="Add Transaction"/> : null}
-                  {navigateTo === "Categories" && <IndicatorButton onclick={() => setShowAddCategoryPrompt(true)} classname="p-2 fs-5 w-100" type="Add Category" />}
-                  {navigateTo === "Subscriptions" && <IndicatorButton onclick={() => setShowAddSubscriptionPrompt(true)} classname="p-2 fs-5 w-100" type="Add Subscription" />}
-                  {navigateTo === "Obligatory" && <IndicatorButton onclick={() => setShowAddObligatoryPrompt(true)} classname="p-2 fs-5 w-100" type="Add Obligatory" />}
+                  {navigateTo === "Categories" && !isNaN(activeCard) && accountsData[activeCard] && <IndicatorButton onclick={() => setShowAddCategoryPrompt(true)} classname="p-2 fs-5 w-100" type="Add Category" />}
+                  {navigateTo === "Subscriptions" && !isNaN(activeCard) && accountsData[activeCard] && <IndicatorButton onclick={() => setShowAddSubscriptionPrompt(true)} classname="p-2 fs-5 w-100" type="Add Subscription" />}
+                  {navigateTo === "Obligatory" && !isNaN(activeCard) && accountsData[activeCard] && <IndicatorButton onclick={() => setShowAddObligatoryPrompt(true)} classname="p-2 fs-5 w-100" type="Add Obligatory" />}
                 </div>
                 <div className="d-flex flex-column align-items-end gap-3 mb-4">
                   <IndicatorButton onclick={() => setShowAddPiggyBankPrompt(true)} classname="p-2 fs-5 w-100" type="Add Piggy Bank" />
