@@ -1,9 +1,0 @@
-.subscription {
-  background-color: var(--component-background);
-  color: var(--text);
-}
-
-.subscription .subscription-title {
-  max-width: 160px;
-  background-color: #ECEDED;
-}
